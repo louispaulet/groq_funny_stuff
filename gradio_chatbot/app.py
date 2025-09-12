@@ -46,7 +46,7 @@ def chat_stream(history):
 def gradio_chatbot():
     with gr.Blocks() as demo:
         chatbot = gr.Chatbot()
-        msg = gr.Textbox(label="Your message")
+        msg = gr.Textbox(label="Your message", elem_id="custom-msg-box")
         send = gr.Button("Send")
         def respond(message, history):
             history = history or []
@@ -57,6 +57,8 @@ def gradio_chatbot():
                 # Update the last assistant message with the partial output
                 updated_history = history + [[message, partial]]
                 yield updated_history
+        # Use Gradio's native submit event for Enter-to-send
+        msg.submit(respond, inputs=[msg, chatbot], outputs=chatbot)
         send.click(respond, inputs=[msg, chatbot], outputs=chatbot)
     demo.launch()
 
