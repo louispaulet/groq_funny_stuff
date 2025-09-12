@@ -9,10 +9,10 @@ venv:
 
 install: venv
 	$(PIP) install --upgrade pip
-	$(PIP) install -r gradio_chatbot/requirements.txt
+	$(PIP) install -r src/requirements.txt
 
 run: venv
-	$(PYTHON) gradio_chatbot/app.py
+	$(PYTHON) src/app.py
 
 clean:
 	rm -rf $(VENV_DIR)

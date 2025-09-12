@@ -44,7 +44,7 @@ def chat_stream(history, model):
                 continue
 
 def gradio_chatbot():
-    with gr.Blocks(css="custom_footer.css") as demo:
+    with gr.Blocks(css="assets/custom_footer.css") as demo:
         with gr.Row():
             with gr.Column(scale=8):
                 chatbot = gr.Chatbot()
