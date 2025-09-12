@@ -50,16 +50,15 @@ def gradio_chatbot():
         send = gr.Button("Send")
         def respond(message, history):
             history = history or []
-            # Add the new user message with empty assistant reply for streaming
             temp_history = history + [[message, ""]]
             bot_stream = chat_stream(temp_history)
             for partial in bot_stream:
-                # Update the last assistant message with the partial output
                 updated_history = history + [[message, partial]]
-                yield updated_history
-        # Use Gradio's native submit event for Enter-to-send
-        msg.submit(respond, inputs=[msg, chatbot], outputs=chatbot)
-        send.click(respond, inputs=[msg, chatbot], outputs=chatbot)
+                # Clear the textbox after sending
+                yield updated_history, ""
+        # Update outputs to clear textbox
+        msg.submit(respond, inputs=[msg, chatbot], outputs=[chatbot, msg])
+        send.click(respond, inputs=[msg, chatbot], outputs=[chatbot, msg])
     demo.launch()
 
 if __name__ == "__main__":
