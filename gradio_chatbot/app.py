@@ -44,15 +44,22 @@ def chat_stream(history, model):
                 continue
 
 def gradio_chatbot():
-    with gr.Blocks() as demo:
+    with gr.Blocks(css="custom_footer.css") as demo:
+        with gr.Row():
+            with gr.Column(scale=8):
+                chatbot = gr.Chatbot()
+            with gr.Column(scale=4):
+                pass  # Empty column for spacing if needed
+        with gr.Row():
+            with gr.Column(scale=9):
+                msg = gr.Textbox(label="Your message", elem_id="custom-msg-box")
+            with gr.Column(scale=1):
+                send = gr.Button("Send", elem_id="custom-send-btn")
         model_dropdown = gr.Dropdown(
             label="Choose Model",
             choices=["openai/gpt-oss-20b", "openai/gpt-oss-120b"],
             value=DEFAULT_MODEL
         )
-        chatbot = gr.Chatbot()
-        msg = gr.Textbox(label="Your message", elem_id="custom-msg-box")
-        send = gr.Button("Send")
         def respond(message, history, model):
             history = history or []
             temp_history = history + [[message, ""]]
@@ -61,7 +68,6 @@ def gradio_chatbot():
                 updated_history = history + [[message, partial]]
                 # Clear the textbox after sending
                 yield updated_history, ""
-        # Update outputs to clear textbox
         msg.submit(respond, inputs=[msg, chatbot, model_dropdown], outputs=[chatbot, msg])
         send.click(respond, inputs=[msg, chatbot, model_dropdown], outputs=[chatbot, msg])
     demo.launch()
