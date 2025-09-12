@@ -10,12 +10,19 @@ headers = {
     "Content-Type": "application/json"
 }
 
-def chat_stream(user_message):
+def chat_stream(history):
+    # history: list of [user, assistant] pairs
+    messages = []
+    for pair in history:
+        user_msg = pair[0]
+        assistant_msg = pair[1] if len(pair) > 1 and pair[1] else None
+        messages.append({"role": "user", "content": user_msg})
+        if assistant_msg:
+            messages.append({"role": "assistant", "content": assistant_msg})
+    # Add a placeholder for the next user message (handled in respond)
     payload = {
         "model": MODEL,
-        "messages": [
-            {"role": "user", "content": user_message}
-        ],
+        "messages": messages,
         "stream": True
     }
     response = requests.post(API_URL, headers=headers, json=payload, stream=True)
@@ -43,9 +50,13 @@ def gradio_chatbot():
         send = gr.Button("Send")
         def respond(message, history):
             history = history or []
-            bot_stream = chat_stream(message)
+            # Add the new user message with empty assistant reply for streaming
+            temp_history = history + [[message, ""]]
+            bot_stream = chat_stream(temp_history)
             for partial in bot_stream:
-                yield history + [[message, partial]]
+                # Update the last assistant message with the partial output
+                updated_history = history + [[message, partial]]
+                yield updated_history
         send.click(respond, inputs=[msg, chatbot], outputs=chatbot)
     demo.launch()
 
