@@ -3,14 +3,14 @@ import requests
 
 API_KEY = "REDACTED_GROQ_KEY"
 API_URL = "https://api.groq.com/openai/v1/chat/completions"
-MODEL = "openai/gpt-oss-20b"
+DEFAULT_MODEL = "openai/gpt-oss-20b"
 
 headers = {
     "Authorization": f"Bearer {API_KEY}",
     "Content-Type": "application/json"
 }
 
-def chat_stream(history):
+def chat_stream(history, model):
     # history: list of [user, assistant] pairs
     messages = []
     for pair in history:
@@ -21,7 +21,7 @@ def chat_stream(history):
             messages.append({"role": "assistant", "content": assistant_msg})
     # Add a placeholder for the next user message (handled in respond)
     payload = {
-        "model": MODEL,
+        "model": model,
         "messages": messages,
         "stream": True
     }
@@ -45,20 +45,25 @@ def chat_stream(history):
 
 def gradio_chatbot():
     with gr.Blocks() as demo:
+        model_dropdown = gr.Dropdown(
+            label="Choose Model",
+            choices=["openai/gpt-oss-20b", "openai/gpt-oss-120b"],
+            value=DEFAULT_MODEL
+        )
         chatbot = gr.Chatbot()
         msg = gr.Textbox(label="Your message", elem_id="custom-msg-box")
         send = gr.Button("Send")
-        def respond(message, history):
+        def respond(message, history, model):
             history = history or []
             temp_history = history + [[message, ""]]
-            bot_stream = chat_stream(temp_history)
+            bot_stream = chat_stream(temp_history, model)
             for partial in bot_stream:
                 updated_history = history + [[message, partial]]
                 # Clear the textbox after sending
                 yield updated_history, ""
         # Update outputs to clear textbox
-        msg.submit(respond, inputs=[msg, chatbot], outputs=[chatbot, msg])
-        send.click(respond, inputs=[msg, chatbot], outputs=[chatbot, msg])
+        msg.submit(respond, inputs=[msg, chatbot, model_dropdown], outputs=[chatbot, msg])
+        send.click(respond, inputs=[msg, chatbot, model_dropdown], outputs=[chatbot, msg])
     demo.launch()
 
 if __name__ == "__main__":
