@@ -6,9 +6,9 @@ export default function Composer({ value, onChange, onSend, onStop, loading, onC
       onSubmit={(e) => { e.preventDefault(); if (!loading) onSend?.() }}
       className="sticky bottom-0 w-full"
     >
-      <div className="flex items-end gap-2 rounded-2xl border border-slate-200 bg-white/90 p-2 shadow-sm backdrop-blur">
+      <div className="flex items-end gap-2 rounded-2xl border border-slate-200 bg-white/90 dark:border-slate-700 dark:bg-slate-900/60 p-2 shadow-sm backdrop-blur">
         <textarea
-          className="block w-full resize-none rounded-xl border-none bg-transparent p-3 text-sm focus:outline-none"
+          className="block w-full resize-none rounded-xl border-none bg-transparent dark:bg-slate-800/70 p-3 text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-600/60"
           rows={2}
           value={value}
           onChange={(e) => onChange?.(e.target.value)}
