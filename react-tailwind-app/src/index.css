@@ -2,9 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Code highlighting theme */
-@import 'highlight.js/styles/github.css';
-
 /* Global App Styles */
 html, body, #root { height: 100%; }
 body { @apply bg-gradient-to-br from-slate-50 to-slate-100 text-slate-900; }
