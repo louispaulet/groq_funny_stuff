@@ -2,5 +2,21 @@
 @tailwind components;
 @tailwind utilities;
 
-/* You can add global styles below if needed */
-/* e.g., body { @apply bg-gray-50 text-gray-900; } */
+/* Global App Styles */
+html, body, #root { height: 100%; }
+body { @apply bg-gradient-to-br from-slate-50 to-slate-100 text-slate-900; }
+
+/* Prose (Markdown) tweaks */
+.prose {
+  @apply prose-slate max-w-none leading-relaxed;
+}
+.prose pre { @apply bg-slate-900 text-slate-100 rounded-lg shadow-inner; }
+.prose code { @apply text-[0.95em]; }
+.prose a { @apply text-brand-600 no-underline hover:underline; }
+.prose h1, .prose h2, .prose h3 { @apply font-semibold tracking-tight; }
+.prose blockquote { @apply border-l-4 border-slate-200 bg-slate-50; }
+
+/* Scrollbar (WebKit) */
+.thin-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
+.thin-scrollbar::-webkit-scrollbar-thumb { @apply bg-slate-300 rounded-full; }
+.thin-scrollbar::-webkit-scrollbar-track { @apply bg-transparent; }

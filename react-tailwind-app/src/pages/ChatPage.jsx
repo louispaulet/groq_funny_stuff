@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useGroqClient } from '../hooks/useGroqClient'
 import { useChatStream } from '../hooks/useChatStream'
 import { buildPromptFromMessages } from '../lib/chat'
-import ModelSelector from '../components/ModelSelector'
+import Header from '../components/Header'
 import MessageList from '../components/chat/MessageList'
 import Composer from '../components/chat/Composer'
 
@@ -59,20 +59,19 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-3">
-        <ModelSelector value={model} onChange={setModel} />
-      </div>
-      <MessageList messages={messages} />
-      <Composer
-        value={prompt}
-        onChange={setPrompt}
-        onSend={handleSend}
-        onStop={stop}
-        loading={loading}
-        onClear={handleClear}
-      />
+    <div className="min-h-screen flex flex-col">
+      <Header model={model} onModelChange={setModel} />
+      <main className="mx-auto w-full max-w-6xl grow px-4 py-6 space-y-4">
+        <MessageList messages={messages} />
+        <Composer
+          value={prompt}
+          onChange={setPrompt}
+          onSend={handleSend}
+          onStop={stop}
+          loading={loading}
+          onClear={handleClear}
+        />
+      </main>
     </div>
   )
 }
-
