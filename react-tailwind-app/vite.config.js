@@ -13,6 +13,7 @@ export default defineConfig({
             if (id.includes('openai')) return 'openai'
             if (id.includes('marked') || id.includes('dompurify') || id.includes('highlight.js')) return 'markdown'
             if (id.includes('@heroicons')) return 'icons'
+            if (id.includes('three') || id.includes('@react-three')) return 'stl'
           }
         },
       },
