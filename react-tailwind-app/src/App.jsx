@@ -1,8 +1,11 @@
 import ChatPage from './pages/ChatPage'
+import { ThemeProvider } from './theme/ThemeContext'
 
 function App() {
   return (
-    <ChatPage />
+    <ThemeProvider>
+      <ChatPage />
+    </ThemeProvider>
   )
 }
 
