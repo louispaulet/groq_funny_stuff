@@ -24,3 +24,22 @@ body { @apply bg-gradient-to-br from-slate-50 to-slate-100 text-slate-900; }
 .thin-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
 .thin-scrollbar::-webkit-scrollbar-thumb { @apply bg-slate-300 rounded-full; }
 .thin-scrollbar::-webkit-scrollbar-track { @apply bg-transparent; }
+
+/* Native select dark-mode defaults (best-effort; varies by OS/UA) */
+@layer base {
+  select {
+    @apply bg-white text-slate-800 border border-slate-300 rounded-md;
+  }
+  .dark select {
+    @apply bg-slate-800 text-slate-100 border-slate-700;
+  }
+  /* Some browsers read option colors from these rules */
+  select option {
+    color: #0f172a; /* slate-900 */
+    background: #ffffff;
+  }
+  .dark select option {
+    color: #e5e7eb; /* slate-200 */
+    background: #0b1220; /* deep slate */
+  }
+}
