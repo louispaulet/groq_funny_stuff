@@ -6,8 +6,16 @@ A lightweight, local Pokédex chat where you can ask questions about a Pokémon 
 
 Run it:
 
-- `python src/pokedex_app.py` (direct) or
-- `python -m src.pokedex_app` (as a module)
+- Install deps: `make install chat` or `make install pokedex`
+- Run app: `make run chat` or `make run pokedex`
+Direct run:
+
+- `python pokedex/pokedex_app.py`
+- `python chat/app.py`
+
+Update Pokédex names (optional):
+
+- `python pokedex/scripts/generate_pokemon_names.py` (writes to `pokedex/pokemon_names.py`)
 
 Examples:
 
