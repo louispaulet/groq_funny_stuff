@@ -1,4 +1,4 @@
-import GroqChat from './GroqChat'
+import ChatPage from './pages/ChatPage'
 
 function App() {
   return (
@@ -14,7 +14,7 @@ function App() {
         </header>
 
         <div className="mt-8 rounded-xl border border-slate-200 bg-white/80 p-6 shadow-sm">
-          <GroqChat />
+          <ChatPage />
         </div>
       </div>
     </div>
