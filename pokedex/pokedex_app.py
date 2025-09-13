@@ -148,7 +148,7 @@ def answer_question(question: str) -> str:
 
 
 def build_ui():
-    with gr.Blocks(css="assets/custom_footer.css", theme=gr.themes.Soft()) as demo:
+    with gr.Blocks(css="pokedex/assets/custom_footer.css", theme=gr.themes.Soft()) as demo:
         gr.Markdown("# Pokédex — Ask about a Pokémon")
         chatbot = gr.Chatbot(height=300)
         with gr.Row():
