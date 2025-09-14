@@ -12,7 +12,7 @@ export default function Header({ model, onModelChange }) {
           <div className="h-8 w-8 rounded-lg bg-brand-600 text-white grid place-items-center font-semibold">G</div>
           <div>
             <div className="text-sm text-slate-500 dark:text-slate-400">Groq Chat</div>
-            <div className="text-base font-semibold text-slate-800 dark:text-slate-100">React + Tailwind</div>
+            <div className="text-base font-semibold text-slate-800 dark:text-slate-100">3D STL Preview</div>
           </div>
         </div>
         <div className="flex items-center gap-3">
