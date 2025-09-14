@@ -4,6 +4,49 @@ import { OrbitControls } from '@react-three/drei'
 import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js'
 import * as THREE from 'three'
 
+function parseAsciiStl(text) {
+  const positions = []
+  const normals = []
+  let nx = 0, ny = 0, nz = 1
+  const numRe = /[-+]?\d*\.?\d+(?:[eE][+-]?\d+)?/g
+  const lines = String(text).split(/\r?\n/)
+  for (let i = 0; i < lines.length; i++) {
+    const l = lines[i].trim()
+    if (!l) continue
+    if (l.toLowerCase().startsWith('facet normal')) {
+      const nums = l.match(numRe)
+      if (nums && nums.length >= 3) {
+        nx = parseFloat(nums[0]); ny = parseFloat(nums[1]); nz = parseFloat(nums[2])
+      }
+    } else if (l.toLowerCase().startsWith('vertex')) {
+      const nums = l.match(numRe)
+      if (nums && nums.length >= 3) {
+        const x = parseFloat(nums[0]); const y = parseFloat(nums[1]); const z = parseFloat(nums[2])
+        positions.push(x, y, z)
+        normals.push(nx, ny, nz)
+      }
+    }
+  }
+  // Ensure triangles (groups of 3 vertices)
+  const vertCount = positions.length / 3
+  const triCount = Math.floor(vertCount / 3)
+  const needed = triCount * 9
+  if (positions.length > needed) {
+    positions.length = needed
+    normals.length = triCount * 9
+  }
+  const geom = new THREE.BufferGeometry()
+  if (positions.length === 0) return null
+  geom.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
+  // If normals look invalid, let three compute them
+  try {
+    geom.setAttribute('normal', new THREE.Float32BufferAttribute(normals, 3))
+  } catch {
+    // ignore
+  }
+  return geom
+}
+
 function prepareGeometry(geometry) {
   const g = geometry
   g.computeVertexNormals()
@@ -19,8 +62,18 @@ function prepareGeometry(geometry) {
   return { geometry: g, scale }
 }
 
+function proxiedUrl(url) {
+  try {
+    if (/^https?:\/\//i.test(url)) {
+      return `/stl-proxy?url=${encodeURIComponent(url)}`
+    }
+  } catch {}
+  return url
+}
+
 function ModelFromUrl({ url }) {
-  const geometry = useLoader(STLLoader, url, (loader) => {
+  const src = proxiedUrl(url)
+  const geometry = useLoader(STLLoader, src, (loader) => {
     loader.setCrossOrigin('anonymous')
   })
   const { scale } = useMemo(() => prepareGeometry(geometry), [geometry])
@@ -34,13 +87,20 @@ function ModelFromUrl({ url }) {
 }
 
 function ModelFromText({ text }) {
-  const { geometry, scale } = useMemo(() => {
-    const enc = new TextEncoder()
-    const buffer = enc.encode(text).buffer
-    const loader = new STLLoader()
-    const geom = loader.parse(buffer)
-    return prepareGeometry(geom)
+  const parsed = useMemo(() => {
+    try {
+      // Robust ASCII STL parsing (tolerant/fall-back)
+      const geom = parseAsciiStl(text)
+      if (!geom) throw new Error('No triangles parsed')
+      return prepareGeometry(geom)
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error('STL parse failed', e)
+      return null
+    }
   }, [text])
+  if (!parsed) throw new Error('Invalid or incomplete STL content')
+  const { geometry, scale } = parsed
   return (
     <group scale={[scale, scale, scale]}>
       <mesh geometry={geometry} castShadow receiveShadow>
@@ -64,8 +124,19 @@ function Lights() {
 export default function STLCanvas({ source, className }) {
   return (
     <div className={className}>
-      <Canvas camera={{ position: [2.8, 2.2, 2.8], fov: 50 }} shadows>
-        <color attach="background" args={[0, 0, 0, 0]} />
+      <Canvas
+        camera={{ position: [2.8, 2.2, 2.8], fov: 50 }}
+        gl={{ antialias: true, powerPreference: 'high-performance' }}
+        shadows={false}
+        onCreated={({ gl }) => {
+          const canvas = gl.domElement
+          const onLost = (e) => {
+            e.preventDefault()
+          }
+          canvas.addEventListener('webglcontextlost', onLost, false)
+        }}
+      >
+        <color attach="background" args={[0, 0, 0]} />
         <Suspense fallback={null}>
           {source?.type === 'text' ? (
             <ModelFromText text={source.text} />
