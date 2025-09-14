@@ -3,40 +3,57 @@ import { formatTime } from '../../lib/time'
 import { UserCircleIcon, SparklesIcon } from '@heroicons/react/24/outline'
 import { lazy, Suspense, useMemo } from 'react'
 const STLViewer = lazy(() => import('../stl/STLViewer'))
+import ErrorBoundary from '../common/ErrorBoundary'
 
 function extractStlSources(text) {
   if (!text) return []
   const sources = []
-  // 1) URLs ending in .stl
-  const reUrl = /(https?:\/\/[^\s)]+\.stl)\b/gi
+
+  // 1) URLs ending with .stl
+  const urlRegex = /(https?:\/\/\S+?\.stl)\b/gi
   const urlSet = new Set()
-  let m
-  while ((m = reUrl.exec(text)) !== null) urlSet.add(m[1])
+  let um
+  while ((um = urlRegex.exec(text)) !== null) urlSet.add(um[1])
   for (const url of urlSet) sources.push({ type: 'url', url })
 
-  // 2) Fenced code blocks ```stl ... ``` or generic containing STL markers
-  const fenceRe = /```(\w+)?\s*([\s\S]*?)```/g
+  // Prepare lower-cased text for simple includes checks
+  const lower = text.toLowerCase()
+
+  // 2) Fenced code blocks: ```stl ...``` or blocks that clearly look like STL
+  const fenceRegex = /```([^\n`]*)\n([\s\S]*?)```/g
   let fm
-  while ((fm = fenceRe.exec(text)) !== null) {
-    const lang = (fm[1] || '').toLowerCase()
-    const body = fm[2] || ''
-    const looksStl = lang === 'stl' || (/(?:^|\n)\s*facet\s+normal\b/i.test(body) && /(?:^|\n)\s*vertex\b/i.test(body))
+  while ((fm = fenceRegex.exec(text)) !== null) {
+    const lang = (fm[1] || '').trim().toLowerCase()
+    const body = (fm[2] || '')
+    const bodyLower = body.toLowerCase()
+    const facetCount = (bodyLower.match(/facet normal/g) || []).length
+    const looksStl = lang === 'stl' || bodyLower.startsWith('solid') || (facetCount >= 4 && bodyLower.includes('vertex'))
     if (looksStl) sources.push({ type: 'text', text: body.trim() })
   }
 
-  // 3) Whole-message STL (ASCII) — if it includes multiple STL markers
-  const markerCount = (text.match(/\bfacet\s+normal\b/gi) || []).length
-  if (markerCount >= 2 && /\bvertex\b/i.test(text) && /\bouter\s+loop\b/i.test(text)) {
-    // Avoid duplicating if we already captured via fences
+  // 3) Whole-message ASCII STL heuristic (allow preface text)
+  const facetAll = (lower.match(/facet normal/g) || []).length
+  const hasSolidLine = /(\n|^)\s*solid\b/.test(lower)
+  if ((hasSolidLine && facetAll >= 1) || (facetAll >= 4 && lower.includes('vertex'))) {
     if (!sources.some((s) => s.type === 'text')) sources.push({ type: 'text', text: text.trim() })
   }
 
   return sources
 }
 
-export default function MessageBubble({ role, content, name, timestamp, showAvatar = true, showName = true }) {
+export default function MessageBubble({ role, content, name, timestamp, streaming = false, showAvatar = true, showName = true }) {
   const isUser = role === 'user'
   const stlSources = useMemo(() => extractStlSources(content), [content])
+  const maybeStl = useMemo(() => {
+    const lower = (content || '').toLowerCase()
+    const signals = [
+      lower.includes('.stl'),
+      lower.includes('facet normal'),
+      lower.includes('vertex '),
+      lower.includes('outer loop'),
+    ]
+    return signals.filter(Boolean).length >= 2
+  }, [content])
   return (
     <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
       {!isUser && showAvatar && (
@@ -63,13 +80,22 @@ export default function MessageBubble({ role, content, name, timestamp, showAvat
           <div className="prose" dangerouslySetInnerHTML={{ __html: toSafeHtml(content) }} />
         )}
 
-        {stlSources.length > 0 && (
+        {stlSources.length > 0 && !streaming && (
           <div className="mt-2">
-            {stlSources.map((s, idx) => (
-              <Suspense key={idx} fallback={<div className="h-64 grid place-items-center text-slate-500">Loading 3D viewer…</div>}>
-                <STLViewer source={s} />
+            <ErrorBoundary>
+              <Suspense fallback={<div className="h-64 grid place-items-center text-slate-500">Loading 3D viewer…</div>}>
+                {/* Render at most one viewer per message for stability */}
+                <STLViewer source={stlSources[0]} />
               </Suspense>
-            ))}
+            </ErrorBoundary>
+          </div>
+        )}
+        {stlSources.length > 0 && streaming && (
+          <div className="mt-2 text-xs text-slate-500">3D preview will appear when the response finishes…</div>
+        )}
+        {stlSources.length === 0 && !streaming && maybeStl && (
+          <div className="mt-2 text-xs text-amber-600 dark:text-amber-400">
+            Looks like STL text, but it may be incomplete. Wrap it in a fenced block (```stl … ```), or include full facets.
           </div>
         )}
       </div>

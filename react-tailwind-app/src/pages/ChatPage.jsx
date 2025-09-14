@@ -31,7 +31,7 @@ export default function ChatPage() {
         const msgs = [...c.messages]
         const i = msgs.length - 1
         if (i >= 0 && msgs[i].role === 'assistant') {
-          msgs[i] = { ...msgs[i], content: msgs[i].content + piece }
+          msgs[i] = { ...msgs[i], content: msgs[i].content + piece, streaming: true }
         }
         return { ...c, messages: msgs }
       }))
@@ -42,7 +42,7 @@ export default function ChatPage() {
         const msgs = [...c.messages]
         const i = msgs.length - 1
         if (i >= 0 && msgs[i].role === 'assistant') {
-          msgs[i] = { ...msgs[i], content: text }
+          msgs[i] = { ...msgs[i], content: text, streaming: false }
         }
         return { ...c, messages: msgs }
       }))
@@ -58,12 +58,22 @@ export default function ChatPage() {
     const history = [...messages, userMsg]
     setConversations((prev) => prev.map((c) => {
       if (c.id !== activeId) return c
-      const msgs = [...c.messages, userMsg, { role: 'assistant', name: 'Groq', timestamp: Date.now(), content: '' }]
+      const msgs = [...c.messages, userMsg, { role: 'assistant', name: 'Groq', timestamp: Date.now(), content: '', streaming: true }]
       const title = c.title === 'New Chat' ? userMsg.content.slice(0, 30) : c.title
       return { ...c, messages: msgs, title }
     }))
     setPrompt('')
     await start(buildPromptFromMessages(history))
+    // Ensure streaming flag flips off even if 'completed' did not fire
+    setConversations((prev) => prev.map((c) => {
+      if (c.id !== activeId) return c
+      const msgs = [...c.messages]
+      const i = msgs.length - 1
+      if (i >= 0 && msgs[i].role === 'assistant' && msgs[i].streaming) {
+        msgs[i] = { ...msgs[i], streaming: false }
+      }
+      return { ...c, messages: msgs }
+    }))
   }
 
   function handleClear() {

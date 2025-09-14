@@ -27,6 +27,7 @@ export default function MessageList({ messages }) {
             content={m.content}
             name={m.name}
             timestamp={m.timestamp}
+            streaming={m.streaming}
             showAvatar={m.isFirstOfGroup}
             showName={m.isFirstOfGroup}
           />
