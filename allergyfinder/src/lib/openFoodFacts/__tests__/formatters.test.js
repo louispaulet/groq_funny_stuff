@@ -39,3 +39,18 @@ test('falls back to defaults when product data missing', () => {
   assert.ok(context.includes('Reported allergens: none listed in OpenFoodFacts'))
   assert.ok(context.includes('Reminder: verify allergen information'))
 })
+
+test('truncates ingredients and builds fallback source link', () => {
+  const longText = 'a'.repeat(650)
+  const product = {
+    code: '999',
+    product_name: 'Test Product',
+    ingredients_text: longText,
+  }
+
+  const context = formatProductContext(product)
+
+  const expectedSnippet = `${'a'.repeat(600)}…`
+  assert.ok(context.includes(expectedSnippet))
+  assert.ok(context.includes('Source: https://world.openfoodfacts.org/product/999'))
+})
