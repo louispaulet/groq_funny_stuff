@@ -19,7 +19,7 @@ export function parseLLMCandidateResponse(text) {
 
   let parsed = tryParseJson(trimmed)
   if (!parsed) {
-    const matches = trimmed.match(/\{[\s\S]*\}/g)
+    const matches = trimmed.match(/(\{[\s\S]*?\}|\[[\s\S]*?\])/g)
     if (matches && matches.length) {
       for (let i = matches.length - 1; i >= 0; i -= 1) {
         const candidate = tryParseJson(matches[i])
