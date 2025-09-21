@@ -1,3 +1,5 @@
+import { pathToFileURL } from 'node:url'
+
 import { findOpenFoodFactsMatch } from '../src/lib/openFoodFacts/index.js'
 
 const API_BASE_V2 = 'https://world.openfoodfacts.org/api/v2'
@@ -191,4 +193,23 @@ async function main() {
   console.log('Done.')
 }
 
-main()
+const isDirectRun = (() => {
+  const mainArg = globalThis.process?.argv?.[1]
+  if (!mainArg) return false
+  try {
+    return pathToFileURL(mainArg).href === import.meta.url
+  } catch {
+    return false
+  }
+})()
+
+const isNodeTestContext = Boolean(globalThis.process?.env?.NODE_TEST_CONTEXT)
+
+if (isNodeTestContext) {
+  const { test } = await import('node:test')
+  test('OpenFoodFacts diagnostics (manual)', { skip: true }, () => {})
+}
+
+if (isDirectRun && !isNodeTestContext) {
+  main()
+}
