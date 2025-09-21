@@ -9,10 +9,19 @@ export default function Header({ model, onModelChange }) {
     <header className="sticky top-0 z-10 backdrop-blur supports-[backdrop-filter]:bg-white/70 bg-white/60 dark:supports-[backdrop-filter]:bg-slate-900/60 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800">
       <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-lg bg-brand-600 text-white grid place-items-center font-semibold">G</div>
+          <div className="h-8 w-8 rounded-lg bg-brand-600 text-white grid place-items-center">
+            <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden>
+              <path d="M4 3h16a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3H11l-5 3v-3H4a3 3 0 0 1-3-3V6a3 3 0 0 1 3-3z" fill="currentColor"/>
+              <g transform="translate(6 6)">
+                <path d="M4.5 1 9 3.5 4.5 6 0 3.5 4.5 1z" fill="#fff"/>
+                <path d="M4.5 6v5L9 8.5V3.5L4.5 6z" fill="#fff" opacity="0.9"/>
+                <path d="M4.5 6v5L0 8.5V3.5L4.5 6z" fill="#e2f3ff"/>
+              </g>
+            </svg>
+          </div>
           <div>
             <div className="text-sm text-slate-500 dark:text-slate-400">Groq Chat</div>
-            <div className="text-base font-semibold text-slate-800 dark:text-slate-100">React + Tailwind</div>
+            <div className="text-base font-semibold text-slate-800 dark:text-slate-100">3D STL Preview</div>
           </div>
         </div>
         <div className="flex items-center gap-3">
