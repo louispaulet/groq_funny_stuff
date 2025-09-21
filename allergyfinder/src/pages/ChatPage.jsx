@@ -2,7 +2,7 @@ import { useRef, useState } from 'react'
 import { useGroqClient } from '../hooks/useGroqClient'
 import { useChatStream } from '../hooks/useChatStream'
 import { buildPromptFromMessages } from '../lib/chat'
-import { fetchAllergenContext } from '../lib/openFoodFacts'
+import { findOpenFoodFactsMatch } from '../lib/openFoodFacts/index.js'
 import Header from '../components/Header'
 import Sidebar from '../components/Sidebar'
 import MessageList from '../components/chat/MessageList'
@@ -55,6 +55,50 @@ export default function ChatPage() {
     },
   })
 
+  async function validateProductMatch(query, match) {
+    if (!match?.product || !client) return { valid: false, verdict: '' }
+    try {
+      const response = await client.responses.create({
+        model,
+        temperature: 0,
+        max_output_tokens: 120,
+        input: [
+          {
+            role: 'system',
+            content: [
+              'You are a fact-checker verifying if an OpenFoodFacts product is relevant to a user query about food allergens.',
+              'Answer with "YES -" or "NO -" followed by a brief justification.',
+              'Only answer YES when the product clearly satisfies the request (allow close synonym products like Lentille verte for lentilles du puy).',
+            ].join(' '),
+          },
+          {
+            role: 'user',
+            content: [
+              `User query: ${query}`,
+              'Candidate product context:',
+              match.context,
+              'Does this product match the user query?',
+            ].join('\n'),
+          },
+        ],
+      })
+      const verdict = (response.output_text || '').trim()
+      const directiveMatch = verdict.match(/^(yes|no)\b/i)
+      let valid
+      if (!directiveMatch) {
+        console.warn('LLM validation returned no explicit YES/NO directive, defaulting to accept', { query, verdict })
+        valid = true
+      } else {
+        valid = directiveMatch[0].toLowerCase() === 'yes'
+      }
+      console.log('[OFF] LLM validation verdict:', { query, verdict, valid })
+      return { valid, verdict }
+    } catch (error) {
+      console.error('Failed to validate OpenFoodFacts match with LLM', error)
+      return { valid: true, verdict: '' }
+    }
+  }
+
   async function resolveAllergenContext(text) {
     const key = text.trim().toLowerCase()
     if (!key) return ''
@@ -62,9 +106,20 @@ export default function ChatPage() {
     if (cache.has(key)) {
       return cache.get(key) || ''
     }
-    const context = await fetchAllergenContext(text)
-    cache.set(key, context)
-    return context || ''
+    const match = await findOpenFoodFactsMatch(text)
+    if (!match) {
+      cache.set(key, '')
+      return ''
+    }
+
+    const { valid } = await validateProductMatch(text, match)
+    if (!valid) {
+      cache.set(key, '')
+      return ''
+    }
+
+    cache.set(key, match.context)
+    return match.context
   }
 
   async function handleSend() {
