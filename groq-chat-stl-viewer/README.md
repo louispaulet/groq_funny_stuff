@@ -1,4 +1,4 @@
-# Groq Chat — React + Tailwind (Vite)
+# Groq Chat — 3D STL Preview (React + Vite)
 
 Interactive chat UI powered by Groq models, built with React, Vite, and Tailwind. Includes streaming responses, model selection, Markdown with syntax highlighting, dark mode, and an inline 3D STL preview (URLs or ASCII STL text).
 
@@ -26,7 +26,7 @@ Requirements: Node.js 18+ and npm.
 1) Install dependencies
 
 ```bash
-cd react-tailwind-app
+cd groq-chat-stl-viewer
 npm install
 ```
 
