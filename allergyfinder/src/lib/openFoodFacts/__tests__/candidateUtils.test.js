@@ -42,3 +42,9 @@ test('ignores invalid tokens and returns empty array when no terms', () => {
   const result = parseLLMCandidateResponse(input)
   assert.deepEqual(result, [])
 })
+
+test('deduplicates terms and strips invalid characters', () => {
+  const input = '{"terms": ["Nutella", "nutella", "hazel<nuts>", "hazelnuts"]}'
+  const result = parseLLMCandidateResponse(input)
+  assert.deepEqual(result, ['Nutella', 'hazelnuts'])
+})

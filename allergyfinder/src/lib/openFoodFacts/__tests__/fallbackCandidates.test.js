@@ -24,3 +24,9 @@ test('returns empty array for blank input', () => {
   const terms = buildFallbackCandidateTerms('   ')
   assert.deepEqual(terms, [])
 })
+
+test('includes capitalized token combinations', () => {
+  const terms = buildFallbackCandidateTerms('Would Nutella Hazelnut Spread be safe?')
+  assert.ok(terms.includes('Nutella Hazelnut Spread'))
+  assert.ok(terms.includes('Nutella'), 'single capitalized token kept')
+})
