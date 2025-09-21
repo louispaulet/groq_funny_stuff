@@ -1,7 +1,18 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 
-import { parseLLMCandidateResponse } from '../candidateUtils.js'
+import { normalizeCandidateTerm, parseLLMCandidateResponse } from '../candidateUtils.js'
+
+test('normalizes candidate terms by collapsing whitespace and quotes', () => {
+  const input = '  "Nutella"   `Hazelnut`  '
+  const result = normalizeCandidateTerm(input)
+  assert.equal(result, 'Nutella Hazelnut')
+})
+
+test('normalizes candidate term to empty string for non-string inputs', () => {
+  const result = normalizeCandidateTerm(null)
+  assert.equal(result, '')
+})
 
 test('parses direct JSON object payload', () => {
   const input = '{"terms": ["Nutella", "hazelnuts", "nuts"]}'
