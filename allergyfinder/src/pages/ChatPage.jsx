@@ -3,7 +3,7 @@ import { useGroqClient } from '../hooks/useGroqClient'
 import { useChatStream } from '../hooks/useChatStream'
 import { buildPromptFromMessages } from '../lib/chat'
 import { findOpenFoodFactsMatch } from '../lib/openFoodFacts/index.js'
-import { API_ROOT } from '../lib/openFoodFacts/constants.js'
+import { buildSourcesFromMatch } from '../lib/openFoodFacts/sources.js'
 import Header from '../components/Header'
 import Sidebar from '../components/Sidebar'
 import MessageList from '../components/chat/MessageList'
@@ -11,31 +11,6 @@ import Composer from '../components/chat/Composer'
 
 const DEFAULT_MODEL = 'openai/gpt-oss-20b'
 const GREETING = 'Hi! Ask me about allergens in any food and I\'ll use OpenFoodFacts to help.'
-
-function buildSourcesFromMatch(match) {
-  const product = match?.product
-  if (!product) return []
-
-  const code = (product.code || '').trim()
-  const url = product.link || product.url || (code ? `${API_ROOT}/product/${code}` : '')
-  if (!url) return []
-
-  const name = (product.product_name || '').trim()
-  const primaryBrand = (product.brands || '')
-    .split(',')
-    .map((part) => part.trim())
-    .find(Boolean)
-
-  let label = name || 'OpenFoodFacts product entry'
-  if (primaryBrand) {
-    label = name ? `${label} – ${primaryBrand}` : `${primaryBrand} (OpenFoodFacts)`
-  }
-  if (!name && !primaryBrand && code) {
-    label = `OpenFoodFacts product ${code}`
-  }
-
-  return [{ label, url, code: code || undefined }]
-}
 
 export default function ChatPage() {
   const client = useGroqClient()

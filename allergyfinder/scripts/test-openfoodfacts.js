@@ -1,6 +1,7 @@
 import { pathToFileURL } from 'node:url'
 
 import { findOpenFoodFactsMatch } from '../src/lib/openFoodFacts/index.js'
+import { buildSourcesFromMatch } from '../src/lib/openFoodFacts/sources.js'
 
 const API_BASE_V2 = 'https://world.openfoodfacts.org/api/v2'
 const API_PATH_SEARCH = '/search'
@@ -99,6 +100,7 @@ async function testQuery(query) {
   ])
   const match = await findOpenFoodFactsMatch(query)
   const context = match?.context || ''
+  const sources = buildSourcesFromMatch(match)
   return {
     query,
     variants: {
@@ -120,6 +122,7 @@ async function testQuery(query) {
     },
     context,
     match,
+    sources,
   }
 }
 
@@ -148,6 +151,14 @@ function printResult(result) {
     console.log(`  Warnings: ${warnings && warnings.length ? warnings.join('; ') : '<none>'}`)
   }
   console.log('Context snippet:', context ? `${context.slice(0, 280)}${context.length > 280 ? '…' : ''}` : '<empty>')
+  if (sources?.length) {
+    console.log('Sources:')
+    for (const source of sources) {
+      console.log(`  - ${source.label} -> ${source.url}`)
+    }
+  } else {
+    console.log('Sources: <none>')
+  }
   if (match?.product) {
     console.log('Match details:', {
       matchType: match.matchType,
