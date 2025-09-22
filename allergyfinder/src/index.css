@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Global App Styles */
+html, body, #root { height: 100%; }
+body { @apply bg-gradient-to-br from-slate-50 to-slate-100 text-slate-900; }
+.dark body { @apply from-slate-900 to-slate-950 text-slate-100; }
+
+/* Prose (Markdown) tweaks */
+.prose { @apply prose-slate max-w-none leading-relaxed; }
+.dark .prose { @apply prose-invert; }
+.prose pre { @apply bg-slate-900 text-slate-100 rounded-lg shadow-inner; }
+.prose code { @apply text-[0.95em]; }
+.prose a { @apply text-brand-600 no-underline hover:underline; }
+.prose h1, .prose h2, .prose h3 { @apply font-semibold tracking-tight; }
+.prose blockquote { @apply border-l-4 border-slate-200 bg-slate-50; }
+.dark .prose blockquote { @apply border-slate-700 bg-slate-800; }
+
+/* Scrollbar (WebKit) */
+.thin-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
+.thin-scrollbar::-webkit-scrollbar-thumb { @apply bg-slate-300 rounded-full; }
+.thin-scrollbar::-webkit-scrollbar-track { @apply bg-transparent; }
+
+/* Native select dark-mode defaults (best-effort; varies by OS/UA) */
+@layer base {
+  select {
+    @apply bg-white text-slate-800 border border-slate-300 rounded-md;
+  }
+  .dark select {
+    @apply bg-slate-800 text-slate-100 border-slate-700;
+  }
+  /* Some browsers read option colors from these rules */
+  select option {
+    color: #0f172a; /* slate-900 */
+    background: #ffffff;
+  }
+  .dark select option {
+    color: #e5e7eb; /* slate-200 */
+    background: #0b1220; /* deep slate */
+  }
+}
