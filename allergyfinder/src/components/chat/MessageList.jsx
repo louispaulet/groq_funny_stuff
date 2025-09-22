@@ -30,6 +30,7 @@ export default function MessageList({ messages }) {
             streaming={m.streaming}
             showAvatar={m.isFirstOfGroup}
             showName={m.isFirstOfGroup}
+            sources={m.sources}
           />
         ))}
         <div ref={bottomRef} />

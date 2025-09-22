@@ -3,6 +3,7 @@ import { useGroqClient } from '../hooks/useGroqClient'
 import { useChatStream } from '../hooks/useChatStream'
 import { buildPromptFromMessages } from '../lib/chat'
 import { findOpenFoodFactsMatch } from '../lib/openFoodFacts/index.js'
+import { API_ROOT } from '../lib/openFoodFacts/constants.js'
 import Header from '../components/Header'
 import Sidebar from '../components/Sidebar'
 import MessageList from '../components/chat/MessageList'
@@ -10,6 +11,31 @@ import Composer from '../components/chat/Composer'
 
 const DEFAULT_MODEL = 'openai/gpt-oss-20b'
 const GREETING = 'Hi! Ask me about allergens in any food and I\'ll use OpenFoodFacts to help.'
+
+function buildSourcesFromMatch(match) {
+  const product = match?.product
+  if (!product) return []
+
+  const code = (product.code || '').trim()
+  const url = product.link || product.url || (code ? `${API_ROOT}/product/${code}` : '')
+  if (!url) return []
+
+  const name = (product.product_name || '').trim()
+  const primaryBrand = (product.brands || '')
+    .split(',')
+    .map((part) => part.trim())
+    .find(Boolean)
+
+  let label = name || 'OpenFoodFacts product entry'
+  if (primaryBrand) {
+    label = name ? `${label} – ${primaryBrand}` : `${primaryBrand} (OpenFoodFacts)`
+  }
+  if (!name && !primaryBrand && code) {
+    label = `OpenFoodFacts product ${code}`
+  }
+
+  return [{ label, url, code: code || undefined }]
+}
 
 export default function ChatPage() {
   const client = useGroqClient()
@@ -101,25 +127,31 @@ export default function ChatPage() {
 
   async function resolveAllergenContext(text) {
     const key = text.trim().toLowerCase()
-    if (!key) return ''
+    if (!key) return { context: '', sources: [] }
     const cache = allergenCacheRef.current
     if (cache.has(key)) {
-      return cache.get(key) || ''
+      return cache.get(key) || { context: '', sources: [] }
     }
     const match = await findOpenFoodFactsMatch(text)
     if (!match) {
-      cache.set(key, '')
-      return ''
+      const empty = { context: '', sources: [] }
+      cache.set(key, empty)
+      return empty
     }
 
     const { valid } = await validateProductMatch(text, match)
     if (!valid) {
-      cache.set(key, '')
-      return ''
+      const empty = { context: '', sources: [] }
+      cache.set(key, empty)
+      return empty
     }
 
-    cache.set(key, match.context)
-    return match.context
+    const result = {
+      context: match.context,
+      sources: buildSourcesFromMatch(match),
+    }
+    cache.set(key, result)
+    return result
   }
 
   async function handleSend() {
@@ -133,8 +165,19 @@ export default function ChatPage() {
       return { ...c, messages: msgs, title }
     }))
     setPrompt('')
-    const context = await resolveAllergenContext(userMsg.content)
-    await start(buildPromptFromMessages(history, context))
+    const contextInfo = await resolveAllergenContext(userMsg.content)
+    if (contextInfo.sources.length > 0) {
+      setConversations((prev) => prev.map((c) => {
+        if (c.id !== activeId) return c
+        const msgs = [...c.messages]
+        const i = msgs.length - 1
+        if (i >= 0 && msgs[i].role === 'assistant') {
+          msgs[i] = { ...msgs[i], sources: contextInfo.sources }
+        }
+        return { ...c, messages: msgs }
+      }))
+    }
+    await start(buildPromptFromMessages(history, contextInfo.context))
     // Ensure streaming flag flips off even if 'completed' did not fire
     setConversations((prev) => prev.map((c) => {
       if (c.id !== activeId) return c

@@ -41,7 +41,7 @@ function extractStlSources(text) {
   return sources
 }
 
-export default function MessageBubble({ role, content, name, timestamp, streaming = false, showAvatar = true, showName = true }) {
+export default function MessageBubble({ role, content, name, timestamp, streaming = false, showAvatar = true, showName = true, sources = [] }) {
   const isUser = role === 'user'
   const stlSources = useMemo(() => extractStlSources(content), [content])
   const maybeStl = useMemo(() => {
@@ -54,6 +54,7 @@ export default function MessageBubble({ role, content, name, timestamp, streamin
     ]
     return signals.filter(Boolean).length >= 2
   }, [content])
+  const hasSources = !isUser && Array.isArray(sources) && sources.length > 0
   return (
     <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
       {!isUser && showAvatar && (
@@ -97,6 +98,39 @@ export default function MessageBubble({ role, content, name, timestamp, streamin
           <div className="mt-2 text-xs text-amber-600 dark:text-amber-400">
             Looks like STL text, but it may be incomplete. Wrap it in a fenced block (```stl … ```), or include full facets.
           </div>
+        )}
+        {hasSources && (
+          <details className="mt-3 text-xs text-slate-500 dark:text-slate-400">
+            <summary className="cursor-pointer font-medium text-slate-600 dark:text-slate-200">Sources</summary>
+            <ul className="mt-2 space-y-1 text-slate-600 dark:text-slate-200">
+              {sources.map((source, idx) => {
+                const key = source.url || source.code || idx
+                const label = source.label || source.url || 'OpenFoodFacts'
+                return (
+                  <li key={key} className="leading-snug">
+                    {source.url ? (
+                      <a
+                        href={source.url}
+                        target="_blank"
+                        rel="noreferrer noopener"
+                        className="underline decoration-dotted underline-offset-4 hover:text-brand-600 dark:hover:text-brand-400"
+                      >
+                        {label}
+                      </a>
+                    ) : (
+                      <span>{label}</span>
+                    )}
+                    {source.code && (
+                      <span className="ml-1 text-slate-400 dark:text-slate-500">#{source.code}</span>
+                    )}
+                    {source.note && (
+                      <span className="ml-1 text-slate-400 dark:text-slate-500">({source.note})</span>
+                    )}
+                  </li>
+                )
+              })}
+            </ul>
+          </details>
         )}
       </div>
       {isUser && showAvatar && (
