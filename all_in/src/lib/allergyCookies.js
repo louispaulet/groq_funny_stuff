@@ -2,6 +2,7 @@ const ALLERGY_COOKIE_NAME = 'allergy_notes'
 const ALLERGY_CONVERSATIONS_COOKIE_NAME = 'allergyfinder_conversations'
 const USER_PROFILE_COOKIE_NAME = 'allin_profile_name'
 const CHAT_COUNT_COOKIE_NAME = 'allin_chat_counts'
+const ALLERGY_EXPERIENCE_ID = 'allergyfinder'
 
 const YEAR_IN_SECONDS = 60 * 60 * 24 * 365
 const MAX_SAVED_CONVERSATIONS = 2
@@ -121,6 +122,7 @@ export function writeAllergyConversationsCookie(conversations) {
   const payload = buildConversationPayload(conversations)
   if (payload.length === 0) {
     deleteCookie(ALLERGY_CONVERSATIONS_COOKIE_NAME)
+    clearChatCount(ALLERGY_EXPERIENCE_ID)
     return
   }
   let serialized = JSON.stringify(payload)
@@ -133,10 +135,12 @@ export function writeAllergyConversationsCookie(conversations) {
     }
   }
   writeCookie(ALLERGY_CONVERSATIONS_COOKIE_NAME, serialized)
+  ensureChatCountAtLeast(ALLERGY_EXPERIENCE_ID, payload.length)
 }
 
 export function clearAllergyConversationsCookie() {
   deleteCookie(ALLERGY_CONVERSATIONS_COOKIE_NAME)
+  clearChatCount(ALLERGY_EXPERIENCE_ID)
 }
 
 function readChatCountMap() {
@@ -171,8 +175,15 @@ function writeChatCountMap(map) {
 
 export function readChatCounts() {
   const map = readChatCountMap()
+  let allergyCount = Number.parseInt(map.allergyfinder, 10) || 0
+  if (allergyCount === 0) {
+    const saved = readAllergyConversationsCookie()
+    if (saved.length > allergyCount) {
+      allergyCount = saved.length
+    }
+  }
   return {
-    allergyfinder: Number.parseInt(map.allergyfinder, 10) || 0,
+    allergyfinder: allergyCount,
     stlviewer: Number.parseInt(map.stlviewer, 10) || 0,
     pokedex: Number.parseInt(map.pokedex, 10) || 0,
   }
@@ -182,6 +193,17 @@ export function incrementChatCount(experienceId) {
   if (!experienceId) return
   const map = readChatCountMap()
   map[experienceId] = (Number.parseInt(map[experienceId], 10) || 0) + 1
+  writeChatCountMap(map)
+}
+
+export function ensureChatCountAtLeast(experienceId, minimum) {
+  if (!experienceId) return
+  const target = Math.max(0, Number(minimum) || 0)
+  const map = readChatCountMap()
+  const current = Number.parseInt(map[experienceId], 10) || 0
+  if (target === 0 && current === 0) return
+  if (target <= current) return
+  map[experienceId] = target
   writeChatCountMap(map)
 }
 

@@ -8,6 +8,7 @@ import {
   readAllergyCookie,
   readAllergyConversationsCookie,
   writeAllergyConversationsCookie,
+  ensureChatCountAtLeast,
   incrementChatCount,
 } from '../../lib/allergyCookies'
 import { enhanceAssistantContent } from '../../lib/assistantPostprocess'
@@ -117,6 +118,7 @@ export default function ChatExperience({ experience }) {
       if (hydrated.length > 0) {
         loadedConversations = hydrated
         usedSavedHistory = true
+        ensureChatCountAtLeast(experience?.id, hydrated.length)
       }
     }
 
@@ -331,7 +333,6 @@ export default function ChatExperience({ experience }) {
         ? 'Request cancelled.'
         : `Unable to reach the service. ${error?.message || 'Please try again.'}`
       if (!aborted) {
-        // eslint-disable-next-line no-console
         console.error(`[${experience?.logLabel || 'Chat'}] request failed`, error)
       }
       setConversations((prev) => prev.map((conversation) => {

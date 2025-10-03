@@ -6,6 +6,7 @@ import {
   clearChatCount,
   clearUserProfileName,
   readAllergyCookie,
+  readAllergyConversationsCookie,
   readChatCounts,
   readUserProfileName,
   writeAllergyCookie,
@@ -39,6 +40,7 @@ function formatAllergyPreview(notes) {
 export default function UserProfile() {
   const [profileName, setProfileName] = useState('')
   const [chatCounts, setChatCounts] = useState(() => readChatCounts())
+  const [savedConversations, setSavedConversations] = useState(() => readAllergyConversationsCookie().length)
   const [allergyCount, setAllergyCount] = useState(() => countAllergyEntries())
   const [allergyPreview, setAllergyPreview] = useState(() => formatAllergyPreview(readAllergyCookie()))
 
@@ -54,6 +56,7 @@ export default function UserProfile() {
 
   function refreshStats() {
     setChatCounts(readChatCounts())
+    setSavedConversations(readAllergyConversationsCookie().length)
     setAllergyCount(countAllergyEntries())
     setAllergyPreview(formatAllergyPreview(readAllergyCookie()))
   }
@@ -126,6 +129,15 @@ export default function UserProfile() {
             demo. Counts are stored locally in a cookie.</p>
         </div>
         <div className="grid gap-4 md:grid-cols-3">
+          <div className="space-y-3 rounded-3xl border border-emerald-200 bg-emerald-50/70 p-5 shadow-sm dark:border-emerald-500/30 dark:bg-emerald-900/40">
+            <div className="text-sm font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-200">
+              Saved Allergy Chats
+            </div>
+            <div className="text-4xl font-bold text-emerald-700 dark:text-emerald-200">{savedConversations}</div>
+            <p className="text-xs text-emerald-800 dark:text-emerald-100/80">
+              Snapshot of how many AllergyFinder conversations are currently stored in cookies on this device.
+            </p>
+          </div>
           {Object.entries(chatCounts).map(([experienceId, count]) => (
             <div
               key={experienceId}

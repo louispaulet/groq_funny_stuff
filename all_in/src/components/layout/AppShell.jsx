@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom'
 import { MoonIcon, SunIcon, UserCircleIcon } from '@heroicons/react/24/outline'
 import { experiences } from '../../config/experiences'
-import { useTheme } from '../../theme/ThemeContext'
+import { useTheme } from '../../theme'
 
 function ThemeToggle() {
   const { theme, setTheme } = useTheme()

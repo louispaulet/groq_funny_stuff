@@ -29,7 +29,6 @@ export async function callRemoteChat(experience, messages, { signal, model, base
     : Date.now()
   const lastMessage = messages?.[messages.length - 1]
   const lastContent = lastMessage?.content || ''
-  // eslint-disable-next-line no-console
   console.log(
     `[${label}] → POST %s — model: %s — prompt: %s`,
     url,
@@ -97,7 +96,6 @@ export async function callRemoteChat(experience, messages, { signal, model, base
     throw new Error('Remote chat service returned an empty message')
   }
 
-  // eslint-disable-next-line no-console
   console.log(
     `[${label}] ← %s %d in %dms — response: %s`,
     url,
