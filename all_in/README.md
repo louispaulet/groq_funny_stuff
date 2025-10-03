@@ -1,12 +1,12 @@
-# Groq All-In
+# Groq AllIn Studio
 
-Groq All-In combines the three existing demos — AllergyFinder, STL Viewer, and the remote Pokedex — into a single Vite/React workspace with a consistent layout. Each experience keeps its custom prompt and helpers while sharing navigation, theme controls, and chat shell components.
+Groq AllIn Studio combines the AllergyFinder, STL Viewer, and remote Pokédex demos into a single Vite/React workspace with a consistent layout. Each experience keeps its custom prompt and helpers while sharing navigation, theme controls, and chat shell components. The production deployment lives at https://groq-allin.thefrenchartist.dev/.
 
 ## Features
 - Shared layout with top-level navigation, dark-mode toggle, and per-experience landing cards.
 - Reusable chat surface (sidebar, threaded history, composer) tailored by configuration.
 - STL workspace keeps inline 3D previews using `three`, `@react-three/fiber`, and a local `/stl-proxy` helper.
-- Pokedex workspace supports overriding the remote service base URL; others read from configuration and environment variables.
+- Pokédex workspace supports overriding the remote service base URL; others read from configuration and environment variables.
 - Tailwind-powered styling with a unified brand palette across all pages.
 
 ## Getting Started
@@ -22,11 +22,11 @@ Groq All-In combines the three existing demos — AllergyFinder, STL Viewer, and
    ```bash
    npm run dev
    ```
-   Or via the Makefile helper:
+   Or via the Makefile helper (defaults to port 5175):
    ```bash
    make run allin
    ```
-3. Open the URL reported by Vite (defaults to http://localhost:5173) and use the top navigation to switch between workspaces.
+3. Open the printed local URL (Vite defaults to http://localhost:5173). For the hosted version, visit https://groq-allin.thefrenchartist.dev/.
 
 ## Configuration
 The app looks for the following environment variables (via `import.meta.env` or `process.env` when pre-rendered):
@@ -34,7 +34,7 @@ The app looks for the following environment variables (via `import.meta.env` or 
 - `VITE_CHAT_BASE_URL` — default base URL for all chat calls (`/chat` is appended automatically).
 - `VITE_ALLERGY_CHAT_BASE_URL`, `VITE_STL_CHAT_BASE_URL`, `VITE_POKEDEX_CHAT_BASE_URL` — optional per-experience overrides.
 
-You can change the Pokedex base URL from inside the UI. Other experiences read their configured base URL at load time; to point them elsewhere, set the corresponding environment variable before starting Vite (for example, `VITE_STL_CHAT_BASE_URL=https://example.com npm run dev`).
+You can change the Pokédex base URL from inside the UI. Other experiences read their configured base URL at load time; to point them elsewhere, set the corresponding environment variable before starting Vite (for example, `VITE_STL_CHAT_BASE_URL=https://example.com npm run dev`).
 
 ## Project Structure
 - `src/config/experiences.js` — declarative metadata (titles, prompts, colors, model lists) for each workspace.

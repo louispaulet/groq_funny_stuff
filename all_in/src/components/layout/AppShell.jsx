@@ -37,7 +37,7 @@ export default function AppShell({ children }) {
             </div>
             <div className="leading-tight">
               <div className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Groq</div>
-              <div className="text-lg font-semibold text-slate-900 dark:text-slate-100">All-In Studio</div>
+              <div className="text-lg font-semibold text-slate-900 dark:text-slate-100">AllIn Studio</div>
             </div>
           </NavLink>
           <nav className="hidden items-center gap-2 md:flex">
@@ -65,7 +65,7 @@ export default function AppShell({ children }) {
       <footer className="mt-auto border-t border-slate-200 bg-white/80 py-6 text-sm text-slate-600 backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:border-slate-800 dark:bg-slate-900/70 dark:text-slate-300">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-2 px-4 text-center sm:flex-row sm:items-center sm:justify-between sm:text-left">
           <div>
-            <span className="font-semibold text-slate-700 dark:text-slate-200">Groq All-In</span>
+            <span className="font-semibold text-slate-700 dark:text-slate-200">Groq AllIn Studio</span>
             <span className="ml-2 text-xs uppercase tracking-wide text-slate-400 dark:text-slate-500">Unified Playground</span>
           </div>
           <div className="text-xs text-slate-500 dark:text-slate-400">
