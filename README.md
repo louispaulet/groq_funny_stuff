@@ -1,29 +1,57 @@
 # groq_funny_stuff
 
-## Pokédex (Gradio app)
+Groq All-In is the canonical experience in this repo: a single React workspace that bundles the Pokédex, AllergyFinder, and STL viewer demos behind one shell. The legacy folders remain for focused local work, but only `all_in` is packaged for deployment.
 
-A lightweight, local Pokédex chat where you can ask questions about a Pokémon and get a concise 2–3 sentence answer.
+## Overview
+- `all_in/` contains the deployable Groq All-In workspace and is the recommended way to run the demos together.
+- `chat/`, `pokedex/`, `allergyfinder/`, and `groq-chat-stl-viewer/` mirror the original standalone projects that now ship inside All-In.
+- The root `Makefile` exposes consistent install/run/test targets for both the unified app and the legacy subprojects.
+- Only the All-In workspace is shipped to production; the other directories are development artifacts.
 
-Run it:
+## Prerequisites
+- Node.js 18+ and npm for the All-In workspace and the other Vite/React frontends.
+- Python 3.10+ for the standalone Gradio apps in `chat/` and `pokedex/` (useful for local iteration).
+- A Groq API key for the browser clients (`.env.local` files are gitignored).
 
-- Install deps: `make install chat` or `make install pokedex`
-- Run app: `make run chat` or `make run pokedex`
-Direct run:
+## Quick Start
+### Recommended: All-In workspace
+- Install dependencies: `make install allin` *(or `cd all_in && npm install`)*
+- Run locally: `make run allin` *(or `npm run dev` inside `all_in/`)*
+- Deploy: `make deploy allin` *(wraps `npm run deploy` inside `all_in/`)*
+- Default dev port: `5175` (`ALLIN_PORT` overrides when using `make run`).
 
-- `python pokedex/pokedex_app.py`
-- `python chat/app.py`
+### Legacy standalone demos (optional)
+These folders match the experiences embedded in All-In and can still be run individually for debugging.
+- Install dependencies: `make install chat|pokedex|allergyfinder|stlviewer`
+- Launch a demo: `make run chat|pokedex|allergyfinder|stlviewer`
+- Test or lint: `make test chat|pokedex|allergyfinder|stlviewer`
+- Clean the shared Python virtualenv: `make clean`
 
-Update Pokédex names (optional):
+Default ports when run directly: Pokédex 7860, Chat 7861, AllergyFinder 5173, STL Viewer 5174. Override by exporting `POKEDEX_PORT`, `CHAT_PORT`, etc., before calling `make run`.
 
-- `python pokedex/scripts/generate_pokemon_names.py` (writes to `pokedex/pokemon_names.py`)
+## Projects
+### Groq All-In — React + Vite (primary target)
+Unified workspace with shared layout, navigation, and chat components. Switch between the embedded experiences via the top navigation. Configure per-experience chat endpoints with `.env.local` keys:
+- `VITE_CHAT_BASE_URL` — default chat endpoint (`/chat` appended automatically)
+- `VITE_ALLERGY_CHAT_BASE_URL`, `VITE_STL_CHAT_BASE_URL`, `VITE_POKEDEX_CHAT_BASE_URL` — optional overrides for each tab
 
-Examples:
+### Legacy Gradio apps
+- **Remote Chat (`chat/`)** — minimal Gradio UI that forwards prompts to a remote worker. Environment flags: `CHAT_BASE_URL` (default `https://groq-endpoint.louispaulet13.workers.dev`) and `CHAT_REQUEST_TIMEOUT` (seconds).
+- **Pokédex (`pokedex/`)** — local Gradio chat over a Pokédex dataset. Includes `pokedex/scripts/generate_pokemon_names.py` to refresh the derived name map.
 
-- "What are Charizard’s weaknesses?"
-- "Tell me about Pikachu"
-- "Which type is Gengar?"
+### Legacy React demos
+- **AllergyFinder (`allergyfinder/`)** — Groq-powered allergy assistant that enriches prompts with OpenFoodFacts lookups. Requires `VITE_GROQ_API_KEY`.
+- **Groq Chat STL Viewer (`groq-chat-stl-viewer/`)** — chat interface that renders inline 3D STL previews using `three.js` and a development `stl-proxy` helper. Requires `VITE_GROQ_API_KEY`.
 
-Notes:
+## Extras
+- `demos/` — static HTML experiments for Groq streaming APIs.
+- `api_examples/` — quick tests (e.g., `test_openfoodfacts.html`) supporting AllergyFinder.
+- `third_party/` — shared assets sourced from external projects.
 
-- Uses a small built-in dataset (no network required).
-- Supports topics like types, weaknesses, abilities, evolution, height/weight, moves, and general info.
+## Testing Notes
+- All-In: `npm run lint` (inside `all_in/`).
+- Gradio apps: `make test chat` or `make test pokedex` (requires created virtualenv).
+- AllergyFinder: `cd allergyfinder && npm run lint` (also triggers `node --test` when using `make test allergyfinder`).
+- STL Viewer: `cd groq-chat-stl-viewer && npm run lint`.
+
+Questions or tweaks? Check each subdirectory's README for deeper implementation details.
