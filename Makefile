@@ -8,7 +8,7 @@ ALLERGYFINDER_PORT ?= 5173
 STLVIEWER_PORT ?= 5174
 ALLIN_PORT ?= 5175
 
-.PHONY: venv install run clean chat pokedex allergyfinder stlviewer allin test
+.PHONY: venv install run clean chat pokedex allergyfinder stlviewer allin test deploy
 
 venv:
 	python3 -m venv $(VENV_DIR)
@@ -57,6 +57,12 @@ test:
 	@if [ "$(APP)" = "allergyfinder" ]; then cd allergyfinder && npm run lint && node --test src/lib/openFoodFacts/__tests__/*.test.js; fi
 	@if [ "$(APP)" = "stlviewer" ]; then cd groq-chat-stl-viewer && npm run lint; fi
 	@if [ "$(APP)" = "allin" ]; then cd all_in && npm run lint; fi
+
+deploy:
+	@if [ "$(APP)" != "allin" ]; then \
+	  echo "Usage: make deploy allin"; exit 1; \
+	fi
+	@if [ "$(APP)" = "allin" ]; then cd all_in && npm run deploy; fi
 
 clean:
 	rm -rf $(VENV_DIR)
