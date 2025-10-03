@@ -1,4 +1,4 @@
-export default function ExperiencePage({ experience, children }) {
+export default function ExperiencePage({ experience, children, navigation }) {
   if (!experience) {
     return (
       <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-red-700 dark:border-red-800 dark:bg-red-900/40 dark:text-red-200">
@@ -22,6 +22,12 @@ export default function ExperiencePage({ experience, children }) {
         </div>
         <div className="absolute -right-20 bottom-0 top-0 w-64 bg-white/10 blur-3xl" aria-hidden />
       </section>
+
+      {navigation ? (
+        <div className="rounded-2xl border border-slate-200 bg-white/80 px-4 py-3 shadow-sm dark:border-slate-700 dark:bg-slate-900/60">
+          {navigation}
+        </div>
+      ) : null}
 
       <div>{children}</div>
     </div>

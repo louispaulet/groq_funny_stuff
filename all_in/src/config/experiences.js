@@ -34,6 +34,7 @@ export const experiences = [
       'You are an allergy assistant that uses OpenFoodFacts data to answer questions about food allergens.',
       'Use the provided context when it is relevant and be transparent about any gaps.',
       'Encourage users to double-check packaging for medical decisions.',
+      'When allergy notes from the Allergy Cookie Editor are supplied, treat them as authoritative user-provided context and surface relevant reminders proactively.',
     ].join(' '),
     allowBaseUrlOverride: false,
     enableStlViewer: false,

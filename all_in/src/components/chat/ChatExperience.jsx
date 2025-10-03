@@ -4,6 +4,7 @@ import MessageList from './MessageList'
 import Composer from './Composer'
 import ModelSelector from '../ModelSelector'
 import { callRemoteChat } from '../../lib/remoteChat'
+import { readAllergyCookie } from '../../lib/allergyCookies'
 
 function normalizeBaseUrl(raw) {
   const candidate = (raw || '').trim()
@@ -199,7 +200,20 @@ export default function ChatExperience({ experience }) {
 
     try {
       const history = [...messages, userMessage]
-      const chatMessages = buildMessages(experience?.systemPrompt, history)
+      let systemPrompt = experience?.systemPrompt
+      if (experience?.id === 'allergyfinder') {
+        const cookieNotes = readAllergyCookie()
+        if (cookieNotes) {
+          systemPrompt = [
+            systemPrompt,
+            'User allergy notes saved via the Allergy Cookie Editor (markdown format):',
+            cookieNotes,
+          ]
+            .filter(Boolean)
+            .join('\n\n')
+        }
+      }
+      const chatMessages = buildMessages(systemPrompt, history)
       const result = await callRemoteChat(experience, chatMessages, {
         signal: controller.signal,
         model,
