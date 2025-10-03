@@ -20,6 +20,12 @@ export const experiences = [
     badge: 'Nutrition',
     heroGradient: 'from-emerald-500 to-teal-500',
     panelAccent: 'bg-emerald-100 text-emerald-900 dark:bg-emerald-500/20 dark:text-emerald-200',
+    navAccent: {
+      gradient: 'from-emerald-500 to-teal-500',
+      hover:
+        'hover:bg-emerald-500/10 hover:text-emerald-600 hover:border-emerald-400/60 dark:hover:bg-emerald-500/20 dark:hover:text-emerald-200 dark:hover:border-emerald-400/60',
+      focus: 'focus-visible:ring-emerald-500/40',
+    },
     defaultModel: 'openai/gpt-oss-20b',
     modelOptions: ['openai/gpt-oss-20b', 'openai/gpt-oss-120b'],
     greeting: "Hi! Ask me about allergens in any food and I'll look at OpenFoodFacts.",
@@ -43,6 +49,12 @@ export const experiences = [
     badge: '3D',
     heroGradient: 'from-indigo-500 to-slate-700',
     panelAccent: 'bg-indigo-100 text-indigo-900 dark:bg-indigo-500/20 dark:text-indigo-200',
+    navAccent: {
+      gradient: 'from-indigo-500 to-slate-700',
+      hover:
+        'hover:bg-indigo-500/10 hover:text-indigo-400 hover:border-indigo-400/60 dark:hover:bg-indigo-500/20 dark:hover:text-indigo-200 dark:hover:border-indigo-400/60',
+      focus: 'focus-visible:ring-indigo-500/40',
+    },
     defaultModel: 'openai/gpt-oss-20b',
     modelOptions: ['openai/gpt-oss-20b', 'openai/gpt-oss-120b'],
     greeting: 'Hi! Ask me anything about STL models or 3D printing workflows.',
@@ -65,6 +77,12 @@ export const experiences = [
     badge: 'Pokemon',
     heroGradient: 'from-rose-500 to-orange-500',
     panelAccent: 'bg-rose-100 text-rose-900 dark:bg-rose-500/20 dark:text-rose-200',
+    navAccent: {
+      gradient: 'from-rose-500 to-orange-500',
+      hover:
+        'hover:bg-rose-500/10 hover:text-rose-500 hover:border-rose-400/60 dark:hover:bg-rose-500/20 dark:hover:text-rose-200 dark:hover:border-rose-400/60',
+      focus: 'focus-visible:ring-rose-500/40',
+    },
     defaultModel: 'openai/gpt-oss-20b',
     modelOptions: ['openai/gpt-oss-20b', 'openai/gpt-oss-120b'],
     greeting: 'Hi! Ask me about any Pokemon and I will fetch quick Pokedex facts.',

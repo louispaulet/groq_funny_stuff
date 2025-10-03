@@ -19,11 +19,26 @@ function ThemeToggle() {
   )
 }
 
-function navClasses({ isActive }) {
-  const base = 'inline-flex items-center rounded-full px-4 py-2 text-sm font-medium transition-colors'
-  const active = 'bg-brand-600 text-white shadow'
-  const inactive = 'text-slate-600 hover:bg-white/70 hover:text-brand-600 dark:text-slate-300 dark:hover:text-white'
-  return `${base} ${isActive ? active : inactive}`
+function defaultNavClasses({ isActive }) {
+  const base = 'inline-flex items-center rounded-full border px-4 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900'
+  const focus = 'focus-visible:ring-brand-500/40'
+  if (isActive) {
+    return `${base} border-transparent bg-brand-600 text-white shadow ${focus}`
+  }
+  return `${base} border-slate-300 bg-white/70 text-slate-600 hover:border-brand-500/60 hover:bg-brand-500/10 hover:text-brand-600 dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-300 dark:hover:text-white ${focus}`
+}
+
+function experienceNavClasses(accent) {
+  const gradient = accent?.gradient || 'from-brand-500 to-brand-600'
+  const hover = accent?.hover || 'hover:bg-brand-500/10 hover:text-brand-600 hover:border-brand-400/60'
+  const focus = accent?.focus || 'focus-visible:ring-brand-500/40'
+  return ({ isActive }) => {
+    const base = 'inline-flex items-center rounded-full border px-4 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900'
+    if (isActive) {
+      return `${base} border-transparent bg-gradient-to-r ${gradient} text-white shadow ${focus}`
+    }
+    return `${base} border-slate-300 bg-white/70 text-slate-600 ${hover} dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-300 dark:hover:text-white ${focus}`
+  }
 }
 
 function footerLinkClasses({ isActive }) {
@@ -47,19 +62,19 @@ export default function AppShell({ children }) {
             </div>
           </NavLink>
           <nav className="hidden items-center gap-2 md:flex">
-            <NavLink to="/" className={navClasses} end>
+            <NavLink to="/" className={defaultNavClasses} end>
               Overview
             </NavLink>
             {experiences.map((experience) => (
               <NavLink
                 key={experience.id}
                 to={experience.path}
-                className={navClasses}
+                className={experienceNavClasses(experience.navAccent)}
               >
                 {experience.name}
               </NavLink>
             ))}
-            <NavLink to="/about" className={navClasses}>About</NavLink>
+            <NavLink to="/about" className={defaultNavClasses}>About</NavLink>
           </nav>
           <div className="flex items-center gap-2">
             <ThemeToggle />
