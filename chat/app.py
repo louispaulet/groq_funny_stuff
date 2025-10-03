@@ -1,47 +1,77 @@
+import logging
+import os
+
 import gradio as gr
 import requests
 
-API_KEY = "REDACTED_GROQ_KEY"
-API_URL = "https://api.groq.com/openai/v1/chat/completions"
 DEFAULT_MODEL = "openai/gpt-oss-20b"
+BASE_URL = os.getenv("CHAT_BASE_URL", "https://groq-endpoint.louispaulet13.workers.dev").rstrip("/")
+REQUEST_TIMEOUT = float(os.getenv("CHAT_REQUEST_TIMEOUT", "30"))
 
-headers = {
-    "Authorization": f"Bearer {API_KEY}",
-    "Content-Type": "application/json"
-}
 
-def chat_stream(history, model):
-    # history: list of [user, assistant] pairs
-    messages = []
-    for pair in history:
-        user_msg = pair[0]
-        assistant_msg = pair[1] if len(pair) > 1 and pair[1] else None
-        messages.append({"role": "user", "content": user_msg})
-        if assistant_msg:
-            messages.append({"role": "assistant", "content": assistant_msg})
-    # Add a placeholder for the next user message (handled in respond)
-    payload = {
-        "model": model,
-        "messages": messages,
-        "stream": True
-    }
-    response = requests.post(API_URL, headers=headers, json=payload, stream=True)
-    output = ""
-    for line in response.iter_lines():
-        if line:
-            try:
-                data = line.decode("utf-8")
-                if data.startswith("data: "):
-                    data = data[6:]
-                if data == "[DONE]":
-                    break
-                import json
-                chunk = json.loads(data)
-                delta = chunk.get("choices", [{}])[0].get("delta", {}).get("content", "")
-                output += delta
-                yield output
-            except Exception:
-                continue
+logging.basicConfig(level=logging.INFO, format="[chat] %(message)s")
+LOGGER = logging.getLogger("chat.remote")
+
+
+def _preview(text: str, limit: int = 200) -> str:
+    if not text:
+        return ""
+    text = str(text).strip()
+    return text if len(text) <= limit else f"{text[:limit]}..."
+
+
+def build_messages(history, user_input):
+    messages = [{"role": "system", "content": "You are a helpful assistant."}]
+    for pair in history or []:
+        if not pair:
+            continue
+        user_part = pair[0] if len(pair) > 0 else ""
+        assistant_part = pair[1] if len(pair) > 1 else ""
+        if user_part:
+            messages.append({"role": "user", "content": str(user_part)})
+        if assistant_part:
+            messages.append({"role": "assistant", "content": str(assistant_part)})
+    messages.append({"role": "user", "content": user_input})
+    return messages
+
+
+def call_remote_chat(history, user_input, model):
+    if not BASE_URL:
+        raise RuntimeError("CHAT_BASE_URL is not configured.")
+
+    payload = {"messages": build_messages(history, user_input)}
+    if model:
+        payload["model"] = model
+
+    url = f"{BASE_URL}/chat"
+    LOGGER.info("→ POST %s — model=%s — question=%s", url, model or "default", _preview(user_input))
+
+    response = requests.post(url, json=payload, timeout=REQUEST_TIMEOUT)
+    duration = response.elapsed.total_seconds() * 1000
+
+    try:
+        data = response.json()
+    except ValueError as exc:
+        LOGGER.error("← %s %s — invalid JSON: %s", url, response.status_code, _preview(response.text))
+        raise RuntimeError("Remote chat returned invalid JSON") from exc
+
+    if not response.ok:
+        LOGGER.error("← %s %s — body: %s", url, response.status_code, _preview(response.text))
+        raise RuntimeError(f"Remote chat returned HTTP {response.status_code}")
+
+    content = data.get("choices", [{}])[0].get("message", {}).get("content", "").strip()
+    if not content:
+        LOGGER.error("← %s %s — empty message", url, response.status_code)
+        raise RuntimeError("Remote chat returned an empty message")
+
+    LOGGER.info(
+        "← %s %s in %.0fms — response=%s",
+        url,
+        response.status_code,
+        duration,
+        _preview(content),
+    )
+    return content
 
 def gradio_chatbot():
     with gr.Blocks(css="chat/assets/custom_footer.css") as demo:
@@ -62,12 +92,17 @@ def gradio_chatbot():
         )
         def respond(message, history, model):
             history = history or []
-            temp_history = history + [[message, ""]]
-            bot_stream = chat_stream(temp_history, model)
-            for partial in bot_stream:
-                updated_history = history + [[message, partial]]
-                # Clear the textbox after sending
-                yield updated_history, ""
+            user_message = (message or "").strip()
+            if not user_message:
+                return history, ""
+
+            try:
+                assistant_message = call_remote_chat(history, user_message, model)
+            except Exception as error:
+                assistant_message = f"⚠️ {error}"
+
+            updated_history = history + [[user_message, assistant_message]]
+            return updated_history, ""
         msg.submit(respond, inputs=[msg, chatbot, model_dropdown], outputs=[chatbot, msg])
         send.click(respond, inputs=[msg, chatbot, model_dropdown], outputs=[chatbot, msg])
     demo.launch()

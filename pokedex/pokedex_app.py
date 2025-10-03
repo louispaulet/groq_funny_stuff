@@ -1,172 +1,185 @@
-import re
+import logging
+import os
+from pathlib import Path
+from typing import Iterable
+
 import gradio as gr
-from typing import Tuple, Optional
-
-try:
-    # when run as module: python -m src.pokedex_app
-    from .pokedex_data import POKEDEX, AVAILABLE_NAMES
-    from .pokemon_names import NAME_ALIASES, SLUG_TO_DISPLAY
-except Exception:  # pragma: no cover
-    # when run directly: python src/pokedex_app.py
-    from pokedex_data import POKEDEX, AVAILABLE_NAMES
-    from pokemon_names import NAME_ALIASES, SLUG_TO_DISPLAY
+import requests
+from fastapi import HTTPException
+from fastapi.responses import FileResponse
+from fastapi.routing import APIRoute
 
 
-def find_pokemon_in_text(text: str) -> Optional[str]:
-    q = text.lower()
-    # 1) Prefer local dataset keys/names for richer answers
-    for key in sorted(POKEDEX.keys(), key=lambda k: -len(k)):
-        name = POKEDEX[key]["name"].lower()
-        if re.search(rf"\b{re.escape(name)}\b", q) or re.search(rf"\b{re.escape(key)}\b", q):
-            return key
-    # 2) Search all known species aliases
-    for alias in sorted(NAME_ALIASES.keys(), key=lambda a: -len(a)):
-        # Use custom ASCII-alnum boundaries so aliases with symbols (e.g., nidoran♀) match
-        pattern = rf"(?<![A-Za-z0-9]){re.escape(alias)}(?![A-Za-z0-9])"
-        if re.search(pattern, q):
-            return NAME_ALIASES[alias]
-    return None
+os.environ.setdefault("GRADIO_ANALYTICS_ENABLED", "0")
+
+MANIFEST_PATH = Path(__file__).with_name("manifest.json")
+
+LOG_LEVEL = os.getenv("POKEDEX_LOG_LEVEL", "INFO").upper()
+logging.basicConfig(
+    level=getattr(logging, LOG_LEVEL, logging.INFO),
+    format="[%(levelname)s] %(message)s",
+)
+LOGGER = logging.getLogger("pokedex.remote")
+
+DEFAULT_BASE_URL = (
+    os.getenv("POKEDEX_CHAT_BASE_URL")
+    or "https://groq-endpoint.louispaulet13.workers.dev"
+).rstrip("/")
+SYSTEM_PROMPT = (
+    "You are a remote Pokédex assistant. Answer questions about Pokémon in two or three sentences. "
+    "Highlight typings, notable strengths or weaknesses, and other concise Pokédex facts. "
+    "If the question falls outside Pokémon, politely redirect the user."
+)
+REQUEST_TIMEOUT = float(os.getenv("POKEDEX_CHAT_TIMEOUT", "20.0"))
 
 
-def detect_topic(text: str) -> str:
-    q = text.lower()
-    # ordered by specificity
-    if any(w in q for w in ["evolve", "evolution", "evolves", "evolving"]):
-        return "evolution"
-    if any(w in q for w in ["weak", "weakness", "vulnerable", "super effective against it"]):
-        return "weaknesses"
-    if any(w in q for w in ["strong", "strength", "effective against", "resistant to"]):
-        return "strengths"
-    if any(w in q for w in ["type", "typing", "element"]):
-        return "types"
-    if any(w in q for w in ["abilit", "hidden ability"]):
-        return "abilities"
-    if any(w in q for w in ["height", "tall", "size", "how big"]):
-        return "height"
-    if any(w in q for w in ["weight", "heavy", "weigh"]):
-        return "weight"
-    if any(w in q for w in ["stat", "hp", "attack", "defense", "speed"]):
-        return "stats"
-    if any(w in q for w in ["where", "habitat", "find"]):
-        return "location"
-    if any(w in q for w in ["move", "moveset", "learn"]):
-        return "moves"
-    # default to general info
-    return "general"
+class RemoteChatError(RuntimeError):
+    """Raised when the remote /chat service returns an error or malformed payload."""
 
 
-def format_answer(p: dict, topic: str) -> str:
-    name = p["name"]
-    types = "/".join(p["types"])
-    if topic == "evolution":
-        return (
-            f"{name}’s evolutionary line is: {p['evolution']}. "
-            f"It’s a {types}-type Pokémon; evolution methods can vary by game version."
+def normalize_base_url(raw: str) -> str:
+    candidate = (raw or "").strip()
+    if not candidate:
+        raise ValueError("No base URL configured for the Pokédex service.")
+    return candidate.rstrip("/")
+
+
+def build_messages(history: Iterable[dict[str, str]], user_prompt: str) -> list[dict[str, str]]:
+    messages: list[dict[str, str]] = [{"role": "system", "content": SYSTEM_PROMPT}]
+    for turn in history:
+        role = turn.get("role")
+        content = turn.get("content", "")
+        if role in {"user", "assistant"} and content:
+            messages.append({"role": role, "content": str(content)})
+    messages.append({"role": "user", "content": user_prompt})
+    return messages
+
+
+def post_chat(base_url: str, messages: list[dict[str, str]]) -> str:
+    url = f"{base_url}/chat"
+    last_content = ""
+    if messages:
+        last_content = str(messages[-1].get("content", ""))
+    user_preview = last_content[:120] + ("..." if len(last_content) > 120 else "")
+    LOGGER.info("Calling remote Pokédex service: %s — user prompt: %s", url, user_preview)
+    try:
+        response = requests.post(
+            url,
+            json={"messages": messages},
+            timeout=REQUEST_TIMEOUT,
         )
-    if topic == "weaknesses":
-        weak = ", ".join(p.get("weaknesses", [])) or "various types"
-        return (
-            f"{name} is weak to: {weak}. "
-            f"Knowing it’s {types}-type helps you plan resistances and coverage."
+    except requests.RequestException as exc:  # pragma: no cover - network failure path
+        raise RemoteChatError(f"Request error: {exc}") from exc
+
+    if not response.ok:
+        snippet = response.text[:200].strip()
+        raise RemoteChatError(
+            f"Service returned {response.status_code}: {snippet or response.reason}"
         )
-    if topic == "strengths":
-        strong = ", ".join(p.get("strengths", [])) or "specific matchups"
-        return (
-            f"{name} performs well versus: {strong}. "
-            f"Its {types} typing shapes both offense and defense in battle."
-        )
-    if topic == "types":
-        return (
-            f"{name} is a {types}-type Pokémon. "
-            f"This typing defines its STAB moves and matchups."
-        )
-    if topic == "abilities":
-        abilities = ", ".join(p["abilities"]) if p.get("abilities") else "varied abilities"
-        return (
-            f"{name} can have: {abilities}. "
-            f"Abilities synergize with its {types} toolkit and playstyle."
-        )
-    if topic == "height":
-        return (
-            f"{name} is about {p['height_m']} m tall. "
-            f"Size doesn’t affect core mechanics, but informs its Pokédex profile."
-        )
-    if topic == "weight":
-        return (
-            f"{name} weighs roughly {p['weight_kg']} kg. "
-            f"Its build complements its typical role and animations."
-        )
-    if topic == "stats":
-        return (
-            f"{name} is known for characteristic stats fitting a {types}-type. "
-            f"Exact base stats vary by form/generation; check a detailed chart for min–max spreads."
-        )
-    if topic == "location":
-        return (
-            f"Where to find {name} depends on the game version and region. "
-            f"Consult that game’s location data; as a {types}-type, its habitats vary widely."
-        )
-    if topic == "moves":
-        return (
-            f"{name} learns moves via leveling, TMs/TRs, and tutoring. "
-            f"Prioritize STAB {types}-type moves and coverage based on your team needs."
-        )
-    # general
-    desc = p.get("description", f"{name} is a {types}-type Pokémon.")
-    return (
-        f"{desc} "
-        f"In battle, its {types} typing guides both offenses and defenses."
+
+    try:
+        payload = response.json()
+    except ValueError as exc:
+        raise RemoteChatError("Service response was not valid JSON.") from exc
+
+    choices = payload.get("choices") or []
+    if not choices:
+        raise RemoteChatError("Service response did not include any choices.")
+
+    message = choices[0].get("message") or {}
+    content = message.get("content")
+    if not isinstance(content, str) or not content.strip():
+        raise RemoteChatError("Service returned an empty message.")
+
+    cleaned = content.strip()
+    response_preview = cleaned[:200] + ("..." if len(cleaned) > 200 else "")
+    LOGGER.info(
+        "Remote Pokédex service responded with %d characters: %s",
+        len(cleaned),
+        response_preview,
     )
+    return cleaned
 
 
-def answer_question(question: str) -> str:
-    if not question or not question.strip():
-        return "Ask about a Pokémon by name, like ‘Tell me about Pikachu’."
-
-    key = find_pokemon_in_text(question)
-    if not key:
-        names = ", ".join(AVAILABLE_NAMES[:8])
-        return (
-            "I couldn’t spot a Pokémon name in your question. "
-            f"Try something like: ‘What are Charizard’s weaknesses?’ Available examples: {names}."
-        )
-    topic = detect_topic(question)
-    if key in POKEDEX:
-        pokemon = POKEDEX[key]
-        return format_answer(pokemon, topic)
-    # Fallback for species we recognize but don't have details for
-    display = SLUG_TO_DISPLAY.get(key, key.capitalize())
-    if topic == "evolution":
-        return (
-            f"I recognize {display}, but this lightweight Pokédex lacks its full evolution details. "
-            f"For complete lines and methods, check a comprehensive Pokédex."
-        )
-    return (
-        f"I recognize {display}, a Pokémon species. "
-        f"This lightweight Pokédex doesn’t include its full details, but you can still ask about well-known examples like Charizard or Pikachu."
-    )
+def call_remote_pokedex(history: Iterable[dict[str, str]], user_prompt: str, base_url: str) -> str:
+    messages = build_messages(history, user_prompt)
+    return post_chat(base_url, messages)
 
 
 def build_ui():
     with gr.Blocks(css="pokedex/assets/custom_footer.css", theme=gr.themes.Soft()) as demo:
-        gr.Markdown("# Pokédex — Ask about a Pokémon")
-        chatbot = gr.Chatbot(height=300)
+        gr.Markdown("# Pokédex — Remote Chat")
+        gr.Markdown(
+            "Connects to a remote `/chat` endpoint. Update the base URL if you are running a local worker."
+        )
+
+        endpoint_box = gr.Textbox(
+            label="Service base URL",
+            value=DEFAULT_BASE_URL,
+            placeholder="https://groq-endpoint.example.workers.dev",
+            elem_id="service-base-url",
+        )
+
+        chatbot = gr.Chatbot(height=300, type="messages")
         with gr.Row():
-            msg = gr.Textbox(label="Ask a question", placeholder="e.g., What type is Gengar?", elem_id="custom-msg-box")
+            msg = gr.Textbox(
+                label="Ask a question",
+                placeholder="e.g., What type is Gengar?",
+                elem_id="custom-msg-box",
+            )
             send = gr.Button("Send", elem_id="custom-send-btn")
 
-        def respond(message, history):
-            history = history or []
-            reply = answer_question(message)
-            return history + [[message, reply]], ""
+        def respond(message, history, base_url):
+            history = list(history or [])
+            user_message = (message or "").strip()
+            if not user_message:
+                return history, ""
 
-        msg.submit(respond, [msg, chatbot], [chatbot, msg])
-        send.click(respond, [msg, chatbot], [chatbot, msg])
+            try:
+                normalized_base = normalize_base_url(base_url or DEFAULT_BASE_URL)
+            except ValueError as config_error:
+                reply = f"⚠️ {config_error}"
+                augmented = history + [
+                    {"role": "user", "content": user_message},
+                    {"role": "assistant", "content": reply},
+                ]
+                return augmented, ""
 
-        gr.Markdown("Tip: Ask about types, weaknesses, abilities, evolution, height/weight, moves, or general info.")
+            try:
+                reply = call_remote_pokedex(history, user_message, normalized_base)
+            except RemoteChatError as service_error:
+                reply = f"⚠️ Unable to reach Pokédex service: {service_error}"
+
+            augmented = history + [
+                {"role": "user", "content": user_message},
+                {"role": "assistant", "content": reply},
+            ]
+            return augmented, ""
+
+        inputs = [msg, chatbot, endpoint_box]
+        outputs = [chatbot, msg]
+        msg.submit(respond, inputs=inputs, outputs=outputs)
+        send.click(respond, inputs=inputs, outputs=outputs)
+
+        gr.Markdown(
+            "Tip: Provide Pokémon-focused questions. Responses stream from the configured remote service."
+        )
+
+    def _manifest():  # pragma: no cover - framework hook
+        if not MANIFEST_PATH.exists():
+            raise HTTPException(status_code=404, detail="Manifest file missing.")
+        return FileResponse(str(MANIFEST_PATH), media_type="application/manifest+json")
+
+    router = demo.app.router
+    router.routes[:] = [
+        route
+        for route in router.routes
+        if not (isinstance(route, APIRoute) and route.path == "/manifest.json")
+    ]
+    router.add_api_route("/manifest.json", _manifest, methods=["GET"], include_in_schema=False)
     return demo
 
 
 if __name__ == "__main__":
     ui = build_ui()
-    ui.launch()
+    ui.launch(share=False, enable_monitoring=False, pwa=True)

@@ -1,0 +1,10 @@
+{
+  "name": "Pokédex Remote Chat",
+  "short_name": "Pokédex",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0f172a",
+  "description": "Remote Pokédex assistant backed by the /chat endpoint.",
+  "icons": []
+}

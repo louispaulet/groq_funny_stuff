@@ -127,7 +127,7 @@ async function testQuery(query) {
 }
 
 function printResult(result) {
-  const { query, variants, context, match } = result
+  const { query, variants, context, match, sources } = result
   console.log('========================================')
   console.log(`Query: ${query}`)
   for (const key of Object.keys(variants)) {
