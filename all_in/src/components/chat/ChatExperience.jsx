@@ -5,6 +5,7 @@ import Composer from './Composer'
 import ModelSelector from '../ModelSelector'
 import { callRemoteChat } from '../../lib/remoteChat'
 import { readAllergyCookie } from '../../lib/allergyCookies'
+import { enhanceAssistantContent } from '../../lib/assistantPostprocess'
 
 function normalizeBaseUrl(raw) {
   const candidate = (raw || '').trim()
@@ -220,6 +221,7 @@ export default function ChatExperience({ experience }) {
         baseUrl: resolvedBase,
       })
       setBaseUrl(result.baseUrl)
+      const enhancedContent = enhanceAssistantContent(experience, result.content)
       setConversations((prev) => prev.map((conversation) => {
         if (conversation.id !== activeId) return conversation
         const nextMessages = [...conversation.messages]
@@ -227,7 +229,7 @@ export default function ChatExperience({ experience }) {
         if (lastIndex >= 0 && nextMessages[lastIndex].role === 'assistant') {
           nextMessages[lastIndex] = {
             ...nextMessages[lastIndex],
-            content: result.content,
+            content: enhancedContent,
             streaming: false,
             error: false,
           }
