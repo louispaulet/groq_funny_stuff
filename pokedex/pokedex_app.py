@@ -1,3 +1,4 @@
+import logging
 import os
 from pathlib import Path
 from typing import Iterable
@@ -12,6 +13,13 @@ from fastapi.routing import APIRoute
 os.environ.setdefault("GRADIO_ANALYTICS_ENABLED", "0")
 
 MANIFEST_PATH = Path(__file__).with_name("manifest.json")
+
+LOG_LEVEL = os.getenv("POKEDEX_LOG_LEVEL", "INFO").upper()
+logging.basicConfig(
+    level=getattr(logging, LOG_LEVEL, logging.INFO),
+    format="[%(levelname)s] %(message)s",
+)
+LOGGER = logging.getLogger("pokedex.remote")
 
 DEFAULT_BASE_URL = (
     os.getenv("POKEDEX_CHAT_BASE_URL")
@@ -49,6 +57,11 @@ def build_messages(history: Iterable[dict[str, str]], user_prompt: str) -> list[
 
 def post_chat(base_url: str, messages: list[dict[str, str]]) -> str:
     url = f"{base_url}/chat"
+    last_content = ""
+    if messages:
+        last_content = str(messages[-1].get("content", ""))
+    user_preview = last_content[:120] + ("..." if len(last_content) > 120 else "")
+    LOGGER.info("Calling remote Pokédex service: %s — user prompt: %s", url, user_preview)
     try:
         response = requests.post(
             url,
@@ -78,7 +91,14 @@ def post_chat(base_url: str, messages: list[dict[str, str]]) -> str:
     if not isinstance(content, str) or not content.strip():
         raise RemoteChatError("Service returned an empty message.")
 
-    return content.strip()
+    cleaned = content.strip()
+    response_preview = cleaned[:200] + ("..." if len(cleaned) > 200 else "")
+    LOGGER.info(
+        "Remote Pokédex service responded with %d characters: %s",
+        len(cleaned),
+        response_preview,
+    )
+    return cleaned
 
 
 def call_remote_pokedex(history: Iterable[dict[str, str]], user_prompt: str, base_url: str) -> str:
@@ -97,6 +117,7 @@ def build_ui():
             label="Service base URL",
             value=DEFAULT_BASE_URL,
             placeholder="https://groq-endpoint.example.workers.dev",
+            elem_id="service-base-url",
         )
 
         chatbot = gr.Chatbot(height=300, type="messages")
@@ -161,4 +182,4 @@ def build_ui():
 
 if __name__ == "__main__":
     ui = build_ui()
-    ui.launch(share=False, enable_monitoring=False, pwa=False)
+    ui.launch(share=False, enable_monitoring=False, pwa=True)
