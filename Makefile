@@ -2,7 +2,10 @@ VENV_DIR=.venv
 PYTHON=$(VENV_DIR)/bin/python
 PIP=$(VENV_DIR)/bin/pip
 
-.PHONY: venv install run clean chat pokedex
+POKEDEX_PORT ?= 7860
+CHAT_PORT ?= 7861
+
+.PHONY: venv install run clean chat pokedex test
 
 venv:
 	python3 -m venv $(VENV_DIR)
@@ -26,8 +29,20 @@ run:
 	@if [ "$(APP)" != "chat" ] && [ "$(APP)" != "pokedex" ]; then \
 	  echo "Usage: make run chat|pokedex"; exit 1; \
 	fi
-	@if [ "$(APP)" = "chat" ]; then $(PYTHON) chat/app.py; fi
-	@if [ "$(APP)" = "pokedex" ]; then $(PYTHON) pokedex/pokedex_app.py; fi
+	@if [ "$(APP)" = "chat" ]; then $(PYTHON) chat/app.py --server.port $(CHAT_PORT) --server.headless true; fi
+	@if [ "$(APP)" = "pokedex" ]; then $(PYTHON) pokedex/pokedex_app.py --server.port $(POKEDEX_PORT) --server.headless true; fi
+
+test:
+	@if [ "$(APP)" != "chat" ] && [ "$(APP)" != "pokedex" ]; then \
+	  echo "Usage: make test chat|pokedex"; exit 1; \
+	fi
+	@if [ ! -x "$(PYTHON)" ]; then \
+	  echo "Virtualenv missing. Run make install $(APP) first."; exit 1; \
+	fi
+	@if [ "$(APP)" = "chat" ]; then \
+	  $(PYTHON) -m pytest chat || { code=$$?; if [ $$code -ne 5 ]; then exit $$code; fi; echo "No chat tests detected."; }; \
+	fi
+	@if [ "$(APP)" = "pokedex" ]; then $(PYTHON) -m pytest pokedex/tests; fi
 
 clean:
 	rm -rf $(VENV_DIR)

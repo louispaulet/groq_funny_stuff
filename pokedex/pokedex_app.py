@@ -1,9 +1,17 @@
 import os
-from typing import List
+from pathlib import Path
+from typing import Iterable
 
 import gradio as gr
 import requests
+from fastapi import HTTPException
+from fastapi.responses import FileResponse
+from fastapi.routing import APIRoute
 
+
+os.environ.setdefault("GRADIO_ANALYTICS_ENABLED", "0")
+
+MANIFEST_PATH = Path(__file__).with_name("manifest.json")
 
 DEFAULT_BASE_URL = (
     os.getenv("POKEDEX_CHAT_BASE_URL")
@@ -28,17 +36,13 @@ def normalize_base_url(raw: str) -> str:
     return candidate.rstrip("/")
 
 
-def build_messages(history: List[List[str]], user_prompt: str) -> list[dict[str, str]]:
+def build_messages(history: Iterable[dict[str, str]], user_prompt: str) -> list[dict[str, str]]:
     messages: list[dict[str, str]] = [{"role": "system", "content": SYSTEM_PROMPT}]
     for turn in history:
-        if not turn:
-            continue
-        user_part = turn[0] if len(turn) > 0 else ""
-        assistant_part = turn[1] if len(turn) > 1 else ""
-        if user_part:
-            messages.append({"role": "user", "content": str(user_part)})
-        if assistant_part:
-            messages.append({"role": "assistant", "content": str(assistant_part)})
+        role = turn.get("role")
+        content = turn.get("content", "")
+        if role in {"user", "assistant"} and content:
+            messages.append({"role": role, "content": str(content)})
     messages.append({"role": "user", "content": user_prompt})
     return messages
 
@@ -77,7 +81,7 @@ def post_chat(base_url: str, messages: list[dict[str, str]]) -> str:
     return content.strip()
 
 
-def call_remote_pokedex(history: List[List[str]], user_prompt: str, base_url: str) -> str:
+def call_remote_pokedex(history: Iterable[dict[str, str]], user_prompt: str, base_url: str) -> str:
     messages = build_messages(history, user_prompt)
     return post_chat(base_url, messages)
 
@@ -95,7 +99,7 @@ def build_ui():
             placeholder="https://groq-endpoint.example.workers.dev",
         )
 
-        chatbot = gr.Chatbot(height=300)
+        chatbot = gr.Chatbot(height=300, type="messages")
         with gr.Row():
             msg = gr.Textbox(
                 label="Ask a question",
@@ -105,7 +109,7 @@ def build_ui():
             send = gr.Button("Send", elem_id="custom-send-btn")
 
         def respond(message, history, base_url):
-            history = history or []
+            history = list(history or [])
             user_message = (message or "").strip()
             if not user_message:
                 return history, ""
@@ -114,14 +118,22 @@ def build_ui():
                 normalized_base = normalize_base_url(base_url or DEFAULT_BASE_URL)
             except ValueError as config_error:
                 reply = f"⚠️ {config_error}"
-                return history + [[user_message, reply]], ""
+                augmented = history + [
+                    {"role": "user", "content": user_message},
+                    {"role": "assistant", "content": reply},
+                ]
+                return augmented, ""
 
             try:
                 reply = call_remote_pokedex(history, user_message, normalized_base)
             except RemoteChatError as service_error:
                 reply = f"⚠️ Unable to reach Pokédex service: {service_error}"
 
-            return history + [[user_message, reply]], ""
+            augmented = history + [
+                {"role": "user", "content": user_message},
+                {"role": "assistant", "content": reply},
+            ]
+            return augmented, ""
 
         inputs = [msg, chatbot, endpoint_box]
         outputs = [chatbot, msg]
@@ -131,9 +143,22 @@ def build_ui():
         gr.Markdown(
             "Tip: Provide Pokémon-focused questions. Responses stream from the configured remote service."
         )
+
+    def _manifest():  # pragma: no cover - framework hook
+        if not MANIFEST_PATH.exists():
+            raise HTTPException(status_code=404, detail="Manifest file missing.")
+        return FileResponse(str(MANIFEST_PATH), media_type="application/manifest+json")
+
+    router = demo.app.router
+    router.routes[:] = [
+        route
+        for route in router.routes
+        if not (isinstance(route, APIRoute) and route.path == "/manifest.json")
+    ]
+    router.add_api_route("/manifest.json", _manifest, methods=["GET"], include_in_schema=False)
     return demo
 
 
 if __name__ == "__main__":
     ui = build_ui()
-    ui.launch()
+    ui.launch(share=False, enable_monitoring=False, pwa=False)
