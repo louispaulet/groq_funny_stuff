@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { MoonIcon, SunIcon } from '@heroicons/react/24/outline'
+import { MoonIcon, SunIcon, UserCircleIcon } from '@heroicons/react/24/outline'
 import { experiences } from '../../config/experiences'
 import { useTheme } from '../../theme/ThemeContext'
 
@@ -47,6 +47,14 @@ function footerLinkClasses({ isActive }) {
   return `${base} ${isActive ? active : ''}`
 }
 
+function profileNavClasses({ isActive }) {
+  const base = 'inline-flex h-11 w-11 items-center justify-center rounded-full border text-slate-600 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:text-slate-200 dark:focus-visible:ring-offset-slate-900'
+  if (isActive) {
+    return `${base} border-brand-500 bg-brand-600 text-white shadow`
+  }
+  return `${base} border-slate-300 bg-white/80 hover:border-brand-500/60 hover:bg-brand-500/10 hover:text-brand-600 dark:border-slate-700 dark:bg-slate-800/70`
+}
+
 export default function AppShell({ children }) {
   return (
     <div className="min-h-screen flex flex-col">
@@ -77,6 +85,10 @@ export default function AppShell({ children }) {
             <NavLink to="/about" className={defaultNavClasses}>About</NavLink>
           </nav>
           <div className="flex items-center gap-2">
+            <NavLink to="/profile" className={profileNavClasses} title="Profile options">
+              <UserCircleIcon className="h-5 w-5" />
+              <span className="sr-only">Profile options</span>
+            </NavLink>
             <ThemeToggle />
           </div>
         </div>

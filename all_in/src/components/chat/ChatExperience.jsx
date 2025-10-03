@@ -8,6 +8,7 @@ import {
   readAllergyCookie,
   readAllergyConversationsCookie,
   writeAllergyConversationsCookie,
+  incrementChatCount,
 } from '../../lib/allergyCookies'
 import { enhanceAssistantContent } from '../../lib/assistantPostprocess'
 
@@ -229,6 +230,7 @@ export default function ChatExperience({ experience }) {
 
     const timestamp = Date.now()
     const userMessage = { role: 'user', name: 'You', timestamp, content: trimmed }
+    const shouldIncrementCount = Boolean(experience?.id) && !messages.some((message) => message.role === 'user')
 
     let resolvedBase
     try {
@@ -284,6 +286,9 @@ export default function ChatExperience({ experience }) {
     abortRef.current = controller
 
     try {
+      if (shouldIncrementCount) {
+        incrementChatCount(experience.id)
+      }
       const history = [...messages, userMessage]
       let systemPrompt = experience?.systemPrompt
       if (experience?.id === 'allergyfinder') {
