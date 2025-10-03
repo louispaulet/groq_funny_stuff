@@ -2,6 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import AppShell from './components/layout/AppShell'
 import HomePage from './pages/HomePage'
 import ExperiencePage from './pages/ExperiencePage'
+import AboutPage from './pages/AboutPage'
 import ChatExperience from './components/chat/ChatExperience'
 import { ThemeProvider } from './theme/ThemeContext'
 import { experiences } from './config/experiences'
@@ -24,6 +25,7 @@ export default function App() {
                 )}
               />
             ))}
+            <Route path="/about" element={<AboutPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </AppShell>
