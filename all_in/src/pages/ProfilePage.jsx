@@ -11,7 +11,8 @@ export default function ProfilePage() {
           <h1 className="text-3xl font-semibold sm:text-4xl">User Preferences & Stats</h1>
           <p className="max-w-2xl text-sm text-slate-700 dark:text-slate-300">
             Manage your generated alias, review chat counters across experiences, and clear local cookies for allergy notes and
-            saved conversations. Everything shown here lives only in your browser.
+            saved conversations. Everything shown here lives only in your browser — we do not store personal health information,
+            we keep no server-side logs, and this workspace is operated with GDPR compliance in mind.
           </p>
         </div>
       </section>

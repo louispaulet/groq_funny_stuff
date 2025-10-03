@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import {
   countAllergyEntries,
   clearAllChatCounts,
@@ -123,6 +124,52 @@ export default function UserProfile() {
         </p>
       </section>
 
+      <section className="space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h3 className="text-xl font-semibold text-slate-800 dark:text-slate-100">Saved Allergies</h3>
+          <Link
+            to="/allergyfinder/cookies"
+            className="inline-flex items-center rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-500"
+          >
+            Edit Allergy List
+          </Link>
+        </div>
+        <div className="rounded-3xl border border-emerald-200 bg-white/85 p-5 shadow-sm dark:border-emerald-500/40 dark:bg-emerald-900/20">
+          <div className="text-3xl font-bold text-emerald-700 dark:text-emerald-200">{allergyCount}</div>
+          <div className="text-sm text-slate-600 dark:text-slate-300">Allergens listed across your saved markdown notes.</div>
+          <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4 text-sm text-emerald-900 dark:border-emerald-500/30 dark:bg-emerald-900/40 dark:text-emerald-100">
+            {allergyItems.length > 0 ? (
+              <ul className="list-disc space-y-1 pl-5">
+                {allergyItems.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+                {allergyCount > allergyItems.length ? (
+                  <li className="italic text-emerald-700/80 dark:text-emerald-200/80">
+                    …and {allergyCount - allergyItems.length} more allergens saved.
+                  </li>
+                ) : null}
+              </ul>
+            ) : (
+              <div className="italic text-emerald-700/80 dark:text-emerald-200/80">
+                No allergy notes saved yet.
+              </div>
+            )}
+          </div>
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            <button
+            type="button"
+            onClick={handleFlushAllergyData}
+            className="inline-flex items-center rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-red-500"
+          >
+            Delete Allergy Notes & Saved Chats
+          </button>
+          <p className="rounded-xl border border-red-300 bg-red-50/80 px-4 py-2 text-xs text-red-700 dark:border-red-700 dark:bg-red-900/30 dark:text-red-200">
+            Critical warning: This removes the allergy notes cookie and any saved AllergyFinder conversations from this browser.
+          </p>
+          </div>
+        </div>
+      </section>
+
       <section className="space-y-6">
         <div>
           <h3 className="text-xl font-semibold text-slate-800 dark:text-slate-100">Chat Activity</h3>
@@ -164,44 +211,6 @@ export default function UserProfile() {
           <p className="rounded-xl border border-red-300 bg-red-50/90 px-4 py-2 text-xs text-red-700 dark:border-red-700 dark:bg-red-900/40 dark:text-red-200">
             Warning: This deletes every saved chat cookie across AllergyFinder, STL Studio, and the Pokédex on this device.
           </p>
-        </div>
-      </section>
-
-      <section className="space-y-4">
-        <h3 className="text-xl font-semibold text-slate-800 dark:text-slate-100">Allergy Notebook Snapshot</h3>
-        <div className="rounded-3xl border border-emerald-200 bg-white/85 p-5 shadow-sm dark:border-emerald-500/40 dark:bg-emerald-900/20">
-          <div className="text-3xl font-bold text-emerald-700 dark:text-emerald-200">{allergyCount}</div>
-          <div className="text-sm text-slate-600 dark:text-slate-300">Allergens listed across your saved markdown notes.</div>
-          <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4 text-sm text-emerald-900 dark:border-emerald-500/30 dark:bg-emerald-900/40 dark:text-emerald-100">
-            {allergyItems.length > 0 ? (
-              <ul className="list-disc space-y-1 pl-5">
-                {allergyItems.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-                {allergyCount > allergyItems.length ? (
-                  <li className="italic text-emerald-700/80 dark:text-emerald-200/80">
-                    …and {allergyCount - allergyItems.length} more allergens saved.
-                  </li>
-                ) : null}
-              </ul>
-            ) : (
-              <div className="italic text-emerald-700/80 dark:text-emerald-200/80">
-                No allergy notes saved yet.
-              </div>
-            )}
-          </div>
-          <div className="mt-4 flex flex-wrap items-center gap-3">
-            <button
-            type="button"
-            onClick={handleFlushAllergyData}
-            className="inline-flex items-center rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-red-500"
-          >
-            Delete Allergy Notes & Saved Chats
-          </button>
-          <p className="rounded-xl border border-red-300 bg-red-50/80 px-4 py-2 text-xs text-red-700 dark:border-red-700 dark:bg-red-900/30 dark:text-red-200">
-            Critical warning: This removes the allergy notes cookie and any saved AllergyFinder conversations from this browser.
-          </p>
-          </div>
         </div>
       </section>
     </div>
