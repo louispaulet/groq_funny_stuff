@@ -4,6 +4,7 @@ import {
   clearAllChatCounts,
   clearAllergyConversationsCookie,
   clearChatCount,
+  clearSavedConversations,
   clearUserProfileName,
   readAllergyCookie,
   readChatCounts,
@@ -27,19 +28,20 @@ function generateDisplayName() {
   return `${adjective} ${noun}`
 }
 
-function formatAllergyPreview(notes) {
-  if (!notes) return 'No allergy notes saved yet.'
-  const trimmed = notes.trim()
-  if (!trimmed) return 'No allergy notes saved yet.'
-  if (trimmed.length <= 160) return trimmed
-  return `${trimmed.slice(0, 160)}…`
+function parseAllergyList(notes, limit = 12) {
+  if (!notes) return []
+  return notes
+    .split(/\r?\n/)
+    .map((line) => line.replace(/^[-*+\s]+/, '').trim())
+    .filter(Boolean)
+    .slice(0, limit)
 }
 
 export default function UserProfile() {
   const [profileName, setProfileName] = useState('')
   const [chatCounts, setChatCounts] = useState(() => readChatCounts())
   const [allergyCount, setAllergyCount] = useState(() => countAllergyEntries())
-  const [allergyPreview, setAllergyPreview] = useState(() => formatAllergyPreview(readAllergyCookie()))
+  const [allergyItems, setAllergyItems] = useState(() => parseAllergyList(readAllergyCookie()))
 
   useEffect(() => {
     let stored = readUserProfileName()
@@ -54,7 +56,7 @@ export default function UserProfile() {
   function refreshStats() {
     setChatCounts(readChatCounts())
     setAllergyCount(countAllergyEntries())
-    setAllergyPreview(formatAllergyPreview(readAllergyCookie()))
+    setAllergyItems(parseAllergyList(readAllergyCookie()))
   }
 
   function handleRegenerateProfile() {
@@ -69,12 +71,16 @@ export default function UserProfile() {
   }
 
   function handleFlushCount(experienceId) {
+    clearSavedConversations(experienceId)
     clearChatCount(experienceId)
     refreshStats()
   }
 
   function handleFlushAllCounts() {
     clearAllChatCounts()
+    Object.keys(EXPERIENCE_LABELS).forEach((experienceId) => {
+      clearSavedConversations(experienceId)
+    })
     refreshStats()
   }
 
@@ -108,11 +114,11 @@ export default function UserProfile() {
             onClick={handleFlushProfile}
             className="inline-flex items-center rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-red-500"
           >
-            Danger: Erase Profile Cookie
+            Delete Profile Cookie
           </button>
         </div>
         <p className="mt-3 rounded-2xl border border-red-300 bg-red-50/80 p-3 text-sm text-red-700 dark:border-red-700 dark:bg-red-900/30 dark:text-red-200">
-          Warning: Flushing the profile cookie removes the saved alias immediately. The next time you open this page a new random
+          Warning: Deleting the profile cookie removes your saved alias immediately. The next time you open this page a new random
           name will be generated.
         </p>
       </section>
@@ -138,10 +144,11 @@ export default function UserProfile() {
                 onClick={() => handleFlushCount(experienceId)}
                 className="inline-flex items-center rounded-xl bg-red-600 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-white shadow-sm transition hover:bg-red-500"
               >
-                Flush {EXPERIENCE_LABELS[experienceId] || experienceId} Count
+                Delete {EXPERIENCE_LABELS[experienceId] || experienceId} History
               </button>
               <p className="rounded-lg border border-red-200 bg-red-50/80 p-2 text-xs text-red-700 dark:border-red-700 dark:bg-red-900/30 dark:text-red-200">
-                Warning: This obliterates the stored counter for this experience. You cannot recover the previous total once cleared.
+                Warning: This deletes the saved cookie for this experience. Any stored conversations and counters are permanently
+                removed from this browser.
               </p>
             </div>
           ))}
@@ -152,10 +159,10 @@ export default function UserProfile() {
             onClick={handleFlushAllCounts}
             className="inline-flex items-center rounded-xl bg-red-700 px-4 py-2 text-sm font-semibold uppercase tracking-wide text-white shadow-sm transition hover:bg-red-600"
           >
-            Flush All Chat Counters
+            Delete All Saved Chat History
           </button>
           <p className="rounded-xl border border-red-300 bg-red-50/90 px-4 py-2 text-xs text-red-700 dark:border-red-700 dark:bg-red-900/40 dark:text-red-200">
-            Warning: This wipes every stored chat counter across AllergyFinder, STL Studio, and the Pokédex in one go.
+            Warning: This deletes every saved chat cookie across AllergyFinder, STL Studio, and the Pokédex on this device.
           </p>
         </div>
       </section>
@@ -166,19 +173,34 @@ export default function UserProfile() {
           <div className="text-3xl font-bold text-emerald-700 dark:text-emerald-200">{allergyCount}</div>
           <div className="text-sm text-slate-600 dark:text-slate-300">Allergens listed across your saved markdown notes.</div>
           <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4 text-sm text-emerald-900 dark:border-emerald-500/30 dark:bg-emerald-900/40 dark:text-emerald-100">
-            {allergyPreview}
+            {allergyItems.length > 0 ? (
+              <ul className="list-disc space-y-1 pl-5">
+                {allergyItems.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+                {allergyCount > allergyItems.length ? (
+                  <li className="italic text-emerald-700/80 dark:text-emerald-200/80">
+                    …and {allergyCount - allergyItems.length} more allergens saved.
+                  </li>
+                ) : null}
+              </ul>
+            ) : (
+              <div className="italic text-emerald-700/80 dark:text-emerald-200/80">
+                No allergy notes saved yet.
+              </div>
+            )}
           </div>
           <div className="mt-4 flex flex-wrap items-center gap-3">
             <button
-              type="button"
-              onClick={handleFlushAllergyData}
-              className="inline-flex items-center rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-red-500"
-            >
-              Flush Allergy Notes & Saved Chats
-            </button>
-            <p className="rounded-xl border border-red-300 bg-red-50/80 px-4 py-2 text-xs text-red-700 dark:border-red-700 dark:bg-red-900/30 dark:text-red-200">
-              Critical warning: This clears the allergy notes cookie and any saved AllergyFinder conversations on this device.
-            </p>
+            type="button"
+            onClick={handleFlushAllergyData}
+            className="inline-flex items-center rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-red-500"
+          >
+            Delete Allergy Notes & Saved Chats
+          </button>
+          <p className="rounded-xl border border-red-300 bg-red-50/80 px-4 py-2 text-xs text-red-700 dark:border-red-700 dark:bg-red-900/30 dark:text-red-200">
+            Critical warning: This removes the allergy notes cookie and any saved AllergyFinder conversations from this browser.
+          </p>
           </div>
         </div>
       </section>

@@ -7,7 +7,7 @@ const EXPERIENCE_COOKIE_PREFIX = 'allin_conversations_'
 const KNOWN_EXPERIENCE_IDS = ['allergyfinder', 'stlviewer', 'pokedex']
 
 const YEAR_IN_SECONDS = 60 * 60 * 24 * 365
-const MAX_SAVED_CONVERSATIONS = 2
+export const MAX_SAVED_CONVERSATIONS = 2
 const MAX_SAVED_MESSAGES = 6
 const MAX_MESSAGE_LENGTH = 220
 const COOKIE_MAX_SIZE = 3500

@@ -10,6 +10,7 @@ import {
   writeSavedConversations,
   ensureChatCountAtLeast,
   incrementChatCount,
+  MAX_SAVED_CONVERSATIONS,
 } from '../../lib/allergyCookies'
 import { enhanceAssistantContent } from '../../lib/assistantPostprocess'
 
@@ -176,7 +177,10 @@ export default function ChatExperience({ experience }) {
   function handleNewConversation() {
     if (loading) return
     const fresh = createConversation(experience, assistantName)
-    setConversations((prev) => [fresh, ...prev])
+    setConversations((prev) => {
+      const next = [fresh, ...prev]
+      return persistConversations ? next.slice(0, MAX_SAVED_CONVERSATIONS) : next
+    })
     setActiveId(fresh.id)
     setPrompt('')
   }
