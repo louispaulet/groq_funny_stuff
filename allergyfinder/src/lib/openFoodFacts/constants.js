@@ -34,7 +34,6 @@ export const STOPWORDS = new Set([
   'you', 'know',
 ])
 
-export const GROQ_ENDPOINT = 'https://api.groq.com/openai/v1/responses'
 export const DEFAULT_GROQ_MODEL = 'openai/gpt-oss-20b'
 
 export { candidateSchema }

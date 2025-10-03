@@ -18,13 +18,7 @@
     <pre id="out"></pre>
 
     <script type="module">
-      import OpenAI from "https://esm.sh/openai@4";
-
-      const client = new OpenAI({
-        apiKey: "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", // ⚠️ exposed
-        baseURL: "https://api.groq.com/openai/v1",
-        dangerouslyAllowBrowser: true,
-      });
+      const baseEndpoint = (window.VITE_CHAT_BASE_URL || 'https://groq-endpoint.louispaulet13.workers.dev').replace(/\/$/, '');
 
       const msg = document.getElementById("msg");
       const out = document.getElementById("out");
@@ -36,14 +30,27 @@
           out.textContent = "Please type a message first.";
           return;
         }
-
-        out.textContent = "Calling Groq…";
+        out.textContent = "Calling /chat worker…";
         try {
-          const resp = await client.responses.create({
-            model: "openai/gpt-oss-20b",
-            input: text,
+          const response = await fetch(`${baseEndpoint}/chat`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              messages: [
+                { role: 'system', content: 'You are a helpful assistant.' },
+                { role: 'user', content: text },
+              ],
+            }),
           });
-          out.textContent = resp.output_text;
+
+          if (!response.ok) {
+            const errorBody = await response.text();
+            throw new Error(`HTTP ${response.status}: ${errorBody}`);
+          }
+
+          const payload = await response.json();
+          const content = payload?.choices?.[0]?.message?.content?.trim() || '';
+          out.textContent = content || '(no content returned)';
         } catch (err) {
           out.textContent = "Error: " + (err?.message || err);
         }
@@ -51,4 +58,3 @@
     </script>
   </body>
 </html>
-

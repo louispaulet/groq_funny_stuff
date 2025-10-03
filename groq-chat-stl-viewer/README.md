@@ -57,8 +57,8 @@ Open the printed local URL (typically http://localhost:5173).
 
 ## Configuration
 
-- API client is created in `src/hooks/useGroqClient.js` using `VITE_GROQ_API_KEY` and `baseURL=https://api.groq.com/openai/v1`.
-- Streaming is handled in `src/hooks/useChatStream.js`.
+- Chat requests are proxied through the `/chat` worker via `src/lib/remoteChat.js` (no API key stored locally).
+- Conversations are managed in `src/pages/ChatPage.jsx`, including cancel/abort handling.
 - Model options live in `src/components/ModelSelector.jsx`.
 - Markdown rendering is in `src/lib/markdown.js` with sanitization and highlighting.
 - Theme handling is in `src/theme/ThemeContext.jsx`.
