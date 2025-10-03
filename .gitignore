@@ -209,3 +209,6 @@ __marimo__/
 
 # Local third-party libraries
 third_party/*
+
+# Node-based workspaces
+all_in/node_modules/
