@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Groq JSON Object Tester</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+      }
+      body {
+        font-family: system-ui, sans-serif;
+        margin: 2rem auto;
+        max-width: 760px;
+        color: #0f172a;
+        line-height: 1.5;
+      }
+      h1 {
+        margin-bottom: 0.25rem;
+      }
+      p.helper {
+        margin-top: 0;
+        color: #475569;
+        font-size: 0.95rem;
+      }
+      label {
+        display: block;
+        font-weight: 600;
+        margin-top: 1rem;
+      }
+      textarea {
+        width: 100%;
+        min-height: 140px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        padding: 0.75rem;
+        border: 1px solid #cbd5f5;
+        border-radius: 6px;
+        resize: vertical;
+      }
+      select,
+      input[type="text"],
+      input[type="url"] {
+        width: 100%;
+        padding: 0.65rem;
+        border: 1px solid #cbd5f5;
+        border-radius: 6px;
+      }
+      button {
+        margin-top: 1.5rem;
+        padding: 0.75rem 1.4rem;
+        background: #2563eb;
+        color: #f8fafc;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+      }
+      button:disabled {
+        opacity: 0.65;
+        cursor: not-allowed;
+      }
+      pre {
+        background: #0f172a;
+        color: #e2e8f0;
+        padding: 1rem;
+        border-radius: 6px;
+        overflow-x: auto;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+      .row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 1rem;
+      }
+      .status {
+        margin-top: 1rem;
+        font-size: 0.95rem;
+        color: #475569;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>JSON Object Endpoint Tester</h1>
+    <p class="helper">
+      Use this page to exercise <code>POST /obj/{objectName}</code>. Provide prompts and a JSON schema describing the object you
+      expect back from Groq, then inspect the parsed response. Structured JSON replies are currently limited to the
+      <code>openai/gpt-oss-120b</code> and <code>openai/gpt-oss-20b</code> models. Numeric bound keywords such as
+      <code>minimum</code> and <code>maximum</code> are not yet supported in schemas.
+    </p>
+
+    <label for="base">Worker Base URL</label>
+    <select id="base">
+      <option value="http://127.0.0.1:8787">Local (http://127.0.0.1:8787)</option>
+      <option value="https://groq-endpoint.louispaulet13.workers.dev">Deployed (groq-endpoint.louispaulet13.workers.dev)</option>
+      <option value="custom">Custom...</option>
+    </select>
+
+    <input
+      type="url"
+      id="custom-base"
+      placeholder="https://example.com"
+      style="display:none;"
+      autocomplete="url"
+    />
+
+    <div class="row">
+      <div>
+        <label for="object-name">Object Name</label>
+        <input type="text" id="object-name" value="ProductSummary" />
+      </div>
+      <div>
+        <label for="model">Structured Model</label>
+        <select id="model">
+          <option value="openai/gpt-oss-120b">openai/gpt-oss-120b (default)</option>
+          <option value="openai/gpt-oss-20b">openai/gpt-oss-20b</option>
+        </select>
+      </div>
+      <div>
+        <label for="strict-mode">Strict Mode</label>
+        <select id="strict-mode">
+          <option value="true">Strict (recommended)</option>
+          <option value="false">Allow non-strict</option>
+          <option value="omit">Omit field</option>
+        </select>
+      </div>
+    </div>
+
+    <label for="system">System Prompt</label>
+    <textarea id="system">You turn structured JSON schemas into precise answers.</textarea>
+
+    <label for="user">User Prompt</label>
+    <textarea id="user">Create a short summary for the provided product name and rating.
+
+It is a hot sauce. Please make sure the rating is never below 2.
+
+Be original, or traditional, the idea is to create a plausible hot sauce.
+The title has to be original too, and the embodiement of the ingredients.
+
+Our brand name is : Fire-in-the-Hole.</textarea>
+
+    <label for="schema">JSON Schema</label>
+    <textarea id="schema">{
+  "type": "object",
+  "properties": {
+    "title": { "type": "string" },
+    "rating": { "type": "number" },
+    "summary": { "type": "string" }
+  },
+  "required": ["title", "rating", "summary"],
+  "additionalProperties": false
+}</textarea>
+
+    <label for="options">Additional Options (JSON, optional)</label>
+    <textarea id="options">{
+  "temperature": 0.2
+}</textarea>
+
+    <button id="send">Generate Object</button>
+    <div class="status" id="status"></div>
+
+    <h2>Response</h2>
+    <pre id="response">(no response yet)</pre>
+
+    <script>
+      const baseSelect = document.getElementById('base');
+      const customBaseInput = document.getElementById('custom-base');
+      const objectNameInput = document.getElementById('object-name');
+      const modelSelect = document.getElementById('model');
+      const systemInput = document.getElementById('system');
+      const userInput = document.getElementById('user');
+      const schemaTextarea = document.getElementById('schema');
+      const optionsTextarea = document.getElementById('options');
+      const strictSelect = document.getElementById('strict-mode');
+      const sendButton = document.getElementById('send');
+      const responsePre = document.getElementById('response');
+      const statusDiv = document.getElementById('status');
+
+      function getBaseUrl() {
+        if (baseSelect.value === 'custom') {
+          return customBaseInput.value.trim();
+        }
+        return baseSelect.value;
+      }
+
+      function buildEndpoint(baseUrl, objectName) {
+        const trimmed = baseUrl.replace(/\/$/, '');
+        return `${trimmed}/obj/${encodeURIComponent(objectName)}`;
+      }
+
+      baseSelect.addEventListener('change', () => {
+        if (baseSelect.value === 'custom') {
+          customBaseInput.style.display = 'block';
+          customBaseInput.focus();
+        } else {
+          customBaseInput.style.display = 'none';
+        }
+      });
+
+      sendButton.addEventListener('click', async () => {
+        const baseUrl = getBaseUrl();
+        const objectName = objectNameInput.value.trim();
+
+        if (!baseUrl) {
+          statusDiv.textContent = 'Please provide a worker base URL.';
+          return;
+        }
+
+        if (!objectName) {
+          statusDiv.textContent = 'Object name cannot be empty.';
+          return;
+        }
+
+        let schema;
+        try {
+          schema = JSON.parse(schemaTextarea.value);
+        } catch (error) {
+          statusDiv.textContent = 'JSON schema is invalid.';
+          return;
+        }
+
+        let extraOptions = {};
+        const optionsText = optionsTextarea.value.trim();
+        if (optionsText) {
+          try {
+            extraOptions = JSON.parse(optionsText);
+            if (extraOptions && typeof extraOptions !== 'object') {
+              statusDiv.textContent = 'Additional options must be a JSON object.';
+              return;
+            }
+          } catch (error) {
+            statusDiv.textContent = 'Additional options JSON is invalid.';
+            return;
+          }
+        }
+
+        const payload = {
+          schema,
+          system: systemInput.value,
+          user: userInput.value,
+          ...extraOptions,
+        };
+
+        payload.model = modelSelect.value;
+
+        if (strictSelect.value === 'true') {
+          payload.strict = true;
+        } else if (strictSelect.value === 'false') {
+          payload.strict = false;
+        }
+
+        const endpoint = buildEndpoint(baseUrl, objectName);
+
+        sendButton.disabled = true;
+        statusDiv.textContent = `Sending request to ${endpoint}...`;
+        responsePre.textContent = '(waiting for response...)';
+
+        try {
+          const res = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+
+          const text = await res.text();
+          const contentType = res.headers.get('content-type') || '';
+          let formatted = text;
+
+          if (contentType.includes('application/json')) {
+            try {
+              formatted = JSON.stringify(JSON.parse(text), null, 2);
+            } catch (error) {
+              // fall back to raw text
+            }
+          }
+
+          responsePre.textContent = formatted;
+          statusDiv.textContent = `Status: ${res.status}`;
+        } catch (error) {
+          responsePre.textContent = String(error);
+          statusDiv.textContent = 'Request failed.';
+        } finally {
+          sendButton.disabled = false;
+        }
+      });
+    </script>
+  </body>
+</html>
