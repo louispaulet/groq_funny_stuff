@@ -51,7 +51,7 @@ test:
 	  $(PYTHON) -m pytest chat || { code=$$?; if [ $$code -ne 5 ]; then exit $$code; fi; echo "No chat tests detected."; }; \
 	fi
 	@if [ "$(APP)" = "pokedex" ]; then $(PYTHON) -m pytest pokedex/tests; fi
-	@if [ "$(APP)" = "allergyfinder" ]; then cd allergyfinder && npm run lint; fi
+	@if [ "$(APP)" = "allergyfinder" ]; then cd allergyfinder && npm run lint && node --test src/lib/openFoodFacts/__tests__/*.test.js; fi
 	@if [ "$(APP)" = "stlviewer" ]; then cd groq-chat-stl-viewer && npm run lint; fi
 
 clean:

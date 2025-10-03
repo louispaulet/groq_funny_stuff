@@ -123,9 +123,7 @@ export default function ChatPage() {
 
   function handleStop() {
     if (!loading) return
-    try {
-      abortRef.current?.abort()
-    } catch {}
+    abortRef.current?.abort()
     abortRef.current = null
     setLoading(false)
     setConversations((prev) => prev.map((conversation) => {

@@ -19,8 +19,5 @@ export function ThemeProvider({ children }) {
   const value = useMemo(() => ({ theme, setTheme }), [theme])
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
 }
-
-export function useTheme() {
-  return useContext(ThemeContext)
-}
-
+// eslint-disable-next-line react-refresh/only-export-components
+export const useTheme = () => useContext(ThemeContext)

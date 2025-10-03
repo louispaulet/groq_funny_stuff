@@ -77,7 +77,6 @@ export default function MessageBubble({ role, content, name, timestamp, streamin
         {isUser ? (
           <div className="whitespace-pre-wrap">{content}</div>
         ) : (
-          // eslint-disable-next-line react/no-danger
           <div className="prose" dangerouslySetInnerHTML={{ __html: toSafeHtml(content) }} />
         )}
 

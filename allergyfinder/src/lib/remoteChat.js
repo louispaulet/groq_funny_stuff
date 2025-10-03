@@ -1,4 +1,13 @@
-const DEFAULT_BASE_URL = (import.meta.env.VITE_CHAT_BASE_URL || 'https://groq-endpoint.louispaulet13.workers.dev').replace(/\/$/, '')
+const importMetaEnv = typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env : undefined
+const processEnv = typeof globalThis !== 'undefined' && globalThis.process?.env ? globalThis.process.env : undefined
+
+function getEnvValue(key) {
+  if (importMetaEnv && importMetaEnv[key] !== undefined) return importMetaEnv[key]
+  if (processEnv && processEnv[key] !== undefined) return processEnv[key]
+  return undefined
+}
+
+const DEFAULT_BASE_URL = (getEnvValue('VITE_CHAT_BASE_URL') || 'https://groq-endpoint.louispaulet13.workers.dev').replace(/\/$/, '')
 
 function preview(text = '', length = 200) {
   if (!text) return ''
@@ -8,7 +17,7 @@ function preview(text = '', length = 200) {
 }
 
 export async function callRemoteChat(messages, { signal, model } = {}) {
-  const baseUrl = (import.meta.env.VITE_CHAT_BASE_URL || DEFAULT_BASE_URL).replace(/\/$/, '')
+  const baseUrl = (getEnvValue('VITE_CHAT_BASE_URL') || DEFAULT_BASE_URL).replace(/\/$/, '')
   if (!baseUrl) {
     throw new Error('Missing chat service base URL. Set VITE_CHAT_BASE_URL in your environment.')
   }
@@ -33,22 +42,47 @@ export async function callRemoteChat(messages, { signal, model } = {}) {
   })
 
   const duration = Math.round(performance.now() - started)
-  const text = await response.text()
+  let rawBody = ''
+  let payload
+
+  const canReadText = typeof response.text === 'function'
+  const canReadJson = typeof response.json === 'function'
+
+  if (canReadText) {
+    rawBody = await response.text()
+    try {
+      payload = JSON.parse(rawBody)
+    } catch {
+      payload = undefined
+    }
+  } else if (canReadJson) {
+    payload = await response.json()
+    try {
+      rawBody = JSON.stringify(payload)
+    } catch {
+      rawBody = '[object Object]'
+    }
+  }
 
   if (!response.ok) {
-    console.error('[AllergyFinder] ← %s %d in %dms — body: %s', url, response.status, duration, preview(text, 200))
+    console.error('[AllergyFinder] ← %s %d in %dms — body: %s', url, response.status, duration, preview(rawBody, 200))
     throw new Error(`Remote chat service returned ${response.status}`)
   }
 
-  let payload
-  try {
-    payload = JSON.parse(text)
-  } catch (error) {
-    console.error('[AllergyFinder] Failed to parse JSON response', error)
-    throw new Error('Remote chat service returned invalid JSON')
+  if (!payload) {
+    try {
+      payload = JSON.parse(rawBody)
+    } catch (error) {
+      console.error('[AllergyFinder] Failed to parse JSON response', error)
+      throw new Error('Remote chat service returned invalid JSON')
+    }
   }
 
-  const content = payload?.choices?.[0]?.message?.content?.trim()
+  let content = payload?.choices?.[0]?.message?.content
+  if (!content && typeof payload?.output_text === 'string') {
+    content = payload.output_text
+  }
+  content = typeof content === 'string' ? content.trim() : ''
   if (!content) {
     console.warn('[AllergyFinder] No message content returned from chat service', payload)
     throw new Error('Remote chat service returned an empty message')

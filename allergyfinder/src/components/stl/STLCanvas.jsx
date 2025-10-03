@@ -39,10 +39,8 @@ function parseAsciiStl(text) {
   if (positions.length === 0) return null
   geom.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
   // If normals look invalid, let three compute them
-  try {
+  if (normals.length === positions.length) {
     geom.setAttribute('normal', new THREE.Float32BufferAttribute(normals, 3))
-  } catch {
-    // ignore
   }
   return geom
 }
@@ -63,11 +61,14 @@ function prepareGeometry(geometry) {
 }
 
 function proxiedUrl(url) {
+  if (!/^https?:\/\//i.test(url)) {
+    return url
+  }
   try {
-    if (/^https?:\/\//i.test(url)) {
-      return `/stl-proxy?url=${encodeURIComponent(url)}`
-    }
-  } catch {}
+    return `/stl-proxy?url=${encodeURIComponent(url)}`
+  } catch (error) {
+    console.warn('Failed to encode STL proxy URL', error)
+  }
   return url
 }
 
@@ -94,7 +95,6 @@ function ModelFromText({ text }) {
       if (!geom) throw new Error('No triangles parsed')
       return prepareGeometry(geom)
     } catch (e) {
-      // eslint-disable-next-line no-console
       console.error('STL parse failed', e)
       return null
     }
@@ -107,17 +107,6 @@ function ModelFromText({ text }) {
         <meshStandardMaterial color="#9ca3af" metalness={0.1} roughness={0.8} />
       </mesh>
     </group>
-  )
-}
-
-function Lights() {
-  const dirRef = useHelper(() => null)
-  return (
-    <>
-      <ambientLight intensity={0.6} />
-      <directionalLight ref={dirRef} position={[3, 5, 4]} intensity={0.8} castShadow />
-      <directionalLight position={[-3, -2, -4]} intensity={0.3} />
-    </>
   )
 }
 
