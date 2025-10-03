@@ -28,7 +28,7 @@ function navClasses({ isActive }) {
 
 export default function AppShell({ children }) {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen flex flex-col">
       <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:border-slate-800 dark:bg-slate-900/70">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4">
           <NavLink to="/" className="flex items-center gap-3">
@@ -59,9 +59,20 @@ export default function AppShell({ children }) {
           </div>
         </div>
       </header>
-      <main className="mx-auto w-full max-w-6xl px-4 py-8">
+      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8">
         {children}
       </main>
+      <footer className="mt-auto border-t border-slate-200 bg-white/80 py-6 text-sm text-slate-600 backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:border-slate-800 dark:bg-slate-900/70 dark:text-slate-300">
+        <div className="mx-auto flex w-full max-w-6xl flex-col gap-2 px-4 text-center sm:flex-row sm:items-center sm:justify-between sm:text-left">
+          <div>
+            <span className="font-semibold text-slate-700 dark:text-slate-200">Groq All-In</span>
+            <span className="ml-2 text-xs uppercase tracking-wide text-slate-400 dark:text-slate-500">Unified Playground</span>
+          </div>
+          <div className="text-xs text-slate-500 dark:text-slate-400">
+            Fast chats powered by Groq’s API · Built with React, Vite, and Tailwind CSS
+          </div>
+        </div>
+      </footer>
     </div>
   )
 }

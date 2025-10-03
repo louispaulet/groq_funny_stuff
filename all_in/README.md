@@ -14,9 +14,17 @@ Groq All-In combines the three existing demos — AllergyFinder, STL Viewer, and
    ```bash
    npm install
    ```
+   Or, from the repository root, use the helper target:
+   ```bash
+   make install allin
+   ```
 2. Run the dev server:
    ```bash
    npm run dev
+   ```
+   Or via the Makefile helper:
+   ```bash
+   make run allin
    ```
 3. Open the URL reported by Vite (defaults to http://localhost:5173) and use the top navigation to switch between workspaces.
 
@@ -39,4 +47,3 @@ You can change the Pokedex base URL from inside the UI. Other experiences read t
 ## Notes
 - The STL viewer relies on `fetch` to stream STL files through `/stl-proxy` during development and preview builds, mirroring the behaviour of the original demo.
 - If you need to reset a conversation, use the *Clear* button inside the composer, or start a new chat from the sidebar.
-

@@ -59,7 +59,7 @@ export const experiences = [
   {
     id: 'pokedex',
     path: '/pokedex',
-    name: 'Pokedex Remote',
+    name: 'Pokedex',
     headline: 'Concise Pokemon Companion',
     description: 'Ask for typings, strengths, weaknesses, and quick lore delivered by a remote Pokedex service.',
     badge: 'Pokemon',
