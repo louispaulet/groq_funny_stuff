@@ -99,7 +99,6 @@ function ModelFromText({ text }) {
       if (!geom) throw new Error('No triangles parsed')
       return prepareGeometry(geom)
     } catch (error) {
-      // eslint-disable-next-line no-console
       console.error('STL parse failed', error)
       return null
     }

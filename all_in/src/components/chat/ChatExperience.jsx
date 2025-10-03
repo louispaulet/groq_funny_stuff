@@ -4,6 +4,15 @@ import MessageList from './MessageList'
 import Composer from './Composer'
 import ModelSelector from '../ModelSelector'
 import { callRemoteChat } from '../../lib/remoteChat'
+import {
+  readAllergyCookie,
+  readSavedConversations,
+  writeSavedConversations,
+  ensureChatCountAtLeast,
+  incrementChatCount,
+  MAX_SAVED_CONVERSATIONS,
+} from '../../lib/allergyCookies'
+import { enhanceAssistantContent } from '../../lib/assistantPostprocess'
 
 function normalizeBaseUrl(raw) {
   const candidate = (raw || '').trim()
@@ -42,6 +51,44 @@ function createConversation(experience, assistantName) {
   }
 }
 
+const PERSISTENT_EXPERIENCE_IDS = new Set(['allergyfinder', 'stlviewer', 'pokedex'])
+
+function hydrateSavedConversations(saved, experience, assistantName) {
+  if (!Array.isArray(saved) || saved.length === 0) return []
+  return saved
+    .map((conversation, index) => {
+      const id = typeof conversation?.id === 'string' ? conversation.id : makeId()
+      const title = typeof conversation?.title === 'string' && conversation.title.trim()
+        ? conversation.title.trim()
+        : `Saved chat ${index + 1}`
+      const rawMessages = Array.isArray(conversation?.messages) ? conversation.messages : []
+      const messages = rawMessages.length > 0
+        ? rawMessages.map((message) => {
+            const role = message?.role === 'assistant' ? 'assistant' : 'user'
+            const content = typeof message?.content === 'string' ? message.content : ''
+            return {
+              role,
+              content,
+              name: role === 'assistant' ? assistantName : 'You',
+              timestamp:
+                typeof message?.timestamp === 'number' && Number.isFinite(message.timestamp)
+                  ? message.timestamp
+                  : Date.now(),
+              streaming: false,
+              error: Boolean(message?.error),
+              sources: Array.isArray(message?.sources) ? message.sources : undefined,
+            }
+          })
+        : [makeGreeting(experience, assistantName)]
+      return {
+        id,
+        title,
+        messages,
+      }
+    })
+    .filter((conversation) => Array.isArray(conversation.messages) && conversation.messages.length > 0)
+}
+
 export default function ChatExperience({ experience }) {
   const assistantName = experience?.name || 'Groq Assistant'
   const initialModel = experience?.defaultModel || experience?.modelOptions?.[0] || 'openai/gpt-oss-20b'
@@ -60,11 +107,34 @@ export default function ChatExperience({ experience }) {
   const [prompt, setPrompt] = useState('')
   const [loading, setLoading] = useState(false)
   const abortRef = useRef(null)
+  const skipPersistRef = useRef(false)
+
+  const persistConversations = experience?.id && PERSISTENT_EXPERIENCE_IDS.has(experience.id)
 
   useEffect(() => {
-    const fresh = createConversation(experience, assistantName)
-    setConversations([fresh])
-    setActiveId(fresh.id)
+    let loadedConversations = []
+    let usedSavedHistory = false
+
+    if (persistConversations) {
+      const saved = readSavedConversations(experience.id)
+      const hydrated = hydrateSavedConversations(saved, experience, assistantName)
+      if (hydrated.length > 0) {
+        loadedConversations = hydrated
+        usedSavedHistory = true
+        ensureChatCountAtLeast(experience?.id, hydrated.length)
+      }
+    }
+
+    if (loadedConversations.length === 0) {
+      const fresh = createConversation(experience, assistantName)
+      loadedConversations = [fresh]
+      if (persistConversations) {
+        writeSavedConversations(experience.id, loadedConversations)
+      }
+    }
+
+    setConversations(loadedConversations)
+    setActiveId(loadedConversations[0]?.id)
     setPrompt('')
     setModel(experience?.defaultModel || experience?.modelOptions?.[0] || 'openai/gpt-oss-20b')
     setBaseUrl((experience?.defaultBaseUrl || '').replace(/\/$/, ''))
@@ -77,7 +147,8 @@ export default function ChatExperience({ experience }) {
       abortRef.current = null
     }
     setLoading(false)
-  }, [experience, assistantName])
+    skipPersistRef.current = usedSavedHistory
+  }, [experience, assistantName, persistConversations])
 
   const current = useMemo(
     () => conversations.find((conversation) => conversation.id === activeId) || conversations[0],
@@ -85,6 +156,15 @@ export default function ChatExperience({ experience }) {
   )
   const messages = current?.messages || []
   const placeholder = experience?.promptPlaceholder || 'Ask anything...'
+
+  useEffect(() => {
+    if (!persistConversations) return
+    if (skipPersistRef.current) {
+      skipPersistRef.current = false
+      return
+    }
+    writeSavedConversations(experience.id, conversations)
+  }, [conversations, experience?.id, persistConversations])
 
   function handleRename(id, title) {
     setConversations((prev) => prev.map((conversation) => (
@@ -97,7 +177,10 @@ export default function ChatExperience({ experience }) {
   function handleNewConversation() {
     if (loading) return
     const fresh = createConversation(experience, assistantName)
-    setConversations((prev) => [fresh, ...prev])
+    setConversations((prev) => {
+      const next = [fresh, ...prev]
+      return persistConversations ? next.slice(0, MAX_SAVED_CONVERSATIONS) : next
+    })
     setActiveId(fresh.id)
     setPrompt('')
   }
@@ -110,6 +193,18 @@ export default function ChatExperience({ experience }) {
         ? { ...conversation, title: 'New chat', messages: [greeting] }
         : conversation
     )))
+  }
+
+  function handleFlushHistory() {
+    if (loading) return
+    const fresh = createConversation(experience, assistantName)
+    setConversations([fresh])
+    setActiveId(fresh.id)
+    setPrompt('')
+    if (persistConversations) {
+      writeSavedConversations(experience.id, [fresh])
+      skipPersistRef.current = true
+    }
   }
 
   function handleStop() {
@@ -143,6 +238,7 @@ export default function ChatExperience({ experience }) {
 
     const timestamp = Date.now()
     const userMessage = { role: 'user', name: 'You', timestamp, content: trimmed }
+    const shouldIncrementCount = Boolean(experience?.id) && !messages.some((message) => message.role === 'user')
 
     let resolvedBase
     try {
@@ -198,14 +294,31 @@ export default function ChatExperience({ experience }) {
     abortRef.current = controller
 
     try {
+      if (shouldIncrementCount) {
+        incrementChatCount(experience.id)
+      }
       const history = [...messages, userMessage]
-      const chatMessages = buildMessages(experience?.systemPrompt, history)
+      let systemPrompt = experience?.systemPrompt
+      if (experience?.id === 'allergyfinder') {
+        const cookieNotes = readAllergyCookie()
+        if (cookieNotes) {
+          systemPrompt = [
+            systemPrompt,
+            'User allergy notes saved via the Allergy Cookie Editor (markdown format):',
+            cookieNotes,
+          ]
+            .filter(Boolean)
+            .join('\n\n')
+        }
+      }
+      const chatMessages = buildMessages(systemPrompt, history)
       const result = await callRemoteChat(experience, chatMessages, {
         signal: controller.signal,
         model,
         baseUrl: resolvedBase,
       })
       setBaseUrl(result.baseUrl)
+      const enhancedContent = enhanceAssistantContent(experience, result.content)
       setConversations((prev) => prev.map((conversation) => {
         if (conversation.id !== activeId) return conversation
         const nextMessages = [...conversation.messages]
@@ -213,7 +326,7 @@ export default function ChatExperience({ experience }) {
         if (lastIndex >= 0 && nextMessages[lastIndex].role === 'assistant') {
           nextMessages[lastIndex] = {
             ...nextMessages[lastIndex],
-            content: result.content,
+            content: enhancedContent,
             streaming: false,
             error: false,
           }
@@ -226,7 +339,6 @@ export default function ChatExperience({ experience }) {
         ? 'Request cancelled.'
         : `Unable to reach the service. ${error?.message || 'Please try again.'}`
       if (!aborted) {
-        // eslint-disable-next-line no-console
         console.error(`[${experience?.logLabel || 'Chat'}] request failed`, error)
       }
       setConversations((prev) => prev.map((conversation) => {
@@ -260,6 +372,9 @@ export default function ChatExperience({ experience }) {
           onSelect={setActiveId}
           onNew={handleNewConversation}
           onRename={handleRename}
+          onFlushHistory={persistConversations ? handleFlushHistory : undefined}
+          disableNew={loading}
+          disableFlush={loading}
         />
       </aside>
       <section className="md:col-span-8 lg:col-span-9 flex flex-col gap-4">
