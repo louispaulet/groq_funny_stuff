@@ -1,7 +1,16 @@
 import { useState } from 'react'
-import { PencilIcon, PlusIcon } from '@heroicons/react/24/outline'
+import { PencilIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline'
 
-export default function Sidebar({ conversations, activeId, onSelect, onNew, onRename }) {
+export default function Sidebar({
+  conversations,
+  activeId,
+  onSelect,
+  onNew,
+  onRename,
+  onFlushHistory,
+  disableNew = false,
+  disableFlush = false,
+}) {
   const [editingId, setEditingId] = useState(null)
   const [tmpTitle, setTmpTitle] = useState('')
 
@@ -10,10 +19,21 @@ export default function Sidebar({ conversations, activeId, onSelect, onNew, onRe
       <button
         type="button"
         onClick={onNew}
-        className="mb-3 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-brand-600 px-3 py-2 text-sm font-medium text-white hover:bg-brand-700"
+        disabled={disableNew}
+        className="mb-3 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-brand-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:bg-brand-600/60"
       >
         <PlusIcon className="h-5 w-5" /> New chat
       </button>
+      {onFlushHistory ? (
+        <button
+          type="button"
+          onClick={onFlushHistory}
+          disabled={disableFlush}
+          className="mb-4 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-300 px-3 py-2 text-sm font-medium text-slate-600 transition hover:border-slate-400 hover:bg-slate-50 disabled:cursor-not-allowed disabled:text-slate-400 dark:border-slate-700 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:bg-slate-800"
+        >
+          <TrashIcon className="h-5 w-5" /> Flush saved chats
+        </button>
+      ) : null}
       <div className="space-y-1">
         {conversations.map((conversation) => (
           <div

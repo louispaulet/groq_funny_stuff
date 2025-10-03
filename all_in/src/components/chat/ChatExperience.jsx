@@ -4,7 +4,11 @@ import MessageList from './MessageList'
 import Composer from './Composer'
 import ModelSelector from '../ModelSelector'
 import { callRemoteChat } from '../../lib/remoteChat'
-import { readAllergyCookie } from '../../lib/allergyCookies'
+import {
+  readAllergyCookie,
+  readAllergyConversationsCookie,
+  writeAllergyConversationsCookie,
+} from '../../lib/allergyCookies'
 import { enhanceAssistantContent } from '../../lib/assistantPostprocess'
 
 function normalizeBaseUrl(raw) {
@@ -44,6 +48,42 @@ function createConversation(experience, assistantName) {
   }
 }
 
+function hydrateSavedConversations(saved, experience, assistantName) {
+  if (!Array.isArray(saved) || saved.length === 0) return []
+  return saved
+    .map((conversation, index) => {
+      const id = typeof conversation?.id === 'string' ? conversation.id : makeId()
+      const title = typeof conversation?.title === 'string' && conversation.title.trim()
+        ? conversation.title.trim()
+        : `Saved chat ${index + 1}`
+      const rawMessages = Array.isArray(conversation?.messages) ? conversation.messages : []
+      const messages = rawMessages.length > 0
+        ? rawMessages.map((message) => {
+            const role = message?.role === 'assistant' ? 'assistant' : 'user'
+            const content = typeof message?.content === 'string' ? message.content : ''
+            return {
+              role,
+              content,
+              name: role === 'assistant' ? assistantName : 'You',
+              timestamp:
+                typeof message?.timestamp === 'number' && Number.isFinite(message.timestamp)
+                  ? message.timestamp
+                  : Date.now(),
+              streaming: false,
+              error: Boolean(message?.error),
+              sources: Array.isArray(message?.sources) ? message.sources : undefined,
+            }
+          })
+        : [makeGreeting(experience, assistantName)]
+      return {
+        id,
+        title,
+        messages,
+      }
+    })
+    .filter((conversation) => Array.isArray(conversation.messages) && conversation.messages.length > 0)
+}
+
 export default function ChatExperience({ experience }) {
   const assistantName = experience?.name || 'Groq Assistant'
   const initialModel = experience?.defaultModel || experience?.modelOptions?.[0] || 'openai/gpt-oss-20b'
@@ -62,11 +102,33 @@ export default function ChatExperience({ experience }) {
   const [prompt, setPrompt] = useState('')
   const [loading, setLoading] = useState(false)
   const abortRef = useRef(null)
+  const skipPersistRef = useRef(false)
+
+  const persistConversations = experience?.id === 'allergyfinder'
 
   useEffect(() => {
-    const fresh = createConversation(experience, assistantName)
-    setConversations([fresh])
-    setActiveId(fresh.id)
+    let loadedConversations = []
+    let usedSavedHistory = false
+
+    if (persistConversations) {
+      const saved = readAllergyConversationsCookie()
+      const hydrated = hydrateSavedConversations(saved, experience, assistantName)
+      if (hydrated.length > 0) {
+        loadedConversations = hydrated
+        usedSavedHistory = true
+      }
+    }
+
+    if (loadedConversations.length === 0) {
+      const fresh = createConversation(experience, assistantName)
+      loadedConversations = [fresh]
+      if (persistConversations) {
+        writeAllergyConversationsCookie(loadedConversations)
+      }
+    }
+
+    setConversations(loadedConversations)
+    setActiveId(loadedConversations[0]?.id)
     setPrompt('')
     setModel(experience?.defaultModel || experience?.modelOptions?.[0] || 'openai/gpt-oss-20b')
     setBaseUrl((experience?.defaultBaseUrl || '').replace(/\/$/, ''))
@@ -79,7 +141,8 @@ export default function ChatExperience({ experience }) {
       abortRef.current = null
     }
     setLoading(false)
-  }, [experience, assistantName])
+    skipPersistRef.current = usedSavedHistory
+  }, [experience, assistantName, persistConversations])
 
   const current = useMemo(
     () => conversations.find((conversation) => conversation.id === activeId) || conversations[0],
@@ -87,6 +150,15 @@ export default function ChatExperience({ experience }) {
   )
   const messages = current?.messages || []
   const placeholder = experience?.promptPlaceholder || 'Ask anything...'
+
+  useEffect(() => {
+    if (!persistConversations) return
+    if (skipPersistRef.current) {
+      skipPersistRef.current = false
+      return
+    }
+    writeAllergyConversationsCookie(conversations)
+  }, [conversations, persistConversations])
 
   function handleRename(id, title) {
     setConversations((prev) => prev.map((conversation) => (
@@ -112,6 +184,18 @@ export default function ChatExperience({ experience }) {
         ? { ...conversation, title: 'New chat', messages: [greeting] }
         : conversation
     )))
+  }
+
+  function handleFlushHistory() {
+    if (loading) return
+    const fresh = createConversation(experience, assistantName)
+    setConversations([fresh])
+    setActiveId(fresh.id)
+    setPrompt('')
+    if (persistConversations) {
+      writeAllergyConversationsCookie([fresh])
+      skipPersistRef.current = true
+    }
   }
 
   function handleStop() {
@@ -276,6 +360,9 @@ export default function ChatExperience({ experience }) {
           onSelect={setActiveId}
           onNew={handleNewConversation}
           onRename={handleRename}
+          onFlushHistory={persistConversations ? handleFlushHistory : undefined}
+          disableNew={loading}
+          disableFlush={loading}
         />
       </aside>
       <section className="md:col-span-8 lg:col-span-9 flex flex-col gap-4">
