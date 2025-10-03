@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Open Food Facts Finder</title>
+    <style>
+      body { font-family: system-ui, sans-serif; margin: 2.5rem auto; max-width: 680px; color: #0f172a; }
+      h1 { margin-bottom: 0.5rem; }
+      p { margin: 0.5rem 0 1.5rem; }
+      label { display: block; font-weight: 600; margin-top: 1rem; }
+      input[type="text"] { width: 100%; padding: 0.7rem; border: 1px solid #cbd5f5; border-radius: 6px; }
+      select { width: 100%; padding: 0.6rem; border: 1px solid #cbd5f5; border-radius: 6px; }
+      button { margin-top: 1.5rem; padding: 0.7rem 1.2rem; background: #059669; color: white; border: none; border-radius: 6px; cursor: pointer; }
+      button:disabled { opacity: 0.6; cursor: not-allowed; }
+      pre { background: #0f172a; color: #e2e8f0; padding: 1rem; border-radius: 6px; overflow-x: auto; min-height: 140px; }
+      .status { margin-top: 1rem; font-size: 0.95rem; color: #334155; }
+      .content-preview { margin-top: 1.5rem; background: #f8fafc; padding: 1rem; border-radius: 6px; border: 1px solid #cbd5f5; }
+      .content-preview h3 { margin-top: 0; margin-bottom: 0.75rem; }
+      .content-preview p { margin: 0.35rem 0; }
+      .products-preview { margin-top: 1.5rem; }
+      .product-grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+      .product-card { border: 1px solid #cbd5f5; border-radius: 6px; padding: 0.75rem; background: #f8fafc; }
+      .product-card h4 { margin: 0 0 0.3rem; font-size: 1.05rem; }
+      .product-card p { margin: 0.2rem 0; font-size: 0.92rem; }
+      .product-card .meta { color: #475569; font-size: 0.85rem; }
+      .product-card img { max-width: 100%; border-radius: 4px; margin-top: 0.5rem; }
+      .products-preview .empty { color: #475569; font-style: italic; }
+    </style>
+  </head>
+  <body>
+    <h1>Flavor Finder</h1>
+    <p>Fire a GET request to the worker's `/flavor-finder/{food}` route and inspect the Open Food Facts lookup.</p>
+
+    <label for="endpoint">Endpoint</label>
+    <select id="endpoint">
+      <option value="http://127.0.0.1:8787">Local (http://127.0.0.1:8787)</option>
+      <option value="https://groq-endpoint.louispaulet13.workers.dev">Deployed (groq-endpoint.louispaulet13.workers.dev)</option>
+      <option value="custom">Custom...</option>
+    </select>
+
+    <input type="text" id="custom-endpoint" placeholder="https://example.com" style="display:none;" />
+
+    <label for="foodName">Food name</label>
+    <input type="text" id="foodName" placeholder="e.g. chocolate" />
+
+    <button id="sendButton">Search Open Food Facts</button>
+    <div class="status" id="status"></div>
+
+    <h2>Response</h2>
+    <details>
+      <summary>View JSON</summary>
+      <pre id="response">(no response yet)</pre>
+    </details>
+    <div class="products-preview">
+      <h3>Products</h3>
+      <div id="productsPreview" class="product-grid empty">Run a search to see results.</div>
+    </div>
+
+    <h2>Chat Tool Demo</h2>
+    <p>
+      Fire a chat-completion request asking
+      <em>“How many nuts are in Nutella?”</em>. The worker should call Open Food Facts as a
+      tool and cite the returned product page.
+    </p>
+    <label for="toolQuestion">Question for chat tool</label>
+    <input
+      type="text"
+      id="toolQuestion"
+      placeholder="e.g. How many nuts are in Nutella? Include a source link in your answer."
+      value="How many nuts are in Nutella? Include a source link in your answer."
+    />
+
+    <button id="toolButton">Ask via /chat</button>
+    <div class="status" id="toolStatus"></div>
+    <details>
+      <summary>View Request JSON</summary>
+      <pre id="toolRequest">(no request yet)</pre>
+    </details>
+    <details>
+      <summary>View Response JSON</summary>
+      <pre id="toolResponse">(no response yet)</pre>
+    </details>
+    <div class="content-preview">
+      <h3>Answer</h3>
+      <div id="toolContent">(no content yet)</div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js" integrity="sha384-ar5Z1io8GZFwR0JyTzjsLGCfEJu73/vCnFX5AVWHNMuWYNjmKCFplIJ5dYATN4nR" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-PYEYTWGiWgYnMBZeRlmzJxMbzKtR5kC4DLtALHY74iNbvnR2AOlOji5cjl31CluE" crossorigin="anonymous"></script>
+    <script>
+      const endpointSelect = document.getElementById('endpoint');
+      const customEndpointInput = document.getElementById('custom-endpoint');
+      const foodNameInput = document.getElementById('foodName');
+      const sendButton = document.getElementById('sendButton');
+      const responsePre = document.getElementById('response');
+      const statusDiv = document.getElementById('status');
+      const productsPreview = document.getElementById('productsPreview');
+      const toolQuestionInput = document.getElementById('toolQuestion');
+      const toolButton = document.getElementById('toolButton');
+      const toolStatusDiv = document.getElementById('toolStatus');
+      const toolRequestPre = document.getElementById('toolRequest');
+      const toolResponsePre = document.getElementById('toolResponse');
+      const toolContentDiv = document.getElementById('toolContent');
+
+      function getBaseEndpoint() {
+        const value = endpointSelect.value;
+        if (value === 'custom') {
+          return customEndpointInput.value.trim().replace(/\/?$/, '');
+        }
+        return value;
+      }
+
+      endpointSelect.addEventListener('change', () => {
+        if (endpointSelect.value === 'custom') {
+          customEndpointInput.style.display = 'block';
+          customEndpointInput.focus();
+        } else {
+          customEndpointInput.style.display = 'none';
+        }
+      });
+
+      const renderProducts = (payload) => {
+        if (!payload || !Array.isArray(payload.products) || payload.products.length === 0) {
+          productsPreview.classList.add('empty');
+          productsPreview.innerHTML = 'No products to show.';
+          return;
+        }
+
+        const cards = payload.products.map((product) => {
+          const safe = (value) => {
+            if (!value) return '';
+            const sanitized = window.DOMPurify ? window.DOMPurify.sanitize(String(value)) : String(value);
+            return sanitized;
+          };
+
+          const name = safe(product.name) || 'Unnamed product';
+          const brands = safe(product.brands);
+          const nutriscore = safe(product.nutriscore);
+          const ingredients = safe(product.ingredients);
+          const image = safe(product.image);
+          const source = safe(product.source);
+
+          const metaParts = [];
+          if (brands) metaParts.push(`<span>Brands: ${brands}</span>`);
+          if (nutriscore) metaParts.push(`<span>Nutriscore: ${nutriscore.toUpperCase()}</span>`);
+
+          const meta = metaParts.length ? `<p class="meta">${metaParts.join(' · ')}</p>` : '';
+          const ingredientsHtml = ingredients
+            ? `<p><strong>Ingredients:</strong> ${ingredients}</p>`
+            : '';
+          const imageHtml = image ? `<img src="${image}" alt="${name}" />` : '';
+          const sourceHtml = source
+            ? `<p><a href="${source}" target="_blank" rel="noopener noreferrer">View on Open Food Facts</a></p>`
+            : '';
+
+          return `
+            <article class="product-card">
+              <h4>${name}</h4>
+              ${meta}
+              ${ingredientsHtml}
+              ${sourceHtml}
+              ${imageHtml}
+            </article>
+          `;
+        });
+
+        productsPreview.classList.remove('empty');
+        productsPreview.innerHTML = cards.join('');
+      };
+
+      sendButton.addEventListener('click', async () => {
+        const baseEndpoint = getBaseEndpoint();
+        const foodName = foodNameInput.value.trim();
+
+        if (!baseEndpoint) {
+          statusDiv.textContent = 'Please provide a base endpoint URL.';
+          return;
+        }
+
+        if (!foodName) {
+          statusDiv.textContent = 'Please type a food name to look up.';
+          return;
+        }
+
+        const url = `${baseEndpoint.replace(/\/$/, '')}/flavor-finder/${encodeURIComponent(foodName)}`;
+
+        sendButton.disabled = true;
+        statusDiv.textContent = `Requesting ${url} ...`;
+        responsePre.textContent = '(waiting for response...)';
+
+        try {
+          const res = await fetch(url, { method: 'GET' });
+          const text = await res.text();
+          let formatted;
+          let parsed;
+          try {
+            parsed = JSON.parse(text);
+            formatted = JSON.stringify(parsed, null, 2);
+          } catch (error) {
+            formatted = text;
+          }
+          responsePre.textContent = formatted;
+          statusDiv.textContent = `Status: ${res.status}`;
+          renderProducts(parsed);
+        } catch (error) {
+          responsePre.textContent = String(error);
+          statusDiv.textContent = 'Request failed.';
+          renderProducts(null);
+        } finally {
+          sendButton.disabled = false;
+        }
+      });
+
+      toolButton.addEventListener('click', async () => {
+        const baseEndpoint = getBaseEndpoint();
+        if (!baseEndpoint) {
+          toolStatusDiv.textContent = 'Please provide a base endpoint URL.';
+          return;
+        }
+
+        const question = toolQuestionInput.value.trim();
+
+        if (!question) {
+          toolStatusDiv.textContent = 'Please provide a question for the chat example.';
+          return;
+        }
+
+        const url = `${baseEndpoint.replace(/\/$/, '')}/chat`;
+        const payload = {
+          messages: [
+            { role: 'system', content: 'You are a helpful assistant.' },
+            {
+              role: 'user',
+              content: question,
+            },
+          ],
+        };
+
+        toolButton.disabled = true;
+        toolStatusDiv.textContent = `Requesting ${url} ...`;
+        toolRequestPre.textContent = JSON.stringify(payload, null, 2);
+        toolResponsePre.textContent = '(waiting for response...)';
+        toolContentDiv.innerHTML = '(waiting for content...)';
+
+        try {
+          const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+
+          const text = await res.text();
+          let formatted;
+          try {
+            const parsed = JSON.parse(text);
+            const choiceContent = parsed?.choices?.[0]?.message?.content;
+            if (typeof choiceContent === 'string') {
+              formatted = `${JSON.stringify(parsed, null, 2)}\n\n---\nContent:\n${choiceContent}`;
+
+              let htmlContent = '';
+
+              if (window.marked) {
+                const markdownWithLinks = choiceContent.replace(
+                  /(https?:\/\/[\S]+?)(?=[)\s]|$)/g,
+                  (url) => `<${url}>`,
+                );
+
+                const rawHtml = window.marked.parse(markdownWithLinks, {
+                  mangle: false,
+                  headerIds: false,
+                  gfm: true,
+                  breaks: true,
+                });
+                htmlContent = window.DOMPurify ? window.DOMPurify.sanitize(rawHtml) : rawHtml;
+              } else {
+                const autoLink = (input) =>
+                  input.replace(
+                    /(https?:\/\/[\S]+?)(?=[)\s]|$)/g,
+                    (url) =>
+                      `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`,
+                  );
+
+                htmlContent = choiceContent
+                  .split('\n')
+                  .filter((line) => line.trim().length > 0)
+                  .map((line) => `<p>${autoLink(line.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'))}</p>`)
+                  .join('');
+              }
+
+              toolContentDiv.innerHTML = htmlContent || '<p>(no content)</p>';
+            } else {
+              formatted = JSON.stringify(parsed, null, 2);
+              toolContentDiv.innerHTML = '<p>(no content)</p>';
+            }
+          } catch (error) {
+            formatted = text;
+            toolContentDiv.innerHTML = '<p>(no content)</p>';
+          }
+
+          toolResponsePre.textContent = formatted;
+          toolStatusDiv.textContent = `Status: ${res.status}`;
+        } catch (error) {
+          toolResponsePre.textContent = String(error);
+          toolStatusDiv.textContent = 'Request failed.';
+          toolContentDiv.innerHTML = '<p>(no content)</p>';
+        } finally {
+          toolButton.disabled = false;
+        }
+      });
+    </script>
+  </body>
+</html>

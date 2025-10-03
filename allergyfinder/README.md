@@ -55,10 +55,9 @@ Requirements: Node.js 18+ and npm.
 
 ## Implementation Notes
 
-- OFF integration lives in `src/lib/openFoodFacts.js`. It searches OFF, assembles allergen context, and returns a compact summary for prompts.
-- `src/pages/ChatPage.jsx` resolves the OFF context before each LLM call and caches responses to limit duplicate requests.
-- `src/lib/chat.js` builds the final prompt, injecting the OFF context so the assistant cites the data and includes safety reminders.
-- `src/hooks/useGroqClient.js` creates the Groq-compatible OpenAI client using the browser SDK (`dangerouslyAllowBrowser: true`).
+- The browser now delegates all LLM work to the Cloudflare `/chat` worker via `src/lib/remoteChat.js` (no API key stored locally).
+- `src/pages/ChatPage.jsx` manages conversations, cancellation, and renders the worker responses with STL previews and OFF sources when supplied.
+- OpenFoodFacts helpers in `src/lib/openFoodFacts` expose utilities reused by the worker to assemble context and citations.
 
 ## Safety Reminder
 

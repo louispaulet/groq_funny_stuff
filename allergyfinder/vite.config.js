@@ -25,7 +25,8 @@ const stlProxyPlugin = {
         res.setHeader('Access-Control-Allow-Origin', '*')
         const ab = await r.arrayBuffer()
         res.end(Buffer.from(ab))
-      } catch (e) {
+      } catch (error) {
+        console.error('STL proxy (dev) failed', error)
         res.statusCode = 502
         res.end('Proxy error')
       }
@@ -52,7 +53,8 @@ const stlProxyPlugin = {
         res.setHeader('Access-Control-Allow-Origin', '*')
         const ab = await r.arrayBuffer()
         res.end(Buffer.from(ab))
-      } catch (e) {
+      } catch (error) {
+        console.error('STL proxy (preview) failed', error)
         res.statusCode = 502
         res.end('Proxy error')
       }
