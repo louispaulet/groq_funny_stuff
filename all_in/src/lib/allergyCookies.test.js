@@ -2,9 +2,12 @@ import { beforeEach, describe, expect, test } from 'vitest'
 import {
   clearAllergyConversationsCookie,
   clearChatCount,
+  clearSavedConversations,
   readChatCounts,
   readAllergyConversationsCookie,
+  readSavedConversations,
   writeAllergyConversationsCookie,
+  writeSavedConversations,
 } from './allergyCookies'
 
 function installCookieStub() {
@@ -93,5 +96,26 @@ describe('allergy conversation persistence', () => {
     const counts = readChatCounts()
     expect(counts.allergyfinder).toBe(0)
     expect(readAllergyConversationsCookie()).toHaveLength(0)
+  })
+
+  test('other experiences persist conversations and counters', () => {
+    writeSavedConversations('stlviewer', [buildConversation('s1')])
+    writeSavedConversations('pokedex', [buildConversation('p1'), buildConversation('p2')])
+
+    const counts = readChatCounts()
+    expect(counts.stlviewer).toBe(1)
+    expect(counts.pokedex).toBe(2)
+    expect(readSavedConversations('stlviewer')).toHaveLength(1)
+    expect(readSavedConversations('pokedex')).toHaveLength(2)
+
+    clearSavedConversations('stlviewer')
+    clearChatCount('pokedex')
+
+    expect(readSavedConversations('stlviewer')).toHaveLength(0)
+    expect(readChatCounts().stlviewer).toBe(0)
+    expect(readChatCounts().pokedex).toBe(2)
+
+    clearSavedConversations('pokedex')
+    expect(readChatCounts().pokedex).toBe(0)
   })
 })

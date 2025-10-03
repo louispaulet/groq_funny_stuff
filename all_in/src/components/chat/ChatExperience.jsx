@@ -6,8 +6,8 @@ import ModelSelector from '../ModelSelector'
 import { callRemoteChat } from '../../lib/remoteChat'
 import {
   readAllergyCookie,
-  readAllergyConversationsCookie,
-  writeAllergyConversationsCookie,
+  readSavedConversations,
+  writeSavedConversations,
   ensureChatCountAtLeast,
   incrementChatCount,
 } from '../../lib/allergyCookies'
@@ -49,6 +49,8 @@ function createConversation(experience, assistantName) {
     messages: [makeGreeting(experience, assistantName)],
   }
 }
+
+const PERSISTENT_EXPERIENCE_IDS = new Set(['allergyfinder', 'stlviewer', 'pokedex'])
 
 function hydrateSavedConversations(saved, experience, assistantName) {
   if (!Array.isArray(saved) || saved.length === 0) return []
@@ -106,14 +108,14 @@ export default function ChatExperience({ experience }) {
   const abortRef = useRef(null)
   const skipPersistRef = useRef(false)
 
-  const persistConversations = experience?.id === 'allergyfinder'
+  const persistConversations = experience?.id && PERSISTENT_EXPERIENCE_IDS.has(experience.id)
 
   useEffect(() => {
     let loadedConversations = []
     let usedSavedHistory = false
 
     if (persistConversations) {
-      const saved = readAllergyConversationsCookie()
+      const saved = readSavedConversations(experience.id)
       const hydrated = hydrateSavedConversations(saved, experience, assistantName)
       if (hydrated.length > 0) {
         loadedConversations = hydrated
@@ -126,7 +128,7 @@ export default function ChatExperience({ experience }) {
       const fresh = createConversation(experience, assistantName)
       loadedConversations = [fresh]
       if (persistConversations) {
-        writeAllergyConversationsCookie(loadedConversations)
+        writeSavedConversations(experience.id, loadedConversations)
       }
     }
 
@@ -160,8 +162,8 @@ export default function ChatExperience({ experience }) {
       skipPersistRef.current = false
       return
     }
-    writeAllergyConversationsCookie(conversations)
-  }, [conversations, persistConversations])
+    writeSavedConversations(experience.id, conversations)
+  }, [conversations, experience?.id, persistConversations])
 
   function handleRename(id, title) {
     setConversations((prev) => prev.map((conversation) => (
@@ -196,7 +198,7 @@ export default function ChatExperience({ experience }) {
     setActiveId(fresh.id)
     setPrompt('')
     if (persistConversations) {
-      writeAllergyConversationsCookie([fresh])
+      writeSavedConversations(experience.id, [fresh])
       skipPersistRef.current = true
     }
   }

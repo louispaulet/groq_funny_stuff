@@ -3,6 +3,8 @@ const ALLERGY_CONVERSATIONS_COOKIE_NAME = 'allergyfinder_conversations'
 const USER_PROFILE_COOKIE_NAME = 'allin_profile_name'
 const CHAT_COUNT_COOKIE_NAME = 'allin_chat_counts'
 const ALLERGY_EXPERIENCE_ID = 'allergyfinder'
+const EXPERIENCE_COOKIE_PREFIX = 'allin_conversations_'
+const KNOWN_EXPERIENCE_IDS = ['allergyfinder', 'stlviewer', 'pokedex']
 
 const YEAR_IN_SECONDS = 60 * 60 * 24 * 365
 const MAX_SAVED_CONVERSATIONS = 2
@@ -107,8 +109,16 @@ function buildConversationPayload(conversations) {
     .filter(Boolean)
 }
 
-export function readAllergyConversationsCookie() {
-  const raw = readCookieValue(ALLERGY_CONVERSATIONS_COOKIE_NAME)
+function getConversationCookieName(experienceId) {
+  if (!experienceId || experienceId === ALLERGY_EXPERIENCE_ID) {
+    return ALLERGY_CONVERSATIONS_COOKIE_NAME
+  }
+  return `${EXPERIENCE_COOKIE_PREFIX}${experienceId}`
+}
+
+export function readSavedConversations(experienceId) {
+  const name = getConversationCookieName(experienceId)
+  const raw = readCookieValue(name)
   if (!raw) return []
   try {
     const parsed = JSON.parse(decodeURIComponent(raw))
@@ -118,11 +128,12 @@ export function readAllergyConversationsCookie() {
   }
 }
 
-export function writeAllergyConversationsCookie(conversations) {
+export function writeSavedConversations(experienceId, conversations) {
+  const name = getConversationCookieName(experienceId)
   const payload = buildConversationPayload(conversations)
   if (payload.length === 0) {
-    deleteCookie(ALLERGY_CONVERSATIONS_COOKIE_NAME)
-    clearChatCount(ALLERGY_EXPERIENCE_ID)
+    deleteCookie(name)
+    clearChatCount(experienceId)
     return
   }
   let serialized = JSON.stringify(payload)
@@ -130,17 +141,30 @@ export function writeAllergyConversationsCookie(conversations) {
     const trimmed = payload.slice(0, 1)
     serialized = JSON.stringify(trimmed)
     if (serialized.length > COOKIE_MAX_SIZE) {
-      deleteCookie(ALLERGY_CONVERSATIONS_COOKIE_NAME)
+      deleteCookie(name)
       return
     }
   }
-  writeCookie(ALLERGY_CONVERSATIONS_COOKIE_NAME, serialized)
-  ensureChatCountAtLeast(ALLERGY_EXPERIENCE_ID, payload.length)
+  writeCookie(name, serialized)
+  ensureChatCountAtLeast(experienceId, payload.length)
+}
+
+export function clearSavedConversations(experienceId) {
+  const name = getConversationCookieName(experienceId)
+  deleteCookie(name)
+  clearChatCount(experienceId)
+}
+
+export function readAllergyConversationsCookie() {
+  return readSavedConversations(ALLERGY_EXPERIENCE_ID)
+}
+
+export function writeAllergyConversationsCookie(conversations) {
+  writeSavedConversations(ALLERGY_EXPERIENCE_ID, conversations)
 }
 
 export function clearAllergyConversationsCookie() {
-  deleteCookie(ALLERGY_CONVERSATIONS_COOKIE_NAME)
-  clearChatCount(ALLERGY_EXPERIENCE_ID)
+  clearSavedConversations(ALLERGY_EXPERIENCE_ID)
 }
 
 function readChatCountMap() {
@@ -175,18 +199,20 @@ function writeChatCountMap(map) {
 
 export function readChatCounts() {
   const map = readChatCountMap()
-  let allergyCount = Number.parseInt(map.allergyfinder, 10) || 0
-  if (allergyCount === 0) {
-    const saved = readAllergyConversationsCookie()
-    if (saved.length > allergyCount) {
-      allergyCount = saved.length
-    }
-  }
-  return {
-    allergyfinder: allergyCount,
+  const counts = {
+    allergyfinder: Number.parseInt(map.allergyfinder, 10) || 0,
     stlviewer: Number.parseInt(map.stlviewer, 10) || 0,
     pokedex: Number.parseInt(map.pokedex, 10) || 0,
   }
+  KNOWN_EXPERIENCE_IDS.forEach((experienceId) => {
+    if (counts[experienceId] === 0) {
+      const saved = readSavedConversations(experienceId)
+      if (saved.length > 0) {
+        counts[experienceId] = saved.length
+      }
+    }
+  })
+  return counts
 }
 
 export function incrementChatCount(experienceId) {
