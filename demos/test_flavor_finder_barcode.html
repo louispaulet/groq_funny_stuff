@@ -111,10 +111,10 @@
     </style>
   </head>
   <body>
-    <h1>Flavor Finder – Barcode Resolver</h1>
+    <h1>Flavor Finder – Barcode Lookup</h1>
     <p>
-      Paste a barcode or Open Food Facts product ID to confirm the worker follows redirects and returns the
-      final product slug.
+      Paste a barcode or Open Food Facts product ID to fetch the product details returned by the Flavor Finder
+      API. This mirrors what the AllergyFinder chat experience now embeds when a barcode is detected.
     </p>
 
     <label for="endpoint">Endpoint</label>
@@ -131,7 +131,7 @@
     <label for="productId">Product ID or barcode</label>
     <input type="text" id="productId" placeholder="e.g. 3350033995093" />
 
-    <button id="runButton">Resolve product</button>
+    <button id="runButton">Fetch product context</button>
 
     <div class="status" id="status">(waiting for input)</div>
 
@@ -150,10 +150,20 @@
       <dl>
         <dt>Status</dt>
         <dd id="responseStatus" class="empty">(none yet)</dd>
-        <dt>Resolved URL</dt>
-        <dd id="resolvedUrl" class="empty">(none yet)</dd>
-        <dt>Resolved Slug</dt>
-        <dd id="resolvedSlug" class="empty">(none yet)</dd>
+        <dt>Product name</dt>
+        <dd id="productName" class="empty">(none yet)</dd>
+        <dt>Brands</dt>
+        <dd id="productBrands" class="empty">(none yet)</dd>
+        <dt>Nutri-Score</dt>
+        <dd id="productNutriscore" class="empty">(none yet)</dd>
+        <dt>Quantity</dt>
+        <dd id="productQuantity" class="empty">(none yet)</dd>
+        <dt>Ingredients</dt>
+        <dd id="productIngredients" class="empty">(none yet)</dd>
+        <dt>Allergens</dt>
+        <dd id="productAllergens" class="empty">(none yet)</dd>
+        <dt>Traces</dt>
+        <dd id="productTraces" class="empty">(none yet)</dd>
         <dt>Products returned</dt>
         <dd id="productCount" class="empty">(none yet)</dd>
         <dt>Sources</dt>
@@ -174,24 +184,46 @@
       const statusDiv = document.getElementById('status');
       const requestUrlDd = document.getElementById('requestUrl');
       const responseStatusDd = document.getElementById('responseStatus');
-      const resolvedUrlDd = document.getElementById('resolvedUrl');
-      const resolvedSlugDd = document.getElementById('resolvedSlug');
+      const productNameDd = document.getElementById('productName');
+      const productBrandsDd = document.getElementById('productBrands');
+      const productNutriscoreDd = document.getElementById('productNutriscore');
+      const productQuantityDd = document.getElementById('productQuantity');
+      const productIngredientsDd = document.getElementById('productIngredients');
+      const productAllergensDd = document.getElementById('productAllergens');
+      const productTracesDd = document.getElementById('productTraces');
       const productCountDd = document.getElementById('productCount');
       const sourcesDd = document.getElementById('sources');
       const responseJsonPre = document.getElementById('responseJson');
 
       function resetSummary() {
-        responseStatusDd.textContent = '(none yet)';
-        responseStatusDd.classList.add('empty');
-        resolvedUrlDd.textContent = '(none yet)';
-        resolvedUrlDd.classList.add('empty');
-        resolvedSlugDd.textContent = '(none yet)';
-        resolvedSlugDd.classList.add('empty');
-        productCountDd.textContent = '(none yet)';
-        productCountDd.classList.add('empty');
-        sourcesDd.textContent = '(none yet)';
-        sourcesDd.classList.add('empty');
+        const resetToEmpty = (element) => {
+          element.textContent = '(none yet)';
+          element.classList.add('empty');
+        };
+
+        resetToEmpty(responseStatusDd);
+        resetToEmpty(productNameDd);
+        resetToEmpty(productBrandsDd);
+        resetToEmpty(productNutriscoreDd);
+        resetToEmpty(productQuantityDd);
+        resetToEmpty(productIngredientsDd);
+        resetToEmpty(productAllergensDd);
+        resetToEmpty(productTracesDd);
+        resetToEmpty(productCountDd);
+        resetToEmpty(sourcesDd);
         responseJsonPre.textContent = '(no response yet)';
+      }
+
+      function fillSummaryField(element, value) {
+        if (!element) return;
+        const hasValue = value !== undefined && value !== null && String(value).trim() !== '';
+        if (hasValue) {
+          element.textContent = String(value);
+          element.classList.remove('empty');
+        } else {
+          element.textContent = '(not provided)';
+          element.classList.add('empty');
+        }
       }
 
       function getBaseEndpoint() {
@@ -236,7 +268,10 @@
         responseJsonPre.textContent = '(waiting for response...)';
 
         try {
-          const res = await fetch(url, { method: 'GET' });
+          const res = await fetch(url, {
+            method: 'GET',
+            headers: { Accept: 'application/json' },
+          });
           const text = await res.text();
           responseStatusDd.textContent = String(res.status);
           responseStatusDd.classList.remove('empty');
@@ -249,28 +284,33 @@
             responseJsonPre.textContent = text;
           }
 
-          if (parsed && typeof parsed === 'object') {
-            const resolvedUrl = parsed.resolvedUrl || (parsed.products?.[0]?.source ?? '');
-            if (resolvedUrl) {
-              resolvedUrlDd.textContent = resolvedUrl;
-              resolvedUrlDd.classList.remove('empty');
-            }
+          const products = Array.isArray(parsed?.products) ? parsed.products : [];
+          const firstProduct = products[0] || {};
 
-            const resolvedSlug = parsed.resolvedSlug || parsed.products?.[0]?.slug || '';
-            if (resolvedSlug) {
-              resolvedSlugDd.textContent = resolvedSlug;
-              resolvedSlugDd.classList.remove('empty');
-            }
+          const safeValue = (value) => {
+            if (!value) return '';
+            return String(value);
+          };
 
-            const count = Array.isArray(parsed.products) ? parsed.products.length : 0;
-            productCountDd.textContent = String(count);
-            productCountDd.classList.remove('empty');
+          const summaryEntries = [
+            [productNameDd, safeValue(firstProduct.name || firstProduct.genericName || firstProduct.generic_name)],
+            [productBrandsDd, safeValue(firstProduct.brands)],
+            [productNutriscoreDd, safeValue(firstProduct.nutriscore || firstProduct.nutrition_grade)],
+            [productQuantityDd, safeValue(firstProduct.quantity)],
+            [productIngredientsDd, safeValue(firstProduct.ingredients)],
+            [productAllergensDd, safeValue(firstProduct.allergens)],
+            [productTracesDd, safeValue(firstProduct.traces)],
+          ];
 
-            if (Array.isArray(parsed.sources) && parsed.sources.length > 0) {
-              sourcesDd.textContent = parsed.sources.join(', ');
-              sourcesDd.classList.remove('empty');
-            }
-          }
+          summaryEntries.forEach(([element, value]) => fillSummaryField(element, value));
+
+          const count = products.length;
+          fillSummaryField(productCountDd, String(count));
+
+          const sources = Array.isArray(parsed?.sources) && parsed.sources.length > 0
+            ? parsed.sources.join(', ')
+            : '';
+          fillSummaryField(sourcesDd, sources);
 
           statusDiv.textContent = 'Request completed.';
         } catch (error) {
