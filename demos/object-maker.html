@@ -1,0 +1,1289 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Object Maker – Structured Creativity Lab</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --yellow-50: #fefce8;
+        --yellow-100: #fef08a;
+        --yellow-200: #fde047;
+        --yellow-300: #facc15;
+        --yellow-400: #eab308;
+        --slate-900: #0f172a;
+        --slate-700: #334155;
+        --slate-500: #64748b;
+        --slate-300: #cbd5f5;
+        --card-bg: rgba(255, 255, 255, 0.75);
+        --card-border: rgba(148, 163, 184, 0.4);
+        --shadow-sm: 0 12px 30px rgba(15, 23, 42, 0.1);
+        font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: linear-gradient(180deg, var(--yellow-50) 0%, #fffdf5 45%, #ffffff 100%);
+        color: var(--slate-900);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      header.hero {
+        background: radial-gradient(circle at 20% 20%, #fff7c2 0%, #ffe27a 35%, #facc15 70%, #eab308 100%);
+        color: var(--slate-900);
+        padding: 3rem min(5vw, 3rem) 4rem;
+        position: relative;
+        overflow: hidden;
+      }
+
+      header.hero::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at 80% 0%, rgba(255, 255, 255, 0.8), transparent 55%),
+          radial-gradient(circle at 0% 100%, rgba(255, 255, 255, 0.5), transparent 60%);
+        opacity: 0.8;
+        pointer-events: none;
+      }
+
+      header.hero > * {
+        position: relative;
+        z-index: 1;
+      }
+
+      nav.primary-nav {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        margin-bottom: 2rem;
+      }
+
+      nav.primary-nav a {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.55rem 1.1rem;
+        border-radius: 999px;
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        background: rgba(255, 255, 255, 0.7);
+        color: var(--slate-900);
+        text-decoration: none;
+        font-weight: 600;
+        box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+        transition: transform 150ms ease, box-shadow 150ms ease;
+      }
+
+      nav.primary-nav a:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 26px rgba(15, 23, 42, 0.18);
+      }
+
+      nav.primary-nav a.current {
+        background: rgba(250, 204, 21, 0.95);
+        border-color: rgba(234, 179, 8, 0.8);
+        color: #0f172a;
+      }
+
+      header.hero h1 {
+        font-size: clamp(2.5rem, 5vw, 3.5rem);
+        margin: 0 0 1rem;
+        line-height: 1.05;
+        letter-spacing: -0.02em;
+      }
+
+      header.hero p.lead {
+        max-width: 760px;
+        font-size: clamp(1rem, 2.5vw, 1.25rem);
+        margin: 0 0 1.5rem;
+      }
+
+      header.hero .hero-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.25rem;
+        font-size: 0.95rem;
+        color: rgba(15, 23, 42, 0.78);
+      }
+
+      main {
+        flex: 1;
+        padding: 0 min(5vw, 3rem) 4rem;
+        position: relative;
+        top: -3.5rem;
+      }
+
+      .panel {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 18px;
+        box-shadow: var(--shadow-sm);
+        padding: clamp(1.25rem, 2vw, 1.75rem);
+        backdrop-filter: blur(12px);
+      }
+
+      .panel h2,
+      .panel h3 {
+        margin-top: 0;
+      }
+
+      section + section {
+        margin-top: 2.5rem;
+      }
+
+      .designer-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+      }
+
+      textarea,
+      select,
+      input[type="text"],
+      input[type="url"],
+      input[type="number"] {
+        width: 100%;
+        padding: 0.75rem 0.85rem;
+        border-radius: 12px;
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        background: rgba(255, 255, 255, 0.85);
+        font: inherit;
+        transition: border-color 120ms ease, box-shadow 120ms ease;
+      }
+
+      textarea:focus,
+      select:focus,
+      input:focus {
+        outline: none;
+        border-color: rgba(234, 179, 8, 0.65);
+        box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.25);
+      }
+
+      textarea {
+        min-height: 200px;
+        resize: vertical;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+        line-height: 1.5;
+      }
+
+      button,
+      .chip {
+        font: inherit;
+      }
+
+      button {
+        border: none;
+        border-radius: 999px;
+        background: var(--yellow-300);
+        color: var(--slate-900);
+        font-weight: 600;
+        padding: 0.65rem 1.5rem;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: transform 120ms ease, box-shadow 120ms ease;
+        box-shadow: 0 10px 18px rgba(234, 179, 8, 0.25);
+      }
+
+      button:hover:not(:disabled) {
+        transform: translateY(-1px);
+        box-shadow: 0 16px 28px rgba(234, 179, 8, 0.35);
+      }
+
+      button:disabled {
+        cursor: not-allowed;
+        opacity: 0.6;
+        box-shadow: none;
+      }
+
+      .status,
+      .helper-text {
+        margin-top: 0.75rem;
+        font-size: 0.92rem;
+        color: var(--slate-700);
+      }
+
+      pre {
+        background: rgba(15, 23, 42, 0.9);
+        color: #f8fafc;
+        padding: 1rem 1.2rem;
+        border-radius: 14px;
+        overflow-x: auto;
+        white-space: pre-wrap;
+        word-break: break-word;
+        font-size: 0.9rem;
+      }
+
+      .chat-log {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        max-height: 420px;
+        overflow-y: auto;
+        padding-right: 0.25rem;
+      }
+
+      .chat-message {
+        border-radius: 16px;
+        padding: 0.75rem 1rem;
+        background: rgba(255, 255, 255, 0.8);
+        border: 1px solid rgba(148, 163, 184, 0.25);
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+      }
+
+      .chat-message.assistant {
+        background: rgba(254, 240, 138, 0.7);
+        border-color: rgba(234, 179, 8, 0.35);
+      }
+
+      .chat-message .role {
+        font-size: 0.8rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: rgba(15, 23, 42, 0.7);
+        margin-bottom: 0.35rem;
+        font-weight: 600;
+      }
+
+      .chat-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        align-items: center;
+        margin-top: 0.75rem;
+      }
+
+      .chat-toolbar select,
+      .chat-toolbar input[type="number"] {
+        width: auto;
+        min-width: 140px;
+      }
+
+      .chat-toolbar label {
+        font-size: 0.85rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+        color: var(--slate-700);
+        font-weight: 600;
+      }
+
+      form.chat-form {
+        margin-top: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .form-grid {
+        display: grid;
+        gap: 1rem;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      }
+
+      .zoo-groups {
+        display: grid;
+        gap: 1.5rem;
+      }
+
+      .zoo-group {
+        border: 1px solid rgba(148, 163, 184, 0.25);
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.75);
+        padding: 1.5rem;
+        box-shadow: var(--shadow-sm);
+      }
+
+      .zoo-group h3 {
+        margin-top: 0;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+      }
+
+      .zoo-cards {
+        display: grid;
+        gap: 1rem;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        margin-top: 1rem;
+      }
+
+      .zoo-card {
+        background: rgba(255, 255, 255, 0.88);
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        border-radius: 16px;
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+      }
+
+      .zoo-card h4 {
+        margin: 0;
+        font-size: 1.05rem;
+      }
+
+      .zoo-card .meta {
+        font-size: 0.85rem;
+        color: var(--slate-500);
+      }
+
+      details summary {
+        cursor: pointer;
+        font-weight: 600;
+      }
+
+      .empty-state {
+        background: rgba(255, 255, 255, 0.75);
+        border: 1px dashed rgba(148, 163, 184, 0.6);
+        border-radius: 14px;
+        padding: 1.25rem;
+        font-size: 0.95rem;
+        color: var(--slate-700);
+      }
+
+      .conversation-library {
+        display: grid;
+        gap: 1rem;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      }
+
+      .conversation-card {
+        background: rgba(255, 255, 255, 0.85);
+        border-radius: 16px;
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .conversation-card h4 {
+        margin: 0;
+        font-size: 1.05rem;
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.35rem 0.7rem;
+        border-radius: 999px;
+        background: rgba(234, 179, 8, 0.18);
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: rgba(15, 23, 42, 0.85);
+      }
+
+      footer {
+        padding: 2.5rem min(5vw, 3rem) 3rem;
+        text-align: center;
+        color: var(--slate-500);
+        font-size: 0.9rem;
+      }
+
+      @media (max-width: 640px) {
+        header.hero {
+          padding: 2.5rem 1.5rem 3rem;
+        }
+
+        main {
+          top: -2.5rem;
+          padding: 0 1.5rem 3rem;
+        }
+
+        .chat-toolbar {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .chat-toolbar select,
+        .chat-toolbar input[type="number"] {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="hero">
+      <nav class="primary-nav" aria-label="Main sections">
+        <a href="#" aria-disabled="true">Allergyfinder</a>
+        <a href="#" aria-disabled="true">STLViewer</a>
+        <a href="#" aria-disabled="true">Pokedex</a>
+        <a href="#object-maker" class="current">Object Maker</a>
+      </nav>
+      <h1 id="object-maker">Object Maker</h1>
+      <p class="lead">
+        Craft bespoke JSON schemas by hand or co-design them with an LLM, then forge structured objects using the
+        <code>/obj</code> worker route. Every experiment is saved—schemas, chats, and the creations they inspired—so your lab
+        grows into a vibrant zoo of imaginative artifacts.
+      </p>
+      <div class="hero-meta">
+        <span class="pill">Yellow Lab Edition</span>
+        <span>Design manually or collaborate with the <code>/chat</code> endpoint.</span>
+        <span>Curate your personal Object Zoo with every generation.</span>
+      </div>
+    </header>
+
+    <main>
+      <section class="panel" aria-labelledby="environment-heading">
+        <h2 id="environment-heading">Environment</h2>
+        <p class="helper-text">
+          Choose the worker base URL before chatting or generating objects. Local development and deployed worker addresses are
+          preconfigured.
+        </p>
+        <div class="form-grid">
+          <label>
+            Base URL
+            <select id="base-select">
+              <option value="http://127.0.0.1:8787">Local (http://127.0.0.1:8787)</option>
+              <option value="https://groq-endpoint.louispaulet13.workers.dev">
+                Deployed (groq-endpoint.louispaulet13.workers.dev)
+              </option>
+              <option value="custom">Custom...</option>
+            </select>
+          </label>
+          <label id="custom-base-wrapper" style="display:none;">
+            Custom base URL
+            <input type="url" id="custom-base" placeholder="https://example.com" autocomplete="url" />
+          </label>
+        </div>
+      </section>
+
+      <section class="designer-grid" aria-labelledby="designer-heading">
+        <article class="panel" id="manual-designer">
+          <h2 id="designer-heading">Manual JSON Designer</h2>
+          <p class="helper-text">
+            Edit the schema directly. Use the <strong>Validate schema</strong> button to confirm that it parses before invoking
+            <code>/obj</code>. Every object definition must set <code>"additionalProperties": false</code>; the validator will
+            automatically add it anywhere it is missing.
+          </p>
+          <textarea id="schema-textarea" spellcheck="false"></textarea>
+          <div class="chat-toolbar">
+            <button type="button" id="validate-schema">Validate schema</button>
+            <span id="schema-status" class="status" role="status"></span>
+          </div>
+        </article>
+
+        <article class="panel" id="llm-codesigner">
+          <div class="header-row" style="display:flex;justify-content:space-between;align-items:center;gap:1rem;">
+            <h2 style="margin:0;">Schema Co-Designer</h2>
+            <button type="button" id="new-conversation">New conversation</button>
+          </div>
+          <p class="helper-text">
+            Collaborate with the <code>/chat</code> endpoint to brainstorm schema ideas. The assistant follows a schema-focused
+            system prompt. When it returns JSON, capture it into the manual editor. Any schemas pulled from chat will be
+            normalized so that object definitions disallow additional properties.
+          </p>
+          <div class="chat-toolbar" aria-live="polite">
+            <label>
+              Model
+              <select id="chat-model">
+                <option value="llama-3.3-70b-versatile">llama-3.3-70b-versatile</option>
+                <option value="llama-3.1-8b-instant">llama-3.1-8b-instant</option>
+                <option value="mixtral-8x7b-32768">mixtral-8x7b-32768</option>
+              </select>
+            </label>
+            <label>
+              Temperature
+              <input type="number" id="chat-temperature" min="0" max="2" step="0.1" value="0.3" />
+            </label>
+            <span class="pill" id="conversation-title">Schema Brainstorm</span>
+          </div>
+          <div id="chat-log" class="chat-log" aria-live="polite"></div>
+          <form class="chat-form" id="chat-form">
+            <label for="chat-input" class="visually-hidden">Message</label>
+            <textarea id="chat-input" placeholder="Ask the assistant for a schema idea..." spellcheck="true"></textarea>
+            <div style="display:flex;gap:0.75rem;flex-wrap:wrap;align-items:center;">
+              <button type="submit">Send to /chat</button>
+              <button type="button" id="apply-schema" disabled>Use assistant schema</button>
+            </div>
+          </form>
+          <p id="chat-status" class="status" role="status"></p>
+        </article>
+      </section>
+
+      <section class="panel" aria-labelledby="generator-heading">
+        <h2 id="generator-heading">Generate an Object</h2>
+        <p class="helper-text">
+          Configure prompts and structured output options, then send everything to <code>/obj/{objectName}</code>. The resulting
+          JSON is saved to your Object Zoo together with the schema and chat conversation that inspired it.
+        </p>
+        <form id="object-form">
+          <div class="form-grid">
+            <label>
+              Object name
+              <input type="text" id="object-name" placeholder="e.g. HotSauce" value="HotSauce" required />
+            </label>
+            <label>
+              Structured model
+              <select id="object-model">
+                <option value="openai/gpt-oss-120b">openai/gpt-oss-120b</option>
+                <option value="openai/gpt-oss-20b">openai/gpt-oss-20b</option>
+              </select>
+            </label>
+            <label>
+              Strict mode
+              <select id="object-strict">
+                <option value="true">Strict (recommended)</option>
+                <option value="false">Allow non-strict</option>
+                <option value="omit">Omit</option>
+              </select>
+            </label>
+            <label>
+              Temperature
+              <input type="number" id="object-temperature" min="0" max="2" step="0.1" value="0.2" />
+            </label>
+          </div>
+          <label>
+            System prompt
+            <textarea id="object-system" spellcheck="true"></textarea>
+          </label>
+          <label>
+            User prompt
+            <textarea id="object-user" spellcheck="true"></textarea>
+          </label>
+          <div style="margin-top:1rem;display:flex;gap:0.75rem;flex-wrap:wrap;align-items:center;">
+            <button type="submit">Forge object via /obj</button>
+            <button type="button" id="clear-history">Clear saved history</button>
+          </div>
+        </form>
+        <p id="object-status" class="status" role="status"></p>
+        <details style="margin-top:1.25rem;">
+          <summary>Latest response</summary>
+          <pre id="object-response">(no response yet)</pre>
+        </details>
+      </section>
+
+      <section class="panel" aria-labelledby="zoo-heading">
+        <h2 id="zoo-heading">Object Zoo</h2>
+        <p class="helper-text">
+          Every generated object is catalogued below. Explore creations grouped by their object name, inspect their JSON, and
+          revisit the conversation that led to each schema.
+        </p>
+        <div id="zoo-groups" class="zoo-groups"></div>
+      </section>
+
+      <section class="panel" aria-labelledby="library-heading">
+        <h2 id="library-heading">Conversation Library</h2>
+        <p class="helper-text">
+          Saved conversations capture the iterative schema design process. Reload any exchange to continue collaborating with
+          the assistant from where you left off.
+        </p>
+        <div id="conversation-library" class="conversation-library"></div>
+      </section>
+    </main>
+
+    <footer>
+      Built for schema adventurers. Your data lives in this browser via <code>localStorage</code>.
+    </footer>
+
+    <script>
+      (() => {
+        const STORAGE_KEY = 'object-maker-records-v1';
+        const DEFAULT_SCHEMA = {
+          type: 'object',
+          properties: {
+            title: { type: 'string' },
+            rating: { type: 'number' },
+            summary: { type: 'string' }
+          },
+          required: ['title', 'rating', 'summary'],
+          additionalProperties: false
+        };
+        const DEFAULT_SYSTEM_PROMPT = 'You turn structured JSON schemas into precise answers.';
+        const DEFAULT_USER_PROMPT = `Create a short summary for the provided product name and rating.\n\nIt is a hot sauce. Please make sure the rating is never below 2.\n\nBe original, or traditional, the idea is to create a plausible hot sauce.\nThe title has to be original too, and the embodiement of the ingredients.\n\nOur brand name is : Fire-in-the-Hole.`;
+        const DEFAULT_CHAT_SYSTEM = 'You are a meticulous JSON schema designer. Always explain your reasoning briefly and include machine-readable JSON schemas inside ```json``` blocks when proposing a schema.';
+
+        const baseSelect = document.getElementById('base-select');
+        const customBaseWrapper = document.getElementById('custom-base-wrapper');
+        const customBaseInput = document.getElementById('custom-base');
+        const schemaTextarea = document.getElementById('schema-textarea');
+        const validateSchemaButton = document.getElementById('validate-schema');
+        const schemaStatus = document.getElementById('schema-status');
+        const chatLog = document.getElementById('chat-log');
+        const chatForm = document.getElementById('chat-form');
+        const chatInput = document.getElementById('chat-input');
+        const chatStatus = document.getElementById('chat-status');
+        const chatModelSelect = document.getElementById('chat-model');
+        const chatTemperatureInput = document.getElementById('chat-temperature');
+        const applySchemaButton = document.getElementById('apply-schema');
+        const newConversationButton = document.getElementById('new-conversation');
+        const conversationTitle = document.getElementById('conversation-title');
+        const objectForm = document.getElementById('object-form');
+        const objectNameInput = document.getElementById('object-name');
+        const objectModelSelect = document.getElementById('object-model');
+        const objectStrictSelect = document.getElementById('object-strict');
+        const objectTemperatureInput = document.getElementById('object-temperature');
+        const objectSystemTextarea = document.getElementById('object-system');
+        const objectUserTextarea = document.getElementById('object-user');
+        const objectStatus = document.getElementById('object-status');
+        const objectResponsePre = document.getElementById('object-response');
+        const zooGroups = document.getElementById('zoo-groups');
+        const conversationLibrary = document.getElementById('conversation-library');
+        const clearHistoryButton = document.getElementById('clear-history');
+
+        const state = {
+          history: loadHistory(),
+          currentConversation: null,
+          latestSchemaCandidate: null
+        };
+
+        schemaTextarea.value = JSON.stringify(DEFAULT_SCHEMA, null, 2);
+        objectSystemTextarea.value = DEFAULT_SYSTEM_PROMPT;
+        objectUserTextarea.value = DEFAULT_USER_PROMPT;
+
+        baseSelect.addEventListener('change', () => {
+          customBaseWrapper.style.display = baseSelect.value === 'custom' ? 'block' : 'none';
+        });
+
+        function getBaseUrl() {
+          if (baseSelect.value === 'custom') {
+            return (customBaseInput.value || '').trim().replace(/\/$/, '');
+          }
+          return baseSelect.value.replace(/\/$/, '');
+        }
+
+        function loadHistory() {
+          try {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (!raw) {
+              return { conversations: [], objects: [] };
+            }
+            const parsed = JSON.parse(raw);
+            return {
+              conversations: Array.isArray(parsed.conversations) ? parsed.conversations : [],
+              objects: Array.isArray(parsed.objects) ? parsed.objects : []
+            };
+          } catch (error) {
+            console.warn('Failed to parse stored history:', error);
+            return { conversations: [], objects: [] };
+          }
+        }
+
+        function persistHistory() {
+          try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state.history));
+          } catch (error) {
+            console.warn('Failed to persist history:', error);
+          }
+        }
+
+        function createId(prefix) {
+          return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+        }
+
+        function formatDateTime(isoString) {
+          try {
+            const date = new Date(isoString);
+            return date.toLocaleString();
+          } catch (error) {
+            return isoString;
+          }
+        }
+
+        function normalizeSchema(schema) {
+          if (!schema || typeof schema !== 'object') {
+            return { schema, changed: false };
+          }
+
+          let changed = false;
+          const clone = JSON.parse(JSON.stringify(schema));
+
+          const visit = (node) => {
+            if (!node || typeof node !== 'object') {
+              return;
+            }
+
+            if (node.type === 'object') {
+              if (node.additionalProperties !== false) {
+                node.additionalProperties = false;
+                changed = true;
+              }
+              if (node.properties && typeof node.properties === 'object') {
+                for (const value of Object.values(node.properties)) {
+                  visit(value);
+                }
+              }
+              if (node.patternProperties && typeof node.patternProperties === 'object') {
+                for (const value of Object.values(node.patternProperties)) {
+                  visit(value);
+                }
+              }
+              if (node.dependencies && typeof node.dependencies === 'object') {
+                for (const value of Object.values(node.dependencies)) {
+                  if (value && typeof value === 'object') {
+                    visit(value);
+                  }
+                }
+              }
+            }
+
+            if (node.items) {
+              if (Array.isArray(node.items)) {
+                node.items.forEach(visit);
+              } else {
+                visit(node.items);
+              }
+            }
+
+            for (const key of ['allOf', 'anyOf', 'oneOf']) {
+              if (Array.isArray(node[key])) {
+                node[key].forEach(visit);
+              }
+            }
+
+            for (const key of ['not', 'if', 'then', 'else']) {
+              if (node[key] && typeof node[key] === 'object') {
+                visit(node[key]);
+              }
+            }
+
+            for (const defsKey of ['definitions', '$defs']) {
+              if (node[defsKey] && typeof node[defsKey] === 'object') {
+                for (const value of Object.values(node[defsKey])) {
+                  visit(value);
+                }
+              }
+            }
+          };
+
+          visit(clone);
+          return { schema: clone, changed };
+        }
+
+        function startConversation() {
+          state.currentConversation = {
+            id: createId('conv'),
+            startedAt: new Date().toISOString(),
+            title: 'Schema Brainstorm',
+            messages: [
+              { role: 'system', content: DEFAULT_CHAT_SYSTEM }
+            ]
+          };
+          upsertConversation();
+          state.latestSchemaCandidate = null;
+          applySchemaButton.disabled = true;
+          renderConversation();
+        }
+
+        function upsertConversation() {
+          if (!state.currentConversation) return;
+          const copy = JSON.parse(JSON.stringify(state.currentConversation));
+          const index = state.history.conversations.findIndex((conversation) => conversation.id === copy.id);
+          if (index >= 0) {
+            state.history.conversations[index] = copy;
+          } else {
+            state.history.conversations.push(copy);
+          }
+          persistHistory();
+          renderConversationLibrary();
+        }
+
+        function renderConversation() {
+          chatLog.innerHTML = '';
+          if (!state.currentConversation) {
+            conversationTitle.textContent = 'Schema Brainstorm';
+            return;
+          }
+
+          const messagesToShow = state.currentConversation.messages.filter((message) => message.role !== 'system');
+          if (messagesToShow.length === 0) {
+            const empty = document.createElement('div');
+            empty.className = 'empty-state';
+            empty.textContent = 'No messages yet. Ask the assistant for schema inspiration.';
+            chatLog.appendChild(empty);
+          } else {
+            for (const message of messagesToShow) {
+              const item = document.createElement('div');
+              item.className = `chat-message ${message.role}`;
+              const role = document.createElement('div');
+              role.className = 'role';
+              role.textContent = message.role;
+              const content = document.createElement('div');
+              content.className = 'content';
+              const maybeCode = extractCodeBlock(message.content);
+              if (maybeCode) {
+                const pre = document.createElement('pre');
+                pre.textContent = maybeCode;
+                content.appendChild(pre);
+              } else {
+                content.textContent = message.content;
+              }
+              item.appendChild(role);
+              item.appendChild(content);
+              chatLog.appendChild(item);
+            }
+          }
+
+          const firstUser = state.currentConversation.messages.find((message) => message.role === 'user');
+          conversationTitle.textContent = firstUser
+            ? `${firstUser.content.slice(0, 48)}${firstUser.content.length > 48 ? '…' : ''}`
+            : 'Schema Brainstorm';
+          upsertConversation();
+        }
+
+        function extractCodeBlock(text) {
+          const blockMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
+          if (blockMatch) {
+            return blockMatch[1].trim();
+          }
+          return null;
+        }
+
+        function extractJson(text) {
+          const code = extractCodeBlock(text);
+          const candidates = [];
+          if (code) {
+            candidates.push(code);
+          }
+          candidates.push(text);
+          for (const candidate of candidates) {
+            try {
+              const parsed = JSON.parse(candidate);
+              if (typeof parsed === 'object' && parsed) {
+                return parsed;
+              }
+            } catch (error) {
+              continue;
+            }
+          }
+          return null;
+        }
+
+        function renderZoo() {
+          zooGroups.innerHTML = '';
+          if (!state.history.objects.length) {
+            const empty = document.createElement('div');
+            empty.className = 'empty-state';
+            empty.textContent = 'Generate an object to populate the zoo. Your creations will appear here grouped by object name.';
+            zooGroups.appendChild(empty);
+            return;
+          }
+
+          const grouped = new Map();
+          for (const record of state.history.objects) {
+            const list = grouped.get(record.objectName) || [];
+            list.push(record);
+            grouped.set(record.objectName, list);
+          }
+
+          for (const [objectName, records] of grouped.entries()) {
+            records.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+            const group = document.createElement('section');
+            group.className = 'zoo-group';
+            const heading = document.createElement('h3');
+            heading.innerHTML = `${objectName} <span class="pill">${records.length} saved</span>`;
+            group.appendChild(heading);
+
+            const cards = document.createElement('div');
+            cards.className = 'zoo-cards';
+
+            for (const record of records) {
+              const card = document.createElement('article');
+              card.className = 'zoo-card';
+              const title = document.createElement('h4');
+              title.textContent = deriveDisplayTitle(record);
+              const meta = document.createElement('div');
+              meta.className = 'meta';
+              meta.textContent = `Saved ${formatDateTime(record.createdAt)}`;
+              card.appendChild(title);
+              card.appendChild(meta);
+
+              const schemaDetails = document.createElement('details');
+              const schemaSummary = document.createElement('summary');
+              schemaSummary.textContent = 'Schema';
+              const schemaPre = document.createElement('pre');
+              schemaPre.textContent = JSON.stringify(record.schema, null, 2);
+              schemaDetails.appendChild(schemaSummary);
+              schemaDetails.appendChild(schemaPre);
+
+              const responseDetails = document.createElement('details');
+              const responseSummary = document.createElement('summary');
+              responseSummary.textContent = 'Object JSON';
+              const responsePre = document.createElement('pre');
+              responsePre.textContent = JSON.stringify(record.response, null, 2);
+              responseDetails.appendChild(responseSummary);
+              responseDetails.appendChild(responsePre);
+
+              const promptDetails = document.createElement('details');
+              const promptSummary = document.createElement('summary');
+              promptSummary.textContent = 'Prompts';
+              const promptContent = document.createElement('div');
+              const systemPara = document.createElement('p');
+              systemPara.innerHTML = `<strong>System:</strong> ${escapeHtml(record.systemPrompt)}`;
+              const userPara = document.createElement('p');
+              userPara.innerHTML = `<strong>User:</strong> ${escapeHtml(record.userPrompt)}`;
+              promptContent.appendChild(systemPara);
+              promptContent.appendChild(userPara);
+              promptDetails.appendChild(promptSummary);
+              promptDetails.appendChild(promptContent);
+
+              card.appendChild(schemaDetails);
+              card.appendChild(responseDetails);
+              card.appendChild(promptDetails);
+
+              if (record.conversationId) {
+                const conversation = state.history.conversations.find((entry) => entry.id === record.conversationId);
+                if (conversation) {
+                  const convoDetails = document.createElement('details');
+                  const convoSummary = document.createElement('summary');
+                  convoSummary.textContent = 'Conversation';
+                  const convoWrapper = document.createElement('div');
+                  convoWrapper.style.display = 'flex';
+                  convoWrapper.style.flexDirection = 'column';
+                  convoWrapper.style.gap = '0.5rem';
+                  for (const message of conversation.messages.filter((message) => message.role !== 'system')) {
+                    const bubble = document.createElement('div');
+                    bubble.style.borderLeft = message.role === 'assistant' ? '4px solid var(--yellow-300)' : '4px solid rgba(148,163,184,0.6)';
+                    bubble.style.paddingLeft = '0.75rem';
+                    bubble.innerHTML = `<strong>${message.role}:</strong> ${escapeHtml(message.content)}`;
+                    convoWrapper.appendChild(bubble);
+                  }
+                  convoDetails.appendChild(convoSummary);
+                  convoDetails.appendChild(convoWrapper);
+                  card.appendChild(convoDetails);
+                }
+              }
+
+              cards.appendChild(card);
+            }
+
+            group.appendChild(cards);
+            zooGroups.appendChild(group);
+          }
+        }
+
+        function deriveDisplayTitle(record) {
+          if (record.response && typeof record.response === 'object') {
+            for (const key of ['title', 'name', 'label']) {
+              if (record.response[key]) {
+                return String(record.response[key]);
+              }
+            }
+          }
+          return `${record.objectName} object`;
+        }
+
+        function escapeHtml(input) {
+          return String(input)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+        }
+
+        function renderConversationLibrary() {
+          conversationLibrary.innerHTML = '';
+          if (!state.history.conversations.length) {
+            const empty = document.createElement('div');
+            empty.className = 'empty-state';
+            empty.textContent = 'Conversations appear here once you collaborate with the assistant.';
+            conversationLibrary.appendChild(empty);
+            return;
+          }
+
+          const sorted = [...state.history.conversations].sort((a, b) => (a.startedAt < b.startedAt ? 1 : -1));
+          for (const conversation of sorted) {
+            const card = document.createElement('article');
+            card.className = 'conversation-card';
+            const title = document.createElement('h4');
+            const firstUser = conversation.messages.find((message) => message.role === 'user');
+            title.textContent = firstUser
+              ? `${firstUser.content.slice(0, 48)}${firstUser.content.length > 48 ? '…' : ''}`
+              : 'Schema Brainstorm';
+            const meta = document.createElement('div');
+            meta.className = 'meta';
+            meta.textContent = `Started ${formatDateTime(conversation.startedAt)}`;
+            const resumeButton = document.createElement('button');
+            resumeButton.type = 'button';
+            resumeButton.textContent = 'Resume conversation';
+            resumeButton.addEventListener('click', () => {
+              state.currentConversation = JSON.parse(JSON.stringify(conversation));
+              renderConversation();
+              chatStatus.textContent = 'Conversation loaded. Continue chatting to iterate on the schema.';
+              state.latestSchemaCandidate = null;
+              applySchemaButton.disabled = true;
+            });
+
+            card.appendChild(title);
+            card.appendChild(meta);
+            card.appendChild(resumeButton);
+            conversationLibrary.appendChild(card);
+          }
+        }
+
+        validateSchemaButton.addEventListener('click', () => {
+          try {
+            const parsed = JSON.parse(schemaTextarea.value);
+            if (!parsed || typeof parsed !== 'object') {
+              schemaStatus.textContent = 'Schema must be a JSON object.';
+              schemaStatus.style.color = '#b91c1c';
+              return;
+            }
+            const { schema: normalized, changed } = normalizeSchema(parsed);
+            schemaTextarea.value = JSON.stringify(normalized, null, 2);
+            schemaStatus.textContent = changed
+              ? 'Schema parsed successfully. Added "additionalProperties": false to every object definition.'
+              : 'Schema parsed successfully.';
+            schemaStatus.style.color = '#15803d';
+          } catch (error) {
+            schemaStatus.textContent = `Invalid JSON: ${error.message}`;
+            schemaStatus.style.color = '#b91c1c';
+          }
+        });
+
+        chatForm.addEventListener('submit', async (event) => {
+          event.preventDefault();
+          const baseUrl = getBaseUrl();
+          if (!baseUrl) {
+            chatStatus.textContent = 'Please configure a worker base URL first.';
+            chatStatus.style.color = '#b91c1c';
+            return;
+          }
+
+          const userMessage = chatInput.value.trim();
+          if (!userMessage) {
+            chatStatus.textContent = 'Type a prompt before sending.';
+            chatStatus.style.color = '#b91c1c';
+            return;
+          }
+
+          if (!state.currentConversation) {
+            startConversation();
+          }
+
+          state.currentConversation.messages.push({ role: 'user', content: userMessage });
+          chatInput.value = '';
+          chatStatus.textContent = 'Calling /chat...';
+          chatStatus.style.color = varColor('--slate-700');
+          renderConversation();
+
+          try {
+            const payload = {
+              messages: state.currentConversation.messages,
+              model: chatModelSelect.value,
+              temperature: parseFloat(chatTemperatureInput.value) || 0
+            };
+
+            const response = await fetch(`${baseUrl}/chat`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            });
+
+            const contentType = response.headers.get('content-type') || '';
+            let body;
+            if (contentType.includes('application/json')) {
+              body = await response.json();
+            } else {
+              body = await response.text();
+            }
+
+            if (!response.ok) {
+              chatStatus.textContent = `Chat request failed: ${response.status}`;
+              chatStatus.style.color = '#b91c1c';
+              state.currentConversation.messages.push({
+                role: 'assistant',
+                content: typeof body === 'string' ? body : JSON.stringify(body)
+              });
+              renderConversation();
+              return;
+            }
+
+            const assistantMessage =
+              typeof body === 'object'
+                ? body?.choices?.[0]?.message?.content ?? ''
+                : String(body);
+
+            if (!assistantMessage) {
+              chatStatus.textContent = 'No assistant message returned.';
+              chatStatus.style.color = '#b91c1c';
+              return;
+            }
+
+            state.currentConversation.messages.push({ role: 'assistant', content: assistantMessage });
+            renderConversation();
+
+            const parsed = extractJson(assistantMessage);
+            if (parsed) {
+              const { schema: normalizedSchema, changed } = normalizeSchema(parsed);
+              state.latestSchemaCandidate = normalizedSchema;
+              applySchemaButton.disabled = false;
+              chatStatus.textContent = changed
+                ? 'Assistant returned JSON. Normalized object definitions to add "additionalProperties": false. Use "Use assistant schema" to copy it into the editor.'
+                : 'Assistant returned JSON. Use "Use assistant schema" to copy it into the editor.';
+              chatStatus.style.color = '#15803d';
+            } else {
+              state.latestSchemaCandidate = null;
+              applySchemaButton.disabled = true;
+              chatStatus.textContent = 'Assistant responded. Ask for a JSON schema or request revisions.';
+              chatStatus.style.color = varColor('--slate-700');
+            }
+          } catch (error) {
+            chatStatus.textContent = `Failed to reach /chat: ${error.message}`;
+            chatStatus.style.color = '#b91c1c';
+          }
+        });
+
+        applySchemaButton.addEventListener('click', () => {
+          if (!state.latestSchemaCandidate) {
+            chatStatus.textContent = 'No JSON schema detected. Ask the assistant to include one inside ```json```.';
+            chatStatus.style.color = '#b91c1c';
+            return;
+          }
+          schemaTextarea.value = JSON.stringify(state.latestSchemaCandidate, null, 2);
+          schemaStatus.textContent = 'Assistant schema copied to the manual editor.';
+          schemaStatus.style.color = '#15803d';
+        });
+
+        newConversationButton.addEventListener('click', () => {
+          startConversation();
+          chatStatus.textContent = 'Started a fresh schema conversation.';
+          chatStatus.style.color = varColor('--slate-700');
+        });
+
+        clearHistoryButton.addEventListener('click', () => {
+          if (!confirm('Clear all saved objects and conversations?')) {
+            return;
+          }
+          state.history = { conversations: [], objects: [] };
+          state.currentConversation = null;
+          state.latestSchemaCandidate = null;
+          persistHistory();
+          renderConversation();
+          renderZoo();
+          renderConversationLibrary();
+          chatStatus.textContent = 'History cleared.';
+          chatStatus.style.color = varColor('--slate-700');
+        });
+
+        objectForm.addEventListener('submit', async (event) => {
+          event.preventDefault();
+          const baseUrl = getBaseUrl();
+          if (!baseUrl) {
+            objectStatus.textContent = 'Please configure a worker base URL first.';
+            objectStatus.style.color = '#b91c1c';
+            return;
+          }
+
+          let schema;
+          let schemaNormalized = false;
+          try {
+            schema = JSON.parse(schemaTextarea.value);
+          } catch (error) {
+            objectStatus.textContent = `Schema is not valid JSON: ${error.message}`;
+            objectStatus.style.color = '#b91c1c';
+            return;
+          }
+
+          const normalizationResult = normalizeSchema(schema);
+          schema = normalizationResult.schema;
+          schemaNormalized = normalizationResult.changed;
+          if (schemaNormalized) {
+            schemaTextarea.value = JSON.stringify(schema, null, 2);
+            schemaStatus.textContent = 'Schema updated to disallow additional properties on every object definition.';
+            schemaStatus.style.color = '#15803d';
+          }
+
+          const objectName = objectNameInput.value.trim();
+          if (!objectName) {
+            objectStatus.textContent = 'Object name is required.';
+            objectStatus.style.color = '#b91c1c';
+            return;
+          }
+
+          const systemPrompt = objectSystemTextarea.value.trim();
+          const userPrompt = objectUserTextarea.value.trim();
+          if (!systemPrompt || !userPrompt) {
+            objectStatus.textContent = 'Provide both system and user prompts.';
+            objectStatus.style.color = '#b91c1c';
+            return;
+          }
+
+          const payload = {
+            schema,
+            system: systemPrompt,
+            user: userPrompt,
+            model: objectModelSelect.value,
+            temperature: parseFloat(objectTemperatureInput.value) || 0
+          };
+
+          if (objectStrictSelect.value === 'true') {
+            payload.strict = true;
+          } else if (objectStrictSelect.value === 'false') {
+            payload.strict = false;
+          }
+
+          const normalizationSuffix = schemaNormalized
+            ? ' (schema normalized to add "additionalProperties": false)'
+            : '';
+          objectStatus.textContent = `Calling ${baseUrl}/obj/${encodeURIComponent(objectName)}...${normalizationSuffix}`;
+          objectStatus.style.color = varColor('--slate-700');
+
+          try {
+            const response = await fetch(`${baseUrl}/obj/${encodeURIComponent(objectName)}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            });
+
+            const text = await response.text();
+            let parsed;
+            try {
+              parsed = JSON.parse(text);
+              objectResponsePre.textContent = JSON.stringify(parsed, null, 2);
+            } catch (error) {
+              parsed = text;
+              objectResponsePre.textContent = text;
+            }
+
+            if (!response.ok) {
+              objectStatus.textContent = `Object generation failed: ${response.status}`;
+              objectStatus.style.color = '#b91c1c';
+              return;
+            }
+
+            const record = {
+              id: createId('object'),
+              objectName,
+              schema,
+              systemPrompt,
+              userPrompt,
+              response: parsed,
+              createdAt: new Date().toISOString(),
+              conversationId: state.currentConversation ? state.currentConversation.id : null
+            };
+            state.history.objects.unshift(record);
+            persistHistory();
+            renderZoo();
+            objectStatus.textContent = 'Object generated and saved to the zoo.';
+            objectStatus.style.color = '#15803d';
+          } catch (error) {
+            objectStatus.textContent = `Failed to reach /obj: ${error.message}`;
+            objectStatus.style.color = '#b91c1c';
+          }
+        });
+
+        function varColor(variableName) {
+          const value = getComputedStyle(document.documentElement).getPropertyValue(variableName);
+          return (value && value.trim()) || '#334155';
+        }
+
+        // Initialize view
+        renderZoo();
+        renderConversationLibrary();
+        startConversation();
+      })();
+    </script>
+  </body>
+</html>

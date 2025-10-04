@@ -10,6 +10,9 @@ import { experiences } from './config/experiences'
 import AllergyCookieEditor from './components/allergyfinder/AllergyCookieEditor'
 import AllergyFinderNav from './components/allergyfinder/AllergyFinderNav'
 import ProfilePage from './pages/ProfilePage'
+import ObjectMakerNav from './components/objectmaker/ObjectMakerNav'
+import ObjectMakerBuilder from './pages/ObjectMakerBuilder'
+import ObjectMakerZoo from './pages/ObjectMakerZoo'
 
 export default function App() {
   return (
@@ -34,6 +37,25 @@ export default function App() {
                     element={(
                       <ExperiencePage experience={experience} navigation={<AllergyFinderNav />}>
                         <AllergyCookieEditor />
+                      </ExperiencePage>
+                    )}
+                  />
+                </Fragment>
+              ) : experience.id === 'objectmaker' ? (
+                <Fragment key={experience.id}>
+                  <Route
+                    path={experience.path}
+                    element={(
+                      <ExperiencePage experience={experience} navigation={<ObjectMakerNav />}>
+                        <ObjectMakerBuilder />
+                      </ExperiencePage>
+                    )}
+                  />
+                  <Route
+                    path={`${experience.path}/zoo`}
+                    element={(
+                      <ExperiencePage experience={experience} navigation={<ObjectMakerNav />}>
+                        <ObjectMakerZoo />
                       </ExperiencePage>
                     )}
                   />
