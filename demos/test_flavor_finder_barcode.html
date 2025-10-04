@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Flavor Finder Barcode Demo</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+      }
+
+      body {
+        font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        margin: 2.5rem auto;
+        max-width: 720px;
+        padding: 0 1.5rem;
+        line-height: 1.6;
+        color: #0f172a;
+      }
+
+      h1,
+      h2 {
+        color: #0f172a;
+      }
+
+      p {
+        margin-top: 0.75rem;
+        margin-bottom: 1.25rem;
+      }
+
+      label {
+        display: block;
+        font-weight: 600;
+        margin-top: 1.5rem;
+      }
+
+      input,
+      select {
+        width: 100%;
+        padding: 0.65rem 0.75rem;
+        border: 1px solid #cbd5f5;
+        border-radius: 8px;
+        font-size: 1rem;
+      }
+
+      button {
+        margin-top: 1.5rem;
+        padding: 0.75rem 1.4rem;
+        border: none;
+        border-radius: 8px;
+        background: linear-gradient(135deg, #2563eb, #7c3aed);
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 8px 18px rgba(37, 99, 235, 0.25);
+      }
+
+      button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        box-shadow: none;
+      }
+
+      .status {
+        margin-top: 1rem;
+        font-size: 0.95rem;
+        color: #334155;
+      }
+
+      .card {
+        margin-top: 1.5rem;
+        background: #f8fafc;
+        border: 1px solid #cbd5f5;
+        border-radius: 8px;
+        padding: 1rem 1.25rem;
+      }
+
+      .card h3 {
+        margin-top: 0;
+      }
+
+      pre {
+        margin: 0.75rem 0;
+        padding: 0.85rem 1rem;
+        border-radius: 6px;
+        background: #0f172a;
+        color: #e2e8f0;
+        overflow-x: auto;
+        font-size: 0.9rem;
+      }
+
+      dl {
+        display: grid;
+        grid-template-columns: 160px 1fr;
+        gap: 0.4rem 1rem;
+      }
+
+      dt {
+        font-weight: 600;
+        color: #0f172a;
+      }
+
+      dd {
+        margin: 0;
+        color: #334155;
+      }
+
+      .empty {
+        font-style: italic;
+        color: #64748b;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Flavor Finder – Barcode Resolver</h1>
+    <p>
+      Paste a barcode or Open Food Facts product ID to confirm the worker follows redirects and returns the
+      final product slug.
+    </p>
+
+    <label for="endpoint">Endpoint</label>
+    <select id="endpoint">
+      <option value="http://127.0.0.1:8787">Local (http://127.0.0.1:8787)</option>
+      <option value="https://groq-endpoint.louispaulet13.workers.dev">
+        Deployed (groq-endpoint.louispaulet13.workers.dev)
+      </option>
+      <option value="custom">Custom…</option>
+    </select>
+
+    <input type="text" id="customEndpoint" placeholder="https://example.com" style="display: none" />
+
+    <label for="productId">Product ID or barcode</label>
+    <input type="text" id="productId" placeholder="e.g. 3350033995093" />
+
+    <button id="runButton">Resolve product</button>
+
+    <div class="status" id="status">(waiting for input)</div>
+
+    <section class="card">
+      <h3>Request</h3>
+      <dl>
+        <dt>HTTP Method</dt>
+        <dd>GET</dd>
+        <dt>Request URL</dt>
+        <dd id="requestUrl" class="empty">(none yet)</dd>
+      </dl>
+    </section>
+
+    <section class="card">
+      <h3>Response Summary</h3>
+      <dl>
+        <dt>Status</dt>
+        <dd id="responseStatus" class="empty">(none yet)</dd>
+        <dt>Resolved URL</dt>
+        <dd id="resolvedUrl" class="empty">(none yet)</dd>
+        <dt>Resolved Slug</dt>
+        <dd id="resolvedSlug" class="empty">(none yet)</dd>
+        <dt>Products returned</dt>
+        <dd id="productCount" class="empty">(none yet)</dd>
+        <dt>Sources</dt>
+        <dd id="sources" class="empty">(none yet)</dd>
+      </dl>
+    </section>
+
+    <section class="card">
+      <h3>Response JSON</h3>
+      <pre id="responseJson">(no response yet)</pre>
+    </section>
+
+    <script>
+      const endpointSelect = document.getElementById('endpoint');
+      const customEndpointInput = document.getElementById('customEndpoint');
+      const productIdInput = document.getElementById('productId');
+      const runButton = document.getElementById('runButton');
+      const statusDiv = document.getElementById('status');
+      const requestUrlDd = document.getElementById('requestUrl');
+      const responseStatusDd = document.getElementById('responseStatus');
+      const resolvedUrlDd = document.getElementById('resolvedUrl');
+      const resolvedSlugDd = document.getElementById('resolvedSlug');
+      const productCountDd = document.getElementById('productCount');
+      const sourcesDd = document.getElementById('sources');
+      const responseJsonPre = document.getElementById('responseJson');
+
+      function resetSummary() {
+        responseStatusDd.textContent = '(none yet)';
+        responseStatusDd.classList.add('empty');
+        resolvedUrlDd.textContent = '(none yet)';
+        resolvedUrlDd.classList.add('empty');
+        resolvedSlugDd.textContent = '(none yet)';
+        resolvedSlugDd.classList.add('empty');
+        productCountDd.textContent = '(none yet)';
+        productCountDd.classList.add('empty');
+        sourcesDd.textContent = '(none yet)';
+        sourcesDd.classList.add('empty');
+        responseJsonPre.textContent = '(no response yet)';
+      }
+
+      function getBaseEndpoint() {
+        const value = endpointSelect.value;
+        if (value === 'custom') {
+          return customEndpointInput.value.trim().replace(/\/?$/, '');
+        }
+        return value;
+      }
+
+      endpointSelect.addEventListener('change', () => {
+        if (endpointSelect.value === 'custom') {
+          customEndpointInput.style.display = 'block';
+          customEndpointInput.focus();
+        } else {
+          customEndpointInput.style.display = 'none';
+        }
+      });
+
+      runButton.addEventListener('click', async () => {
+        const baseEndpoint = getBaseEndpoint();
+        const productId = productIdInput.value.trim();
+
+        resetSummary();
+
+        if (!baseEndpoint) {
+          statusDiv.textContent = 'Please provide a base endpoint URL.';
+          return;
+        }
+
+        if (!productId) {
+          statusDiv.textContent = 'Please enter a product ID to look up.';
+          return;
+        }
+
+        const url = `${baseEndpoint.replace(/\/$/, '')}/flavor-finder/${encodeURIComponent(productId)}`;
+        requestUrlDd.textContent = url;
+        requestUrlDd.classList.remove('empty');
+
+        runButton.disabled = true;
+        statusDiv.textContent = `Requesting ${url} …`;
+        responseJsonPre.textContent = '(waiting for response...)';
+
+        try {
+          const res = await fetch(url, { method: 'GET' });
+          const text = await res.text();
+          responseStatusDd.textContent = String(res.status);
+          responseStatusDd.classList.remove('empty');
+
+          let parsed;
+          try {
+            parsed = JSON.parse(text);
+            responseJsonPre.textContent = JSON.stringify(parsed, null, 2);
+          } catch (error) {
+            responseJsonPre.textContent = text;
+          }
+
+          if (parsed && typeof parsed === 'object') {
+            const resolvedUrl = parsed.resolvedUrl || (parsed.products?.[0]?.source ?? '');
+            if (resolvedUrl) {
+              resolvedUrlDd.textContent = resolvedUrl;
+              resolvedUrlDd.classList.remove('empty');
+            }
+
+            const resolvedSlug = parsed.resolvedSlug || parsed.products?.[0]?.slug || '';
+            if (resolvedSlug) {
+              resolvedSlugDd.textContent = resolvedSlug;
+              resolvedSlugDd.classList.remove('empty');
+            }
+
+            const count = Array.isArray(parsed.products) ? parsed.products.length : 0;
+            productCountDd.textContent = String(count);
+            productCountDd.classList.remove('empty');
+
+            if (Array.isArray(parsed.sources) && parsed.sources.length > 0) {
+              sourcesDd.textContent = parsed.sources.join(', ');
+              sourcesDd.classList.remove('empty');
+            }
+          }
+
+          statusDiv.textContent = 'Request completed.';
+        } catch (error) {
+          statusDiv.textContent = 'Request failed.';
+          responseJsonPre.textContent = String(error);
+        } finally {
+          runButton.disabled = false;
+        }
+      });
+    </script>
+  </body>
+</html>
