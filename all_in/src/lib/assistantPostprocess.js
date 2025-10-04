@@ -1,4 +1,4 @@
-const OPEN_FOOD_FACTS_URL = 'https://world.openfoodfacts.org/product/'
+const OPEN_FOOD_FACTS_URL = 'https://fr.openfoodfacts.org/produit/'
 const CITATION_MARK_PATTERN = /【[^】]+】/g
 
 function buildOpenFoodFactsLink(code) {

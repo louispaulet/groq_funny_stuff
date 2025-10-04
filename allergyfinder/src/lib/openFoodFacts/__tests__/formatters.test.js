@@ -23,6 +23,7 @@ test('formats context with allergens, traces, and ingredients', () => {
   assert.ok(context.includes('Possible traces: gluten'))
   assert.ok(context.includes('Ingredient analysis tags: palm-oil:yes, vegan:no'))
   assert.ok(context.includes('Ingredients summary: Sugar, palm oil, hazelnuts, cocoa, skim milk, soy lecithin, vanillin'))
+  assert.ok(context.includes('OpenFoodFacts product page: https://fr.openfoodfacts.org/produit/3017620425035'))
   assert.ok(context.includes('Source: https://example.com/nutella'))
   assert.ok(context.includes('Reminder: verify allergen information'))
 })
@@ -52,5 +53,6 @@ test('truncates ingredients and builds fallback source link', () => {
 
   const expectedSnippet = `${'a'.repeat(600)}…`
   assert.ok(context.includes(expectedSnippet))
+  assert.ok(context.includes('OpenFoodFacts product page: https://fr.openfoodfacts.org/produit/999'))
   assert.ok(context.includes('Source: https://world.openfoodfacts.org/product/999'))
 })
