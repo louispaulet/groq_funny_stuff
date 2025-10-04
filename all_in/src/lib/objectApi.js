@@ -10,9 +10,50 @@ function getEnvValue(key) {
 
 const FALLBACK_BASE_URL = (getEnvValue('VITE_CHAT_BASE_URL') || 'https://groq-endpoint.louispaulet13.workers.dev').replace(/\/$/, '')
 
+function getStableUserId() {
+  const envUser = (
+    getEnvValue('VITE_OBJECTMAKER_USER') ||
+    getEnvValue('VITE_CHAT_USER') ||
+    getEnvValue('VITE_USER')
+  )
+  const s = (envUser || '').toString().trim()
+  if (s) return s
+  const key = 'allin_user_id'
+  try {
+    if (typeof localStorage !== 'undefined' && localStorage) {
+      let id = localStorage.getItem(key)
+      if (id && id.trim()) return id.trim()
+      id = `ui-${Math.random().toString(36).slice(2, 10)}`
+      localStorage.setItem(key, id)
+      return id
+    }
+  } catch (_) {
+    // ignore storage errors and fall back to ephemeral id
+  }
+  return `ui-${Math.random().toString(36).slice(2, 10)}`
+}
+
 function preview(text = '', length = 160) {
   const t = (text || '').toString().trim()
   return t.length <= length ? t : `${t.slice(0, length)}...`
+}
+
+function normalizeResponseSchema(schema) {
+  if (!schema || typeof schema !== 'object') return schema
+  try {
+    const s = JSON.parse(JSON.stringify(schema))
+    if (s.type === 'object') {
+      const props = s.properties && typeof s.properties === 'object' ? s.properties : {}
+      const keys = Object.keys(props)
+      if (!('additionalProperties' in s)) s.additionalProperties = false
+      const existingReq = Array.isArray(s.required) ? s.required.filter((k) => typeof k === 'string') : []
+      const requiredSet = new Set([...existingReq, ...keys])
+      s.required = Array.from(requiredSet)
+    }
+    return s
+  } catch {
+    return schema
+  }
 }
 
 function normalizeType(raw) {
@@ -61,7 +102,9 @@ export async function createRemoteObject({ baseUrl, structure, model, objectType
   const p = (prompt || '').toString()
   const defaultSystem = `You are an object maker. Produce a single JSON object that strictly conforms to the provided JSON Schema. Do not include commentary or markdown. Only return the JSON object.`
   const sys = (system || defaultSystem).toString()
-  const payloadBody = { schema: structure, system: sys }
+  const user = getStableUserId()
+  const schema = normalizeResponseSchema(structure)
+  const payloadBody = { schema, system: sys, user }
   if (p) payloadBody.prompt = p
   if (model) payloadBody.model = model
   const bodyCandidates = [payloadBody]

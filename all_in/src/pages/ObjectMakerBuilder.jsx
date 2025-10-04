@@ -9,6 +9,29 @@ import Settings from '../components/objectmaker/Settings'
 import Assist from '../components/objectmaker/Assist'
 import Editor from '../components/objectmaker/Editor'
 
+const DEFAULT_SYSTEM_PROMPT = 'You are an object maker. Produce a single JSON object that strictly conforms to the provided JSON Schema. Do not include commentary or markdown. Only return the JSON object.'
+
+const DEFAULT_STRUCTURE = {
+  type: 'object',
+  additionalProperties: false,
+  properties: {
+    name: { type: 'string' },
+    size: { type: 'string', enum: ['small', 'medium', 'large'] },
+    crust: { type: 'string' },
+    cheese: { type: 'string' },
+    toppings: {
+      type: 'array',
+      items: { type: 'string' },
+    },
+  },
+  required: ['name', 'size', 'crust', 'cheese', 'toppings'],
+}
+
+const DEFAULT_STRUCTURE_TEXT = JSON.stringify(DEFAULT_STRUCTURE, null, 2)
+const DEFAULT_OBJECT_PROMPT = 'make a delicious spicy pizza that respects this schema'
+const DEFAULT_OBJECT_TYPE = 'pizza'
+const DEFAULT_OBJECT_TITLE = 'diavola'
+
 // UI subcomponents moved to components/objectmaker/*
 
 export default function ObjectMakerBuilder() {
@@ -20,14 +43,14 @@ export default function ObjectMakerBuilder() {
   const [chatLoading, setChatLoading] = useState(false)
   const [chatMessages, setChatMessages] = useState([])
 
-  const [structureText, setStructureText] = useState('')
+  const [structureText, setStructureText] = useState(DEFAULT_STRUCTURE_TEXT)
   const [structureObj, setStructureObj] = useState(null)
   const [createLoading, setCreateLoading] = useState(false)
   const [resultObj, setResultObj] = useState(null)
-  const [objectType, setObjectType] = useState('')
-  const [objectTitle, setObjectTitle] = useState('')
-  const [createPrompt, setCreatePrompt] = useState('')
-  const [systemText, setSystemText] = useState('')
+  const [objectType, setObjectType] = useState(DEFAULT_OBJECT_TYPE)
+  const [objectTitle, setObjectTitle] = useState(DEFAULT_OBJECT_TITLE)
+  const [createPrompt, setCreatePrompt] = useState(DEFAULT_OBJECT_PROMPT)
+  const [systemText, setSystemText] = useState(DEFAULT_SYSTEM_PROMPT)
   const [error, setError] = useState('')
 
   function normalizeBaseUrl(raw) {

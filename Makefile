@@ -66,3 +66,19 @@ deploy:
 
 clean:
 	rm -rf $(VENV_DIR)
+
+# ---------------------------------------------
+# ObjectMaker cURL tests (for the /obj endpoint)
+# ---------------------------------------------
+
+OBJ_BASE_URL ?= https://groq-endpoint.louispaulet13.workers.dev
+OBJ_TYPE ?= pizza
+OBJ_TITLE ?= diavola
+OBJ_USER ?= cli-make-test
+SYSTEM_PROMPT ?= You are an object maker. Produce a single JSON object that strictly conforms to the provided JSON Schema. Do not include commentary or markdown. Only return the JSON object.
+
+.PHONY: objtest-pizza
+objtest-pizza:
+	@OBJ_BASE_URL="$(OBJ_BASE_URL)" OBJ_TYPE="$(OBJ_TYPE)" \
+	  OBJ_TITLE="$(OBJ_TITLE)" OBJ_USER="$(OBJ_USER)" SYSTEM_PROMPT="$(SYSTEM_PROMPT)" \
+	  scripts/objtest_pizza.sh
