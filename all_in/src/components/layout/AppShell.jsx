@@ -66,7 +66,7 @@ export default function AppShell({ children }) {
             </div>
             <div className="leading-tight">
               <div className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Groq</div>
-              <div className="text-lg font-semibold text-slate-900 dark:text-slate-100">AllIn Studio 🌐</div>
+              <div className="text-lg font-semibold text-slate-900 dark:text-slate-100">AllIn Studio</div>
             </div>
           </NavLink>
           <nav className="hidden items-center gap-2 md:flex">
@@ -100,7 +100,7 @@ export default function AppShell({ children }) {
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-2 px-4 text-center sm:flex-row sm:items-center sm:justify-between sm:text-left">
           <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 sm:justify-start">
             <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 sm:justify-start">
-              <span className="font-semibold text-slate-700 dark:text-slate-200">Groq AllIn Studio 💼</span>
+              <span className="font-semibold text-slate-700 dark:text-slate-200">Groq AllIn Studio</span>
               <span className="text-xs uppercase tracking-wide text-slate-400 dark:text-slate-500">Unified Workspace ⚙️</span>
             </div>
             <NavLink to="/" className={footerLinkClasses} end>Overview</NavLink>

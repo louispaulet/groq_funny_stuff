@@ -70,7 +70,7 @@ export default function HomePage() {
       <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-brand-600 to-indigo-700 px-8 py-12 text-white shadow-xl">
         <div className="max-w-3xl space-y-4">
           <p className="text-sm uppercase tracking-[0.3em] text-white/80">Groq Studio</p>
-          <h1 className="text-3xl font-semibold sm:text-4xl">All experiences in one workspace. 💼</h1>
+          <h1 className="text-3xl font-semibold sm:text-4xl">All experiences in one workspace.</h1>
           <p className="text-base text-white/90">
             Explore specialized assistants for nutrition, 3D printing, and Pokémon knowledge with a shared interface and a
             streamlined workflow. ⚡️

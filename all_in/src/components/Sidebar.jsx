@@ -22,7 +22,7 @@ export default function Sidebar({
         disabled={disableNew}
         className="mb-3 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-brand-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:bg-brand-600/60"
       >
-        <PlusIcon className="h-5 w-5" /> New chat ✨
+        <PlusIcon className="h-5 w-5" /> New chat
       </button>
       {onFlushHistory ? (
         <button
@@ -31,7 +31,7 @@ export default function Sidebar({
           disabled={disableFlush}
           className="mb-4 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-300 px-3 py-2 text-sm font-medium text-slate-600 transition hover:border-slate-400 hover:bg-slate-50 disabled:cursor-not-allowed disabled:text-slate-400 dark:border-slate-700 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:bg-slate-800"
         >
-          <TrashIcon className="h-5 w-5" /> Delete saved chats 🗑️
+          <TrashIcon className="h-5 w-5" /> Delete saved chats
         </button>
       ) : null}
       <div className="space-y-1">
