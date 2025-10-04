@@ -3,107 +3,38 @@ import { callRemoteChat } from '../lib/remoteChat'
 import { extractFirstJson } from '../lib/jsonExtract'
 import { addZooEntry } from '../lib/objectMakerStore'
 import { createRemoteObject } from '../lib/objectApi'
+import {
+  DEFAULT_SYSTEM_PROMPT,
+  DEFAULT_STRUCTURE,
+  DEFAULT_STRUCTURE_TEXT,
+  DEFAULT_OBJECT_PROMPT,
+  DEFAULT_OBJECT_TYPE,
+  DEFAULT_OBJECT_NAME,
+} from '../lib/objectMakerDefaults'
+import { buildMessages, normalizeBaseUrl, normalizeSchemaForUi } from '../lib/objectMakerUtils'
 
-export const DEFAULT_SYSTEM_PROMPT = 'You are an object maker. Produce a single JSON object that strictly conforms to the provided JSON Schema. Do not include commentary or markdown. Only return the JSON object.'
-
-export const DEFAULT_STRUCTURE = {
-  type: 'object',
-  additionalProperties: false,
-  properties: {
-    name: { type: 'string' },
-    size: { type: 'string', enum: ['small', 'medium', 'large'] },
-    crust: { type: 'string' },
-    cheese: { type: 'string' },
-    toppings: { type: 'array', items: { type: 'string' } },
-  },
-  required: ['name', 'size', 'crust', 'cheese', 'toppings'],
-}
-
-export const DEFAULT_STRUCTURE_TEXT = JSON.stringify(DEFAULT_STRUCTURE, null, 2)
-export const DEFAULT_OBJECT_PROMPT = 'make a delicious spicy pizza that respects this schema'
-export const DEFAULT_OBJECT_TYPE = 'pizza'
-export const DEFAULT_OBJECT_NAME = ''
-
-function buildMessages(history, systemPrompt) {
-  const sys = systemPrompt ? [{ role: 'system', content: systemPrompt }] : []
-  const turns = (history || [])
-    .filter((m) => m && (m.role === 'user' || m.role === 'assistant'))
-    .map((m) => ({ role: m.role, content: m.content }))
-  return [...sys, ...turns]
-}
-
-function normalizeBaseUrl(raw) {
-  const candidate = (raw || '').trim()
-  if (!candidate) return ''
-  return candidate.replace(/\/$/, '')
-}
-
-function normalizeSchemaForUi(schema) {
-  if (!schema || typeof schema !== 'object') {
-    return { schema, changed: false }
+function resolveStructure(structureText, cachedStructure, setStructureObj) {
+  if (cachedStructure) return cachedStructure
+  const parsed = JSON.parse(structureText)
+  if (!parsed || typeof parsed !== 'object') {
+    throw new Error('Structure must be a JSON object')
   }
-
-  let changed = false
-  const clone = JSON.parse(JSON.stringify(schema))
-
-  const visit = (node) => {
-    if (!node || typeof node !== 'object') return
-
-    if (node.type === 'object') {
-      if (node.additionalProperties !== false) {
-        node.additionalProperties = false
-        changed = true
-      }
-      const props = node.properties && typeof node.properties === 'object' ? node.properties : {}
-      const propKeys = Object.keys(props)
-      if (propKeys.length) {
-        const existing = Array.isArray(node.required) ? node.required.filter((key) => typeof key === 'string') : []
-        const set = new Set(existing)
-        const beforeSize = set.size
-        for (const key of propKeys) set.add(key)
-        if (set.size !== beforeSize || existing.length !== set.size) {
-          node.required = Array.from(set)
-          changed = true
-        }
-      }
-      Object.values(props).forEach(visit)
-
-      const patternProps = node.patternProperties && typeof node.patternProperties === 'object' ? node.patternProperties : {}
-      Object.values(patternProps).forEach(visit)
-
-      const deps = node.dependencies && typeof node.dependencies === 'object' ? node.dependencies : {}
-      Object.values(deps).forEach((value) => {
-        if (value && typeof value === 'object') visit(value)
-      })
-    }
-
-    if ('format' in node) {
-      delete node.format
-      changed = true
-    }
-
-    if (node.items) {
-      if (Array.isArray(node.items)) node.items.forEach(visit)
-      else visit(node.items)
-    }
-
-    for (const key of ['allOf', 'anyOf', 'oneOf']) {
-      if (Array.isArray(node[key])) node[key].forEach(visit)
-    }
-
-    for (const key of ['not', 'if', 'then', 'else']) {
-      if (node[key] && typeof node[key] === 'object') visit(node[key])
-    }
-
-    for (const defsKey of ['definitions', '$defs']) {
-      if (node[defsKey] && typeof node[defsKey] === 'object') {
-        Object.values(node[defsKey]).forEach(visit)
-      }
-    }
+  if (parsed.type !== 'object') {
+    throw new Error('Schema must declare "type":"object"')
   }
+  setStructureObj(parsed)
+  return parsed
+}
 
-  visit(clone)
-  return { schema: clone, changed }
+function normalizeAndStoreSchema(structure, setStructureObj, setStructureTextState, setStructureStatus, note) {
+  const normalization = normalizeSchemaForUi(structure)
+  if (!normalization.changed) {
+    return normalization.schema
+  }
+  setStructureObj(normalization.schema)
+  setStructureTextState(JSON.stringify(normalization.schema, null, 2))
+  setStructureStatus(note)
+  return normalization.schema
 }
 
 export function useObjectMakerBuilderState(experience) {
@@ -137,14 +68,18 @@ export function useObjectMakerBuilderState(experience) {
     const trimmed = prompt.trim()
     if (!trimmed || chatLoading) return
     setError('')
-    const user = { role: 'user', content: trimmed, timestamp: Date.now() }
-    const nextHistory = [...chatMessages, user]
+
+    const nextHistory = [...chatMessages, { role: 'user', content: trimmed, timestamp: Date.now() }]
     setChatMessages(nextHistory)
     setPrompt('')
     setChatLoading(true)
+
     try {
       const messages = buildMessages(nextHistory, experience?.systemPrompt)
-      const res = await callRemoteChat(experience, messages, { model, baseUrl: normalizeBaseUrl(baseUrl) })
+      const res = await callRemoteChat(experience, messages, {
+        model,
+        baseUrl: normalizeBaseUrl(baseUrl),
+      })
       const assistant = { role: 'assistant', content: res.content, timestamp: Date.now() }
       setChatMessages((prev) => [...prev, assistant])
     } catch (err) {
@@ -169,10 +104,16 @@ export function useObjectMakerBuilderState(experience) {
       setError('Schema must declare "type":"object".')
       return
     }
-    const { schema: normalized } = normalizeSchemaForUi(obj)
+    const normalized = normalizeAndStoreSchema(
+      obj,
+      setStructureObj,
+      setStructureTextState,
+      setStructureStatus,
+      'Schema adopted from assistant',
+    )
+    setStructureStatus('Schema adopted from assistant')
     setStructureTextState(JSON.stringify(normalized, null, 2))
     setStructureObj(normalized)
-    setStructureStatus('Schema adopted from assistant')
     setError('')
   }
 
@@ -182,29 +123,16 @@ export function useObjectMakerBuilderState(experience) {
       const parsed = JSON.parse(structureText)
       if (!parsed || typeof parsed !== 'object') throw new Error('Not an object')
       if (parsed.type !== 'object') throw new Error('Schema must declare "type":"object"')
-      const normalization = normalizeSchemaForUi(parsed)
-      setStructureObj(normalization.schema)
-      if (normalization.changed) {
-        setStructureTextState(JSON.stringify(normalization.schema, null, 2))
+      const normalized = normalizeSchemaForUi(parsed)
+      setStructureObj(normalized.schema)
+      if (normalized.changed) {
+        setStructureTextState(JSON.stringify(normalized.schema, null, 2))
       }
-      setStructureStatus(normalization.changed ? 'Schema valid (normalized unsupported keywords)' : 'Schema valid')
+      setStructureStatus(normalized.changed ? 'Schema valid (normalized unsupported keywords)' : 'Schema valid')
     } catch (e) {
       setStructureObj(null)
       setError(`Invalid JSON: ${e?.message || 'parse error'}`)
       setStructureStatus('')
-    }
-  }
-
-  const resolveStructure = () => {
-    if (structureObj) return structureObj
-    try {
-      const parsed = JSON.parse(structureText)
-      if (!parsed || typeof parsed !== 'object') throw new Error('Structure must be a JSON object')
-      if (parsed.type !== 'object') throw new Error('Schema must declare "type":"object"')
-      setStructureObj(parsed)
-      return parsed
-    } catch (e) {
-      throw new Error(`Invalid structure: ${e?.message || 'parse error'}`)
     }
   }
 
@@ -214,7 +142,7 @@ export function useObjectMakerBuilderState(experience) {
 
     let structure
     try {
-      structure = resolveStructure()
+      structure = resolveStructure(structureText, structureObj, setStructureObj)
     } catch (err) {
       setError(err.message)
       return
@@ -233,14 +161,13 @@ export function useObjectMakerBuilderState(experience) {
     }
 
     const systemTextValue = systemText.trim() || DEFAULT_SYSTEM_PROMPT
-
-    const normalization = normalizeSchemaForUi(structure)
-    structure = normalization.schema
-    if (normalization.changed) {
-      setStructureObj(structure)
-      setStructureTextState(JSON.stringify(structure, null, 2))
-      setStructureStatus('Schema normalized before create (unsupported keywords removed)')
-    }
+    structure = normalizeAndStoreSchema(
+      structure,
+      setStructureObj,
+      setStructureTextState,
+      setStructureStatus,
+      'Schema normalized before create (unsupported keywords removed)',
+    )
 
     setCreateLoading(true)
     try {

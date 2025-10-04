@@ -1,4 +1,4 @@
-export default function Settings({ baseUrl, setBaseUrl, model, setModel, experience, objectType }) {
+export default function Settings({ baseUrl, setBaseUrl, model, setModel, experience }) {
   function normalizeBaseUrl(raw) {
     const candidate = (raw || '').trim()
     if (!candidate) return ''
