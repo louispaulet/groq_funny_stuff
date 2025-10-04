@@ -83,19 +83,19 @@ export default function MessageBubble({ experience, role, content, name, timesta
         {enableStl && stlSources.length > 0 && !streaming && (
           <div className="mt-2">
             <ErrorBoundary>
-              <Suspense fallback={<div className="h-64 grid place-items-center text-slate-500">Loading 3D viewer...</div>}>
+              <Suspense fallback={<div className="h-64 grid place-items-center text-slate-500">Loading 3D viewer… ⏳</div>}>
                 <STLViewer source={stlSources[0]} />
               </Suspense>
             </ErrorBoundary>
           </div>
         )}
         {enableStl && stlSources.length > 0 && streaming && (
-          <div className="mt-2 text-xs text-slate-500">3D preview will appear when the response finishes...</div>
+          <div className="mt-2 text-xs text-slate-500">3D preview will appear when the response finishes… 🛰️</div>
         )}
         {enableStl && stlSources.length === 0 && !streaming && maybeStl && (
           <div className="mt-2 text-xs text-amber-600 dark:text-amber-400">
             The response looks like STL content but may be incomplete. Wrap it in a fenced block (```stl … ```), or include
-            full facets so the preview can render correctly.
+            full facets so the preview can render correctly. 🧱
           </div>
         )}
       </div>
