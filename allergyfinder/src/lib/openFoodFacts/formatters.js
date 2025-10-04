@@ -48,7 +48,9 @@ export function formatProductContext(product) {
   if (traces) lines.push(`Possible traces: ${traces}`)
   if (analysis) lines.push(`Ingredient analysis tags: ${analysis}`)
   if (ingredients) lines.push(`Ingredients summary: ${ingredients}`)
-  const productPage = buildProductPageUrl(product.code)
+  const resolvedProductPage = product._resolvedProductPageUrl || ''
+  const fallbackProductPage = buildProductPageUrl(product.code)
+  const productPage = resolvedProductPage || fallbackProductPage
   const worldPage = product.code ? `${API_ROOT}/product/${product.code}` : ''
   const sourceLink = product.link || product.url || worldPage
 

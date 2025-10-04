@@ -5,7 +5,8 @@ export function buildSourcesFromMatch(match) {
   if (!product) return []
 
   const code = (product.code || '').trim()
-  const url = product.link || product.url || buildProductPageUrl(code) || (code ? `${API_ROOT}/product/${code}` : '')
+  const resolved = product._resolvedProductPageUrl || ''
+  const url = product.link || product.url || resolved || buildProductPageUrl(code) || (code ? `${API_ROOT}/product/${code}` : '')
   if (!url) return []
 
   const name = (product.product_name || '').trim()

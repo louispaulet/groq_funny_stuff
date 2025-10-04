@@ -43,10 +43,11 @@ export const DEFAULT_GROQ_MODEL = 'openai/gpt-oss-20b'
 
 export { candidateSchema }
 
-export function buildProductPageUrl(code, { locale = PRODUCT_PAGE_DEFAULT_LOCALE } = {}) {
+export function buildProductPageUrl(code, { locale = PRODUCT_PAGE_DEFAULT_LOCALE, slug = '' } = {}) {
   const normalized = `${code || ''}`.trim()
   if (!normalized) return ''
   const root = PRODUCT_PAGE_ROOTS[locale] || PRODUCT_PAGE_ROOTS[PRODUCT_PAGE_DEFAULT_LOCALE] || PRODUCT_PAGE_ROOTS.world
   if (!root) return ''
-  return `${root}/${normalized}`
+  const suffix = slug ? `/${slug}` : ''
+  return `${root}/${normalized}${suffix}`
 }
