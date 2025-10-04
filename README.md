@@ -5,7 +5,7 @@ Groq AllIn Studio is the flagship experience in this repo: a single React worksp
 ## Overview
 - `all_in/` contains the deployable Groq AllIn Studio workspace and is the recommended way to run the demos together.
 - `chat/`, `pokedex/`, `allergyfinder/`, and `groq-chat-stl-viewer/` mirror the original standalone projects that now ship inside Groq AllIn Studio.
-- The root `Makefile` exposes consistent install/run/test targets for both the unified app and the legacy subprojects.
+- The root `Makefile` provides install/run/test/deploy/clean commands for the Groq AllIn Studio workspace.
 - Production deployments target Groq AllIn Studio; the other directories are development artifacts.
 
 ## Prerequisites
@@ -47,7 +47,6 @@ Unified workspace with shared layout, navigation, and chat components. Switch be
 ## Extras
 - `demos/` — static HTML experiments for Groq streaming APIs.
 - `api_examples/` — quick tests (e.g., `test_openfoodfacts.html`) supporting AllergyFinder.
-- `third_party/` — shared assets sourced from external projects.
 
 ## Testing Notes
 - Groq AllIn Studio: `npm run lint` (inside `all_in/`).
