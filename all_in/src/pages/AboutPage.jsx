@@ -4,21 +4,39 @@ export default function AboutPage() {
   return (
     <div className="space-y-12">
       <section className="rounded-3xl bg-gradient-to-br from-slate-900 via-brand-700 to-indigo-600 px-8 py-12 text-white shadow-xl">
-        <div className="max-w-3xl space-y-4">
-          <p className="text-sm uppercase tracking-[0.3em] text-white/70">About Groq AllIn Studio</p>
-          <h1 className="text-3xl font-semibold sm:text-4xl">Louis Paulet&apos;s Groq AllIn Studio 🤝</h1>
+        <div className="max-w-4xl space-y-4">
+          <p className="text-sm uppercase tracking-[0.3em] text-white/70">About the Creator</p>
+          <h1 className="text-3xl font-semibold sm:text-4xl">Louis Paulet</h1>
           <p className="text-base text-white/90">
-            Groq AllIn Studio is a personal initiative by Louis Paulet, Data Scientist at Checkout.com. The project explores
-            how GroqCloud services can support focused conversational tools while complementing his production work. Each
-            module tests practical applications, latency-sensitive interfaces, and the supporting infrastructure required to
-            run them responsibly. 🔍
+            Louis Paulet is a data scientist and AI developer whose work bridges analytical modeling, creative machine
+            learning, and interactive visualization. This studio is a personal initiative to explore how GroqCloud
+            services can support focused, latency-sensitive conversational tools. He is also known online as
+            “the_french_artist,” a moniker that reflects his dual fascination with art and artificial intelligence.
           </p>
-          <Link
-            to="/"
-            className="inline-flex items-center rounded-full bg-white/90 px-4 py-2 text-sm font-medium text-slate-900 transition hover:bg-white"
-          >
-            Back to Overview
-          </Link>
+          <div className="flex flex-wrap gap-4 pt-2">
+            <a
+              href="https://louispaulet.github.io"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center rounded-full bg-white/90 px-4 py-2 text-sm font-medium text-slate-900 transition hover:bg-white"
+            >
+              Website
+            </a>
+            <a
+              href="https://github.com/louispaulet"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center rounded-full bg-white/90 px-4 py-2 text-sm font-medium text-slate-900 transition hover:bg-white"
+            >
+              GitHub
+            </a>
+            <Link
+              to="/"
+              className="inline-flex items-center rounded-full bg-white/10 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/20"
+            >
+              Back to Project Overview
+            </Link>
+          </div>
         </div>
       </section>
 
