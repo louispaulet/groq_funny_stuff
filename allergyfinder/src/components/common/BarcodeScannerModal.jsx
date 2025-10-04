@@ -1,6 +1,29 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { XMarkIcon } from '@heroicons/react/24/solid'
 import { BrowserMultiFormatReader } from '@zxing/browser'
+import { BarcodeFormat, DecodeHintType } from '@zxing/library'
+
+const SCAN_INTERVAL_MS = 1000
+const SUPPORTED_FORMATS = [
+  BarcodeFormat.QR_CODE,
+  BarcodeFormat.CODE_128,
+  BarcodeFormat.CODE_39,
+  BarcodeFormat.CODE_93,
+  BarcodeFormat.ITF,
+  BarcodeFormat.EAN_13,
+  BarcodeFormat.EAN_8,
+  BarcodeFormat.UPC_A,
+  BarcodeFormat.UPC_E,
+  BarcodeFormat.UPC_EAN_EXTENSION,
+]
+
+function isNotFoundError(error) {
+  if (!error) return false
+  const normalizedName = `${error.name || ''}`.toLowerCase()
+  if (normalizedName.includes('notfound')) return true
+  const normalizedMessage = `${error.message || ''}`.toLowerCase()
+  return normalizedMessage.includes('no multiformat readers') || normalizedMessage.includes('not found')
+}
 
 export default function BarcodeScannerModal({ open, onClose, onDetected }) {
   const videoRef = useRef(null)
@@ -10,11 +33,14 @@ export default function BarcodeScannerModal({ open, onClose, onDetected }) {
   const [deviceId, setDeviceId] = useState('')
   const [initializing, setInitializing] = useState(false)
   const [error, setError] = useState('')
+  const [status, setStatus] = useState('')
+  const lastFeedbackRef = useRef(0)
+  const attemptsRef = useRef(0)
 
   const stopReader = useCallback(() => {
     controlsRef.current?.stop()
     controlsRef.current = null
-    readerRef.current?.reset()
+    readerRef.current?.reset?.()
     readerRef.current = null
   }, [])
 
@@ -24,6 +50,9 @@ export default function BarcodeScannerModal({ open, onClose, onDetected }) {
       setDevices([])
       setDeviceId('')
       setError('')
+      setStatus('')
+      attemptsRef.current = 0
+      lastFeedbackRef.current = 0
       setInitializing(false)
       return
     }
@@ -60,12 +89,19 @@ export default function BarcodeScannerModal({ open, onClose, onDetected }) {
   useEffect(() => {
     if (!open || !deviceId) return undefined
 
-    const reader = new BrowserMultiFormatReader()
+    const hints = new Map()
+    hints.set(DecodeHintType.POSSIBLE_FORMATS, SUPPORTED_FORMATS)
+    hints.set(DecodeHintType.TRY_HARDER, true)
+
+    const reader = new BrowserMultiFormatReader(hints, SCAN_INTERVAL_MS)
     readerRef.current = reader
     let active = true
 
+    attemptsRef.current = 0
+    lastFeedbackRef.current = 0
     setInitializing(true)
     setError('')
+    setStatus('Preparing camera…')
 
     reader
       .decodeFromVideoDevice(deviceId, videoRef.current, (result, err, controls) => {
@@ -78,9 +114,27 @@ export default function BarcodeScannerModal({ open, onClose, onDetected }) {
           controls?.stop()
           onClose?.()
         }
-        if (err && err.name !== 'NotFoundException') {
+        if (err) {
+          if (isNotFoundError(err)) {
+            const now = Date.now()
+            if (now - lastFeedbackRef.current >= SCAN_INTERVAL_MS) {
+              lastFeedbackRef.current = now
+              const nextAttempt = attemptsRef.current + 1
+              attemptsRef.current = nextAttempt
+              setStatus(`Still scanning… attempt ${nextAttempt}.`)
+            }
+            setError('')
+            return
+          }
           console.error('Barcode scanner: decode error', err)
           setError('Unable to read the barcode. Try holding the product steady and ensure it fills the frame.')
+          const now = Date.now()
+          if (now - lastFeedbackRef.current >= SCAN_INTERVAL_MS) {
+            lastFeedbackRef.current = now
+            const nextAttempt = attemptsRef.current + 1
+            attemptsRef.current = nextAttempt
+            setStatus(`Retrying in a second… attempt ${nextAttempt}.`)
+          }
         }
       })
       .then((controls) => {
@@ -90,6 +144,7 @@ export default function BarcodeScannerModal({ open, onClose, onDetected }) {
         }
         controlsRef.current = controls
         setInitializing(false)
+        setStatus('Scanning for a barcode…')
       })
       .catch((err) => {
         if (!active) return
@@ -160,15 +215,16 @@ export default function BarcodeScannerModal({ open, onClose, onDetected }) {
             )}
           </div>
 
-          {error ? (
-            <p className="rounded-xl border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-700 dark:border-amber-500/60 dark:bg-amber-500/10 dark:text-amber-200">
-              {error}
-            </p>
-          ) : (
+          <div className="flex flex-col gap-2">
+            {error && (
+              <p className="rounded-xl border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-700 dark:border-amber-500/60 dark:bg-amber-500/10 dark:text-amber-200">
+                {error}
+              </p>
+            )}
             <p className="text-sm text-slate-600 dark:text-slate-300">
-              Once a barcode is detected it will automatically populate the chat.
+              {status || 'Once a barcode is detected it will automatically populate the chat.'}
             </p>
-          )}
+          </div>
         </div>
       </div>
     </div>
