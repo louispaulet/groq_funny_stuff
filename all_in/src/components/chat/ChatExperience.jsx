@@ -4,6 +4,7 @@ import MessageList from './MessageList'
 import Composer from './Composer'
 import ModelSelector from '../ModelSelector'
 import { callRemoteChat } from '../../lib/remoteChat'
+import BarcodeScannerModal from '../common/BarcodeScannerModal'
 import {
   readAllergyCookie,
   readSavedConversations,
@@ -106,10 +107,12 @@ export default function ChatExperience({ experience }) {
   const [activeId, setActiveId] = useState(() => conversations[0]?.id)
   const [prompt, setPrompt] = useState('')
   const [loading, setLoading] = useState(false)
+  const [scannerOpen, setScannerOpen] = useState(false)
   const abortRef = useRef(null)
   const skipPersistRef = useRef(false)
 
   const persistConversations = experience?.id && PERSISTENT_EXPERIENCE_IDS.has(experience.id)
+  const enableBarcodeScanner = Boolean(experience?.enableBarcodeScanner)
 
   useEffect(() => {
     let loadedConversations = []
@@ -232,8 +235,17 @@ export default function ChatExperience({ experience }) {
     }))
   }
 
-  async function handleSend() {
-    const trimmed = prompt.trim()
+  function handleBarcodeDetected(code) {
+    if (!enableBarcodeScanner) return
+    const normalized = `${code}`.trim()
+    if (!normalized) return
+    setScannerOpen(false)
+    setPrompt(normalized)
+    handleSend(normalized)
+  }
+
+  async function handleSend(inputText) {
+    const trimmed = (typeof inputText === 'string' ? inputText : prompt).trim()
     if (!trimmed || loading) return
 
     const timestamp = Date.now()
@@ -433,8 +445,16 @@ export default function ChatExperience({ experience }) {
           onClear={handleClear}
           loading={loading}
           placeholder={placeholder}
+          onOpenScanner={enableBarcodeScanner ? () => setScannerOpen(true) : undefined}
         />
       </section>
+      {enableBarcodeScanner && (
+        <BarcodeScannerModal
+          open={scannerOpen}
+          onClose={() => setScannerOpen(false)}
+          onDetected={handleBarcodeDetected}
+        />
+      )}
     </div>
   )
 }

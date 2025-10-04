@@ -38,6 +38,7 @@ export const experiences = [
     ].join(' '),
     allowBaseUrlOverride: false,
     enableStlViewer: false,
+    enableBarcodeScanner: true,
     logLabel: 'AllergyFinder',
     defaultBaseUrl: (getEnvValue('VITE_ALLERGY_CHAT_BASE_URL') || FALLBACK_BASE_URL).replace(/\/$/, ''),
   },
