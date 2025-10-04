@@ -47,6 +47,7 @@ export default function ObjectMakerBuilder() {
           createLoading={state.createLoading}
           error={state.error}
           resultObj={state.resultObj}
+          structureStatus={state.structureStatus}
         />
       </div>
     </div>

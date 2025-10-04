@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { DocumentDuplicateIcon } from '@heroicons/react/24/outline'
+import { DocumentDuplicateIcon, CheckCircleIcon } from '@heroicons/react/24/outline'
 
 function TextArea({ value, onChange, rows = 10, placeholder }) {
   return (
@@ -43,6 +43,7 @@ export default function Editor({
   createLoading,
   error,
   resultObj,
+  structureStatus,
 }) {
   const [copyFeedback, setCopyFeedback] = useState('')
   const copyTimeout = useRef(null)
@@ -172,6 +173,12 @@ export default function Editor({
           {createLoading ? 'Creating…' : 'Create Object'}
         </button>
       </div>
+      {structureStatus ? (
+        <div className="flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+          <CheckCircleIcon className="h-4 w-4" aria-hidden="true" />
+          <span>{structureStatus}</span>
+        </div>
+      ) : null}
       {error ? (
         <div className="rounded-md border border-red-300 bg-red-50 p-2 text-sm text-red-800 dark:border-red-800/60 dark:bg-red-900/40 dark:text-red-200">{error}</div>
       ) : null}

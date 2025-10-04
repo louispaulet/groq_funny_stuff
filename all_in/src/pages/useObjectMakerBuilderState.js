@@ -114,6 +114,7 @@ export function useObjectMakerBuilderState(experience) {
   const [chatMessages, setChatMessages] = useState([])
   const [structureText, setStructureTextState] = useState(DEFAULT_STRUCTURE_TEXT)
   const [structureObj, setStructureObj] = useState(DEFAULT_STRUCTURE)
+  const [structureStatus, setStructureStatus] = useState('')
   const [createLoading, setCreateLoading] = useState(false)
   const [resultObj, setResultObj] = useState(null)
   const [objectType, setObjectType] = useState(DEFAULT_OBJECT_TYPE)
@@ -127,6 +128,7 @@ export function useObjectMakerBuilderState(experience) {
   const setStructureText = (value) => {
     setStructureTextState(value)
     setStructureObj(null)
+    setStructureStatus('')
   }
 
   const updateBaseUrl = (value) => setBaseUrl(value)
@@ -170,6 +172,7 @@ export function useObjectMakerBuilderState(experience) {
     const { schema: normalized } = normalizeSchemaForUi(obj)
     setStructureTextState(JSON.stringify(normalized, null, 2))
     setStructureObj(normalized)
+    setStructureStatus('Schema adopted from assistant')
     setError('')
   }
 
@@ -184,9 +187,11 @@ export function useObjectMakerBuilderState(experience) {
       if (normalization.changed) {
         setStructureTextState(JSON.stringify(normalization.schema, null, 2))
       }
+      setStructureStatus(normalization.changed ? 'Schema valid (normalized unsupported keywords)' : 'Schema valid')
     } catch (e) {
       setStructureObj(null)
       setError(`Invalid JSON: ${e?.message || 'parse error'}`)
+      setStructureStatus('')
     }
   }
 
@@ -234,6 +239,7 @@ export function useObjectMakerBuilderState(experience) {
     if (normalization.changed) {
       setStructureObj(structure)
       setStructureTextState(JSON.stringify(structure, null, 2))
+      setStructureStatus('Schema normalized before create (unsupported keywords removed)')
     }
 
     setCreateLoading(true)
@@ -290,6 +296,7 @@ export function useObjectMakerBuilderState(experience) {
     structureText,
     setStructureText,
     validateStructure,
+    structureStatus,
     objectType,
     setObjectType,
     objectName,
