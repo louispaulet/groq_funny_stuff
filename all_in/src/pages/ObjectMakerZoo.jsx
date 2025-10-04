@@ -73,15 +73,15 @@ export default function ObjectMakerZoo() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h3 className="text-base font-semibold text-slate-800 dark:text-slate-100">Object Zoo</h3>
+        <h3 className="text-base font-semibold text-slate-800 dark:text-slate-100">Object Zoo 🦾</h3>
         <div className="flex items-center gap-2">
-          <Link to="/objectmaker" className="rounded-md border border-slate-300 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800/60">Back to Builder</Link>
+          <Link to="/objectmaker" className="rounded-md border border-slate-300 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800/60">Back to Builder 🛠️</Link>
           {entries.length > 0 ? (
             <button
               onClick={handleClearAll}
               className="rounded-md border border-red-300 px-3 py-1.5 text-sm font-medium text-red-700 hover:bg-red-50 dark:border-red-800 dark:text-red-300 dark:hover:bg-red-900/30"
             >
-              Clear Zoo
+              Delete all saved objects 🧹
             </button>
           ) : null}
         </div>
@@ -89,14 +89,14 @@ export default function ObjectMakerZoo() {
 
       {entries.length === 0 ? (
         <div className="rounded-xl border border-slate-200 bg-white/70 p-6 text-sm text-slate-500 dark:border-slate-800 dark:bg-slate-900/60 dark:text-slate-400">
-          No entries yet. Create objects in the Builder, and they will appear here grouped by type.
+          No entries yet. Create objects in the Builder and they will appear here grouped by type. 📝
         </div>
       ) : null}
 
       {[...grouped.entries()].map(([type, list]) => (
         <section key={type} className="space-y-3">
           <div className="flex items-center justify-between">
-            <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-200">{type} — {list.length}</h4>
+            <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-200">{type} — {list.length} 📦</h4>
           </div>
           <div className="grid gap-3 md:grid-cols-2">
             {list.map((entry) => (

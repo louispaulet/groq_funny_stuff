@@ -94,10 +94,10 @@ export default function UserProfile() {
   return (
     <div className="space-y-10">
       <section className="rounded-3xl border border-emerald-200 bg-emerald-50/70 p-6 text-emerald-900 dark:border-emerald-500/40 dark:bg-emerald-900/30 dark:text-emerald-100">
-        <h2 className="text-2xl font-semibold">User Profile</h2>
+        <h2 className="text-2xl font-semibold">User Profile 👤</h2>
         <p className="mt-2 text-sm text-emerald-900/80 dark:text-emerald-100/80">
-          We generate a friendly alias so you can save notes without revealing personal details. Your profile name lives in a
-          browser cookie on this device.
+          🔐 The application generates a display alias so you can save notes without revealing personal details. Your profile name
+          lives in a browser cookie on this device.
         </p>
         <div className="mt-6 flex flex-wrap items-center gap-4">
           <div className="rounded-2xl bg-white/80 px-5 py-4 text-lg font-semibold text-emerald-700 shadow-sm dark:bg-slate-900/40 dark:text-emerald-200">
@@ -108,35 +108,35 @@ export default function UserProfile() {
             onClick={handleRegenerateProfile}
             className="inline-flex items-center rounded-xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-emerald-500"
           >
-            Generate New Alias
+            Generate New Alias 🎲
           </button>
           <button
             type="button"
             onClick={handleFlushProfile}
             className="inline-flex items-center rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-red-500"
           >
-            Delete Profile Cookie
+            Remove Profile Cookie 🗑️
           </button>
         </div>
         <p className="mt-3 rounded-2xl border border-red-300 bg-red-50/80 p-3 text-sm text-red-700 dark:border-red-700 dark:bg-red-900/30 dark:text-red-200">
-          Warning: Deleting the profile cookie removes your saved alias immediately. The next time you open this page a new random
-          name will be generated.
+          Important: Removing the profile cookie deletes the saved alias immediately. The next time you open this page a new
+          randomly generated name will appear. ⚠️
         </p>
       </section>
 
       <section className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h3 className="text-xl font-semibold text-slate-800 dark:text-slate-100">Saved Allergies</h3>
+          <h3 className="text-xl font-semibold text-slate-800 dark:text-slate-100">Saved Allergies 🗂️</h3>
           <Link
             to="/allergyfinder/cookies"
             className="inline-flex items-center rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-500"
           >
-            Edit Allergy List
+            Edit Allergy List ✍️
           </Link>
         </div>
         <div className="rounded-3xl border border-emerald-200 bg-white/85 p-5 shadow-sm dark:border-emerald-500/40 dark:bg-emerald-900/20">
           <div className="text-3xl font-bold text-emerald-700 dark:text-emerald-200">{allergyCount}</div>
-          <div className="text-sm text-slate-600 dark:text-slate-300">Allergens listed across your saved markdown notes.</div>
+          <div className="text-sm text-slate-600 dark:text-slate-300">Allergens listed across your saved markdown notes. 📊</div>
           <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4 text-sm text-emerald-900 dark:border-emerald-500/30 dark:bg-emerald-900/40 dark:text-emerald-100">
             {allergyItems.length > 0 ? (
               <ul className="list-disc space-y-1 pl-5">
@@ -145,13 +145,13 @@ export default function UserProfile() {
                 ))}
                 {allergyCount > allergyItems.length ? (
                   <li className="italic text-emerald-700/80 dark:text-emerald-200/80">
-                    …and {allergyCount - allergyItems.length} more allergens saved.
+                    …and {allergyCount - allergyItems.length} more allergens saved. ➕
                   </li>
                 ) : null}
               </ul>
             ) : (
               <div className="italic text-emerald-700/80 dark:text-emerald-200/80">
-                No allergy notes saved yet.
+                No allergy notes saved yet. 🕒
               </div>
             )}
           </div>
@@ -161,10 +161,10 @@ export default function UserProfile() {
             onClick={handleFlushAllergyData}
             className="inline-flex items-center rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-red-500"
           >
-            Delete Allergy Notes & Saved Chats
+            Delete Allergy Notes & Saved Chats 🧹
           </button>
           <p className="rounded-xl border border-red-300 bg-red-50/80 px-4 py-2 text-xs text-red-700 dark:border-red-700 dark:bg-red-900/30 dark:text-red-200">
-            Critical warning: This removes the allergy notes cookie and any saved AllergyFinder conversations from this browser.
+            Important: This removes the allergy notes cookie and any saved AllergyFinder conversations from this browser. ⚠️
           </p>
           </div>
         </div>
@@ -172,9 +172,9 @@ export default function UserProfile() {
 
       <section className="space-y-6">
         <div>
-          <h3 className="text-xl font-semibold text-slate-800 dark:text-slate-100">Chat Activity</h3>
+          <h3 className="text-xl font-semibold text-slate-800 dark:text-slate-100">Chat Activity 📈</h3>
           <p className="text-sm text-slate-600 dark:text-slate-400">We snapshot how many conversations you have started in each
-            demo. Counts are stored locally in a cookie.</p>
+            demo. Counts are stored locally in a cookie. 🧮</p>
         </div>
         <div className="grid gap-4 md:grid-cols-3">
           {Object.entries(chatCounts).map(([experienceId, count]) => (
@@ -191,11 +191,11 @@ export default function UserProfile() {
                 onClick={() => handleFlushCount(experienceId)}
                 className="inline-flex items-center rounded-xl bg-red-600 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-white shadow-sm transition hover:bg-red-500"
               >
-                Delete {EXPERIENCE_LABELS[experienceId] || experienceId} History
+                Delete {EXPERIENCE_LABELS[experienceId] || experienceId} History 🗑️
               </button>
               <p className="rounded-lg border border-red-200 bg-red-50/80 p-2 text-xs text-red-700 dark:border-red-700 dark:bg-red-900/30 dark:text-red-200">
-                Warning: This deletes the saved cookie for this experience. Any stored conversations and counters are permanently
-                removed from this browser.
+                Important: This deletes the saved cookie for this experience. Any stored conversations and counters are
+                permanently removed from this browser. ⚠️
               </p>
             </div>
           ))}
@@ -206,10 +206,10 @@ export default function UserProfile() {
             onClick={handleFlushAllCounts}
             className="inline-flex items-center rounded-xl bg-red-700 px-4 py-2 text-sm font-semibold uppercase tracking-wide text-white shadow-sm transition hover:bg-red-600"
           >
-            Delete All Saved Chat History
+            Delete All Saved Chat History 🧽
           </button>
           <p className="rounded-xl border border-red-300 bg-red-50/90 px-4 py-2 text-xs text-red-700 dark:border-red-700 dark:bg-red-900/40 dark:text-red-200">
-            Warning: This deletes every saved chat cookie across AllergyFinder, STL Studio, and the Pokédex on this device.
+            Important: This deletes every saved chat cookie across AllergyFinder, STL Studio, and the Pokédex on this device. ⚠️
           </p>
         </div>
       </section>
