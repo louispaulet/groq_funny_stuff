@@ -6,10 +6,11 @@ export default function AboutPage() {
       <section className="rounded-3xl bg-gradient-to-br from-slate-900 via-brand-700 to-indigo-600 px-8 py-12 text-white shadow-xl">
         <div className="max-w-3xl space-y-4">
           <p className="text-sm uppercase tracking-[0.3em] text-white/70">About Groq AllIn Studio</p>
-          <h1 className="text-3xl font-semibold sm:text-4xl">Louis Paulet&apos;s Groq playground</h1>
+          <h1 className="text-3xl font-semibold sm:text-4xl">Louis Paulet&apos;s Groq playground 🚀</h1>
           <p className="text-base text-white/90">
             Groq AllIn Studio is a side project by Louis Paulet, Data Scientist at Checkout.com, built to stretch the GroqCloud
-            free tier and explore how far a single worker-backed chat experience can go.
+            free tier and explore how far a single worker-backed chat experience can go. It is also his playground for doing
+            delightfully impractical LLM experiments when he feels like using models for mischief instead of meetings. 😎
           </p>
           <Link
             to="/"
@@ -37,10 +38,11 @@ export default function AboutPage() {
           </p>
         </article>
         <article className="space-y-3 rounded-2xl border border-slate-200 bg-white/80 p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/70">
-          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">3. Legacy sandboxes</h2>
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">3. LLMs for fun 🎉</h2>
           <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-            The other folders in the repo keep the original standalone demos—AllergyFinder, STL Viewer, Remote Chat, and the
-            Pokédex—so fixes can be tested in isolation before being folded back into the studio.
+            Louis keeps a rotating carousel of playful prompts and half-serious experiments stitched into the studio. When the
+            day job runs on production-grade guardrails, this space is free to chase goofy generative ideas, remix agent flows,
+            and generally see what Groq silicon can do when the stakes are just vibes.
           </p>
         </article>
       </section>
@@ -78,8 +80,8 @@ export default function AboutPage() {
           </li>
         </ul>
         <p className="mt-4 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-          Keep an eye on the other repo folders for historical implementations of each feature—the worker is the glue that keeps
-          them coherent inside Groq AllIn Studio.
+          The worker is the glue that keeps every playful detour coherent inside Groq AllIn Studio, even when the brief is simply
+          “let&apos;s see what happens.” 🤖
         </p>
       </section>
     </div>
