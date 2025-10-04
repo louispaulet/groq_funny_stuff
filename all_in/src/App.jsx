@@ -1,5 +1,5 @@
 import { Fragment } from 'react'
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { HashRouter, Navigate, Route, Routes } from 'react-router-dom'
 import AppShell from './components/layout/AppShell'
 import HomePage from './pages/HomePage'
 import ExperiencePage from './pages/ExperiencePage'
@@ -17,7 +17,7 @@ import ObjectMakerZoo from './pages/ObjectMakerZoo'
 export default function App() {
   return (
     <ThemeProvider>
-      <BrowserRouter>
+      <HashRouter>
         <AppShell>
           <Routes>
             <Route path="/" element={<HomePage />} />
@@ -77,7 +77,7 @@ export default function App() {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </AppShell>
-      </BrowserRouter>
+      </HashRouter>
     </ThemeProvider>
   )
 }
