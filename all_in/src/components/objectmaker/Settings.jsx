@@ -38,12 +38,7 @@ export default function Settings({ baseUrl, setBaseUrl, model, setModel, experie
             </label>
           </div>
         </div>
-        <div className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-          Tip: set VITE_OBJECTMAKER_CHAT_BASE_URL in .env.local. Objects are created via
-          <code className="ml-1 rounded bg-slate-100 px-1 py-0.5 text-[11px] dark:bg-slate-800">{baseUrl}/obj/{objectType || '<type>'}</code>.
-        </div>
       </div>
     </section>
   )
 }
-
