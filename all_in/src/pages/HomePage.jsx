@@ -19,8 +19,8 @@ const detailedCopyById = {
   objectmaker: (
     <>
       <p>
-        Object Maker is our playground for structured creativity. Start with a conversational brief and the assistant drafts
-        JSON schemas that describe imaginative artifacts—anything from a pizza, to a track-ready car, to a whimsical ice cream
+        Object Maker is a workspace for structured creativity. Start with a conversational brief and the assistant drafts JSON
+        schemas that describe imaginative artifacts—anything from a pizza, to a track-ready car, to a curated ice cream
         flight. Once the schema looks right, you can call the
         <code className="rounded bg-slate-900/80 px-1 py-0.5 text-[0.7rem] text-white">/obj</code> endpoint to spin up
         dozens of variants that adhere to the structure. The workflow is grounded in Groq hosted
@@ -28,18 +28,18 @@ const detailedCopyById = {
         models, keeping generation fast while your schema evolves.
       </p>
       <p>
-        Every session also curates a “Zoo” of finished creations so you can revisit, remix, and compare outputs. The goal is to
-        explore how reliable JSON scaffolding unlocks downstream tooling: the tighter the schema, the more adventurous the
-        generated objects. Image generation hooks are on the roadmap, but today is all about perfecting the structured prompt.
+        Each session curates a “Zoo” of finished creations so you can revisit, iterate, and compare outputs. The aim is to
+        demonstrate how reliable JSON scaffolding unlocks downstream tooling: the sharper the schema, the more dependable the
+        generated objects. Image generation integrations are planned, but today is about perfecting the structured prompt.
       </p>
     </>
   ),
   stlviewer: (
     <>
       <p>
-        STL Studio keeps the original 3D printing experiment alive. The assistant can draft STL snippets, explain mesh edits,
-        and, thanks to the embedded viewer, render models directly inside the chat transcript. Share a design tweak, paste an
-        STL file, and see the preview update without leaving the conversation.
+        STL Studio preserves the original 3D printing workflow. The assistant can draft STL snippets, explain mesh edits, and,
+        thanks to the embedded viewer, render models directly inside the chat transcript. Share a design tweak, paste an STL
+        file, and see the preview update without leaving the conversation.
       </p>
       <p>
         It is ideal for rapid iteration on printable parts, offering slicing tips, material suggestions, and context-aware
@@ -69,10 +69,11 @@ export default function HomePage() {
     <div className="space-y-12">
       <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-brand-600 to-indigo-700 px-8 py-12 text-white shadow-xl">
         <div className="max-w-3xl space-y-4">
-          <p className="text-sm uppercase tracking-[0.3em] text-white/80">Groq Playground</p>
-          <h1 className="text-3xl font-semibold sm:text-4xl">All experiences under one roof.</h1>
+          <p className="text-sm uppercase tracking-[0.3em] text-white/80">Groq Studio</p>
+          <h1 className="text-3xl font-semibold sm:text-4xl">All experiences in one workspace.</h1>
           <p className="text-base text-white/90">
-            Explore specialized assistants for nutrition, 3D printing, and Pokemon knowledge with a unified design and faster workflow.
+            Explore specialized assistants for nutrition, 3D printing, and Pokémon knowledge with a shared interface and a
+            streamlined workflow.
           </p>
           <div className="flex flex-wrap gap-3 pt-2">
             {experiences.map((experience) => (

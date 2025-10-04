@@ -81,7 +81,7 @@ export default function ObjectMakerZoo() {
               onClick={handleClearAll}
               className="rounded-md border border-red-300 px-3 py-1.5 text-sm font-medium text-red-700 hover:bg-red-50 dark:border-red-800 dark:text-red-300 dark:hover:bg-red-900/30"
             >
-              Clear Zoo
+              Delete all saved objects
             </button>
           ) : null}
         </div>
@@ -89,7 +89,7 @@ export default function ObjectMakerZoo() {
 
       {entries.length === 0 ? (
         <div className="rounded-xl border border-slate-200 bg-white/70 p-6 text-sm text-slate-500 dark:border-slate-800 dark:bg-slate-900/60 dark:text-slate-400">
-          No entries yet. Create objects in the Builder, and they will appear here grouped by type.
+          No entries yet. Create objects in the Builder and they will appear here grouped by type.
         </div>
       ) : null}
 

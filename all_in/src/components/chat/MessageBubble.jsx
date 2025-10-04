@@ -94,7 +94,8 @@ export default function MessageBubble({ experience, role, content, name, timesta
         )}
         {enableStl && stlSources.length === 0 && !streaming && maybeStl && (
           <div className="mt-2 text-xs text-amber-600 dark:text-amber-400">
-            Looks like STL text, but it may be incomplete. Wrap it in a fenced block (```stl ... ```), or include full facets.
+            The response looks like STL content but may be incomplete. Wrap it in a fenced block (```stl … ```), or include
+            full facets so the preview can render correctly.
           </div>
         )}
       </div>

@@ -96,8 +96,8 @@ export default function UserProfile() {
       <section className="rounded-3xl border border-emerald-200 bg-emerald-50/70 p-6 text-emerald-900 dark:border-emerald-500/40 dark:bg-emerald-900/30 dark:text-emerald-100">
         <h2 className="text-2xl font-semibold">User Profile</h2>
         <p className="mt-2 text-sm text-emerald-900/80 dark:text-emerald-100/80">
-          We generate a friendly alias so you can save notes without revealing personal details. Your profile name lives in a
-          browser cookie on this device.
+          The application generates a display alias so you can save notes without revealing personal details. Your profile name
+          lives in a browser cookie on this device.
         </p>
         <div className="mt-6 flex flex-wrap items-center gap-4">
           <div className="rounded-2xl bg-white/80 px-5 py-4 text-lg font-semibold text-emerald-700 shadow-sm dark:bg-slate-900/40 dark:text-emerald-200">
@@ -115,12 +115,12 @@ export default function UserProfile() {
             onClick={handleFlushProfile}
             className="inline-flex items-center rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-red-500"
           >
-            Delete Profile Cookie
+            Remove Profile Cookie
           </button>
         </div>
         <p className="mt-3 rounded-2xl border border-red-300 bg-red-50/80 p-3 text-sm text-red-700 dark:border-red-700 dark:bg-red-900/30 dark:text-red-200">
-          Warning: Deleting the profile cookie removes your saved alias immediately. The next time you open this page a new random
-          name will be generated.
+          Important: Removing the profile cookie deletes the saved alias immediately. The next time you open this page a new
+          randomly generated name will appear.
         </p>
       </section>
 
@@ -164,7 +164,7 @@ export default function UserProfile() {
             Delete Allergy Notes & Saved Chats
           </button>
           <p className="rounded-xl border border-red-300 bg-red-50/80 px-4 py-2 text-xs text-red-700 dark:border-red-700 dark:bg-red-900/30 dark:text-red-200">
-            Critical warning: This removes the allergy notes cookie and any saved AllergyFinder conversations from this browser.
+            Important: This removes the allergy notes cookie and any saved AllergyFinder conversations from this browser.
           </p>
           </div>
         </div>
@@ -194,8 +194,8 @@ export default function UserProfile() {
                 Delete {EXPERIENCE_LABELS[experienceId] || experienceId} History
               </button>
               <p className="rounded-lg border border-red-200 bg-red-50/80 p-2 text-xs text-red-700 dark:border-red-700 dark:bg-red-900/30 dark:text-red-200">
-                Warning: This deletes the saved cookie for this experience. Any stored conversations and counters are permanently
-                removed from this browser.
+                Important: This deletes the saved cookie for this experience. Any stored conversations and counters are
+                permanently removed from this browser.
               </p>
             </div>
           ))}
@@ -209,7 +209,7 @@ export default function UserProfile() {
             Delete All Saved Chat History
           </button>
           <p className="rounded-xl border border-red-300 bg-red-50/90 px-4 py-2 text-xs text-red-700 dark:border-red-700 dark:bg-red-900/40 dark:text-red-200">
-            Warning: This deletes every saved chat cookie across AllergyFinder, STL Studio, and the Pokédex on this device.
+            Important: This deletes every saved chat cookie across AllergyFinder, STL Studio, and the Pokédex on this device.
           </p>
         </div>
       </section>

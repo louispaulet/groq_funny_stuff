@@ -101,7 +101,7 @@ export default function AppShell({ children }) {
           <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 sm:justify-start">
             <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 sm:justify-start">
               <span className="font-semibold text-slate-700 dark:text-slate-200">Groq AllIn Studio</span>
-              <span className="text-xs uppercase tracking-wide text-slate-400 dark:text-slate-500">Unified Playground</span>
+              <span className="text-xs uppercase tracking-wide text-slate-400 dark:text-slate-500">Unified Workspace</span>
             </div>
             <NavLink to="/" className={footerLinkClasses} end>Overview</NavLink>
             <NavLink to="/about" className={footerLinkClasses}>About</NavLink>
