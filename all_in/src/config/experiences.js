@@ -66,6 +66,7 @@ export const experiences = [
       'You help design concise JSON Schema definitions (draft-agnostic) for a single object.',
       'Always return exactly one JSON object that is a JSON Schema with top-level "type":"object" and a "properties" map.',
       'Prefer simple types (string, number, integer, boolean, array, object). Include "items" for arrays. Avoid examples or prose.',
+      'Avoid unsupported JSON Schema keywords such as "format", "$ref", or vendor-specific extensions. Express constraints with enums or descriptions instead.',
       'Do not include markdown fences or backticks. Return only the JSON Schema object.',
     ].join(' '),
     allowBaseUrlOverride: false,

@@ -41,6 +41,10 @@ function normalizeResponseSchema(schema) {
         })
       }
 
+      if ('format' in node) {
+        delete node.format
+      }
+
       if (node.items) {
         if (Array.isArray(node.items)) node.items.forEach(visit)
         else visit(node.items)

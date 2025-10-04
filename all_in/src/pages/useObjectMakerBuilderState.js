@@ -77,6 +77,11 @@ function normalizeSchemaForUi(schema) {
       })
     }
 
+    if ('format' in node) {
+      delete node.format
+      changed = true
+    }
+
     if (node.items) {
       if (Array.isArray(node.items)) node.items.forEach(visit)
       else visit(node.items)
@@ -162,8 +167,9 @@ export function useObjectMakerBuilderState(experience) {
       setError('Schema must declare "type":"object".')
       return
     }
-    setStructureTextState(JSON.stringify(obj, null, 2))
-    setStructureObj(obj)
+    const { schema: normalized } = normalizeSchemaForUi(obj)
+    setStructureTextState(JSON.stringify(normalized, null, 2))
+    setStructureObj(normalized)
     setError('')
   }
 
@@ -173,7 +179,11 @@ export function useObjectMakerBuilderState(experience) {
       const parsed = JSON.parse(structureText)
       if (!parsed || typeof parsed !== 'object') throw new Error('Not an object')
       if (parsed.type !== 'object') throw new Error('Schema must declare "type":"object"')
-      setStructureObj(parsed)
+      const normalization = normalizeSchemaForUi(parsed)
+      setStructureObj(normalization.schema)
+      if (normalization.changed) {
+        setStructureTextState(JSON.stringify(normalization.schema, null, 2))
+      }
     } catch (e) {
       setStructureObj(null)
       setError(`Invalid JSON: ${e?.message || 'parse error'}`)

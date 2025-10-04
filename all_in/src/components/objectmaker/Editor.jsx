@@ -1,4 +1,5 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { DocumentDuplicateIcon } from '@heroicons/react/24/outline'
 
 function TextArea({ value, onChange, rows = 10, placeholder }) {
   return (
@@ -43,6 +44,45 @@ export default function Editor({
   error,
   resultObj,
 }) {
+  const [copyFeedback, setCopyFeedback] = useState('')
+  const copyTimeout = useRef(null)
+
+  useEffect(() => () => {
+    if (copyTimeout.current) {
+      clearTimeout(copyTimeout.current)
+      copyTimeout.current = null
+    }
+  }, [])
+
+  async function handleCopy() {
+    if (!resultObj) return
+    try {
+      const text = JSON.stringify(resultObj, null, 2)
+      if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text)
+      } else {
+        const temp = document.createElement('textarea')
+        temp.value = text
+        temp.setAttribute('readonly', '')
+        temp.style.position = 'absolute'
+        temp.style.left = '-9999px'
+        document.body.appendChild(temp)
+        temp.select()
+        document.execCommand('copy')
+        document.body.removeChild(temp)
+      }
+      setCopyFeedback('Copied!')
+    } catch (err) {
+      console.error('Copy failed', err)
+      setCopyFeedback('Copy failed')
+    }
+    if (copyTimeout.current) clearTimeout(copyTimeout.current)
+    copyTimeout.current = setTimeout(() => {
+      setCopyFeedback('')
+      copyTimeout.current = null
+    }, 2000)
+  }
+
   return (
     <section className="md:col-span-6 space-y-3">
       <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">Structure Editor</h3>
@@ -136,7 +176,22 @@ export default function Editor({
         <div className="rounded-md border border-red-300 bg-red-50 p-2 text-sm text-red-800 dark:border-red-800/60 dark:bg-red-900/40 dark:text-red-200">{error}</div>
       ) : null}
       <section className="space-y-2">
-        <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">Last Created Object</h3>
+        <div className="flex items-center justify-between gap-2">
+          <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">Last Created Object</h3>
+          {resultObj ? (
+            <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+              {copyFeedback ? <span>{copyFeedback}</span> : null}
+              <button
+                type="button"
+                onClick={handleCopy}
+                className="inline-flex items-center gap-1 rounded-md border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800"
+              >
+                <DocumentDuplicateIcon className="h-4 w-4" aria-hidden="true" />
+                Copy JSON
+              </button>
+            </div>
+          ) : null}
+        </div>
         {resultObj ? <JsonBlock value={resultObj} /> : (
           <div className="rounded-lg border border-slate-200 bg-white/60 p-4 text-sm text-slate-500 dark:border-slate-800 dark:bg-slate-900/50 dark:text-slate-400">
             No object created yet. The response from /obj will appear here.
