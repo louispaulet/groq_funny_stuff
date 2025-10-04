@@ -1,0 +1,118 @@
+import { useMemo } from 'react'
+
+function TextArea({ value, onChange, rows = 10, placeholder }) {
+  return (
+    <textarea
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      rows={rows}
+      spellCheck={false}
+      className="mt-1 block w-full rounded-lg border border-slate-300 bg-white/90 p-2 font-mono text-[13px] text-slate-800 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-100"
+      placeholder={placeholder}
+    />
+  )
+}
+
+function JsonBlock({ value }) {
+  const content = useMemo(() => {
+    try { return JSON.stringify(value, null, 2) } catch { return '' }
+  }, [value])
+  return (
+    <pre className="max-h-80 overflow-auto rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs text-slate-800 dark:border-slate-700 dark:bg-slate-900/50 dark:text-slate-200">{content}</pre>
+  )
+}
+
+export default function Editor({
+  structureText,
+  setStructureText,
+  onValidate,
+  objectType,
+  setObjectType,
+  objectTitle,
+  setObjectTitle,
+  createPrompt,
+  setCreatePrompt,
+  systemText,
+  setSystemText,
+  onCreate,
+  createLoading,
+  error,
+  resultObj,
+}) {
+  return (
+    <section className="md:col-span-6 space-y-3">
+      <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">Structure Editor</h3>
+      <p className="text-xs text-slate-500 dark:text-slate-400">Provide a JSON Schema object (must include {`"type":"object"`}).</p>
+      <TextArea
+        value={structureText}
+        onChange={setStructureText}
+        rows={16}
+        placeholder='{"type":"object","properties":{"name":{"type":"string"},"toppings":{"type":"array","items":{"type":"string"}}}}'
+      />
+      <label className="block text-sm">
+        <span className="mr-1 text-slate-600 dark:text-slate-300">Object Prompt</span>
+        <input
+          value={createPrompt}
+          onChange={(e) => setCreatePrompt(e.target.value)}
+          className="mt-1 block w-full rounded-md border border-slate-300 bg-white px-2 py-2 text-sm text-slate-800 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+          placeholder="Describe the instance to create (e.g., 'A Margherita with basil and fresh mozzarella')"
+        />
+      </label>
+      <label className="block text-sm">
+        <span className="mr-1 text-slate-600 dark:text-slate-300">System Instruction (optional)</span>
+        <input
+          value={systemText}
+          onChange={(e) => setSystemText(e.target.value)}
+          className="mt-1 block w-full rounded-md border border-slate-300 bg-white px-2 py-2 text-sm text-slate-800 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+          placeholder="You create a pizza object that conforms strictly to the provided JSON Schema; return only JSON."
+        />
+      </label>
+      <div className="flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          onClick={onValidate}
+          className="rounded-md bg-amber-600 px-3 py-1.5 text-sm font-medium text-white shadow hover:bg-amber-500"
+        >
+          Validate JSON
+        </button>
+        <label className="text-sm text-slate-600 dark:text-slate-300">
+          <span className="mr-1">Type</span>
+          <input
+            value={objectType}
+            onChange={(e) => setObjectType(e.target.value)}
+            className="rounded-md border border-slate-300 bg-white px-2 py-1 text-sm text-slate-800 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+            placeholder="pizza | hot_sauce | car"
+          />
+        </label>
+        <label className="text-sm text-slate-600 dark:text-slate-300">
+          <span className="mr-1">Title</span>
+          <input
+            value={objectTitle}
+            onChange={(e) => setObjectTitle(e.target.value)}
+            className="rounded-md border border-slate-300 bg-white px-2 py-1 text-sm text-slate-800 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+            placeholder="Margherita | Extra Spicy | Sedan"
+          />
+        </label>
+        <button
+          type="button"
+          onClick={onCreate}
+          disabled={createLoading}
+          className="ml-auto rounded-md bg-amber-700 px-3 py-1.5 text-sm font-semibold text-white shadow hover:bg-amber-600 disabled:opacity-50"
+        >
+          {createLoading ? 'Creating…' : 'Create Object'}
+        </button>
+      </div>
+      {error ? (
+        <div className="rounded-md border border-red-300 bg-red-50 p-2 text-sm text-red-800 dark:border-red-800/60 dark:bg-red-900/40 dark:text-red-200">{error}</div>
+      ) : null}
+      <section className="space-y-2">
+        <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">Last Created Object</h3>
+        {resultObj ? <JsonBlock value={resultObj} /> : (
+          <div className="rounded-lg border border-slate-200 bg-white/60 p-4 text-sm text-slate-500 dark:border-slate-800 dark:bg-slate-900/50 dark:text-slate-400">
+            No object created yet. The response from /obj will appear here.
+          </div>
+        )}
+      </section>
+    </section>
+  )
+}

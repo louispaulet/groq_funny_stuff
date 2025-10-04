@@ -42,6 +42,38 @@ export const experiences = [
     defaultBaseUrl: (getEnvValue('VITE_ALLERGY_CHAT_BASE_URL') || FALLBACK_BASE_URL).replace(/\/$/, ''),
   },
   {
+    id: 'objectmaker',
+    path: '/objectmaker',
+    name: 'Object Maker',
+    headline: 'Design JSON → Create Objects',
+    description:
+      'Handcraft a JSON structure or ask the assistant to propose one, then call the /obj endpoint to instantiate concrete objects. Save results and browse them in the Zoo.',
+    badge: 'Builder',
+    heroGradient: 'from-yellow-400 to-amber-600',
+    panelAccent: 'bg-yellow-100 text-yellow-900 dark:bg-yellow-500/20 dark:text-yellow-200',
+    navAccent: {
+      gradient: 'from-yellow-400 to-amber-600',
+      hover:
+        'hover:bg-yellow-500/10 hover:text-amber-600 hover:border-amber-400/60 dark:hover:bg-yellow-500/20 dark:hover:text-yellow-200 dark:hover:border-amber-400/60',
+      focus: 'focus-visible:ring-yellow-500/40',
+    },
+    defaultModel: 'openai/gpt-oss-20b',
+    modelOptions: ['openai/gpt-oss-20b', 'openai/gpt-oss-120b'],
+    greeting:
+      'Describe an object you want (e.g., pizza, hot sauce, car). I will propose a JSON Schema with type "object" and useful properties.',
+    promptPlaceholder: 'Describe the JSON Schema you want…',
+    systemPrompt: [
+      'You help design concise JSON Schema definitions (draft-agnostic) for a single object.',
+      'Always return exactly one JSON object that is a JSON Schema with top-level "type":"object" and a "properties" map.',
+      'Prefer simple types (string, number, integer, boolean, array, object). Include "items" for arrays. Avoid examples or prose.',
+      'Do not include markdown fences or backticks. Return only the JSON Schema object.',
+    ].join(' '),
+    allowBaseUrlOverride: false,
+    enableStlViewer: false,
+    logLabel: 'Object Maker',
+    defaultBaseUrl: (getEnvValue('VITE_OBJECTMAKER_CHAT_BASE_URL') || FALLBACK_BASE_URL).replace(/\/$/, ''),
+  },
+  {
     id: 'stlviewer',
     path: '/stlviewer',
     name: 'STL Studio',
