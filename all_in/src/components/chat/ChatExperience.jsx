@@ -18,7 +18,7 @@ import { enhanceAssistantContent } from '../../lib/assistantPostprocess'
 function normalizeBaseUrl(raw) {
   const candidate = (raw || '').trim()
   if (!candidate) {
-    throw new Error('Service base URL is required.')
+    throw new Error('Endpoint is required.')
   }
   return candidate.replace(/\/$/, '')
 }
@@ -373,7 +373,7 @@ export default function ChatExperience({ experience }) {
     }
   }
 
-  const baseUrlReadonly = experience?.allowBaseUrlOverride ? null : (baseUrl || experience?.defaultBaseUrl || '')
+  const endpointDisplay = baseUrl || experience?.defaultBaseUrl || ''
 
   return (
     <div className="grid gap-6 md:grid-cols-12">
@@ -398,31 +398,6 @@ export default function ChatExperience({ experience }) {
             </div>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
               <ModelSelector value={model} onChange={setModel} options={experience?.modelOptions || []} />
-              {experience?.allowBaseUrlOverride ? (
-                <label className="block text-sm">
-                  <span className="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Service base URL</span>
-                  <input
-                    type="url"
-                    value={baseUrl}
-                    onChange={(event) => setBaseUrl(event.target.value)}
-                    onBlur={(event) => {
-                      try {
-                        setBaseUrl(normalizeBaseUrl(event.target.value))
-                      } catch {
-                        // keep raw input; validation happens on send
-                      }
-                    }}
-                    className="mt-1 block w-64 rounded-md border border-slate-300 bg-white px-2 py-2 text-sm text-slate-800 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
-                    placeholder="https://your-endpoint.example"
-                    disabled={loading}
-                  />
-                </label>
-              ) : (
-                <div className="min-w-[16rem] rounded-md border border-slate-200 bg-white px-3 py-2 text-xs text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
-                  <div className="uppercase tracking-wide text-[10px] text-slate-500 dark:text-slate-400">Service base URL</div>
-                  <code className="break-all text-[12px]">{baseUrlReadonly || 'Not configured'}</code>
-                </div>
-              )}
             </div>
           </div>
           <div className="mt-3 grid gap-2 text-xs text-slate-500 dark:text-slate-400 sm:grid-cols-2">
@@ -430,7 +405,7 @@ export default function ChatExperience({ experience }) {
               <span className="font-semibold text-slate-600 dark:text-slate-300">Assistant</span>: {assistantName}
             </div>
             <div>
-              <span className="font-semibold text-slate-600 dark:text-slate-300">Endpoint</span>: {baseUrlReadonly || baseUrl || 'Not configured'}
+              <span className="font-semibold text-slate-600 dark:text-slate-300">Endpoint</span>: {endpointDisplay || 'Not configured'}
             </div>
           </div>
         </div>
