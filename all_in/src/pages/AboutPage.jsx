@@ -26,7 +26,7 @@ export default function AboutPage() {
         <article className="space-y-3 rounded-2xl border border-slate-200 bg-white/80 p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/70">
           <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">1. Frontend studio 🖥️</h2>
           <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-            🧱 The <code>all_in/</code> workspace is the production React shell that unifies the Pokédex, AllergyFinder, STL Viewer,
+             The <code>all_in/</code> workspace is the production React shell that unifies the Pokédex, AllergyFinder, STL Viewer,
             and Object Maker experiences for deployment. It is the only project that ships live, while reusing shared chat and UI
             components across each tab.
           </p>
