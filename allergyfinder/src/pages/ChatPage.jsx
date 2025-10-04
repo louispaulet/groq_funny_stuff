@@ -4,12 +4,14 @@ import Sidebar from '../components/Sidebar'
 import MessageList from '../components/chat/MessageList'
 import Composer from '../components/chat/Composer'
 import { callRemoteChat } from '../lib/remoteChat'
+import BarcodeScannerModal from '../components/common/BarcodeScannerModal'
 
 const DEFAULT_MODEL = 'openai/gpt-oss-20b'
 const GREETING = "Hi! Ask me about allergens in any food and I'll use OpenFoodFacts to help."
 const SYSTEM_PROMPT = [
   'You are an allergy assistant that uses OpenFoodFacts data to answer questions about food allergens.',
   'Use the provided context when it is relevant and be transparent about any gaps.',
+  'When a barcode or OpenFoodFacts code is available, share the product page URL in the form https://fr.openfoodfacts.org/produit/<code> (substitute the numeric code).',
   'Encourage users to double-check packaging for medical decisions.',
 ].join(' ')
 
@@ -34,13 +36,15 @@ export default function ChatPage() {
   const [activeId, setActiveId] = useState('conv-1')
   const [prompt, setPrompt] = useState('')
   const [loading, setLoading] = useState(false)
+  const [scannerOpen, setScannerOpen] = useState(false)
   const abortRef = useRef(null)
 
   const current = conversations.find((c) => c.id === activeId)
   const messages = current?.messages || []
 
-  async function handleSend() {
-    const trimmed = prompt.trim()
+  async function handleSend(inputText) {
+    const text = typeof inputText === 'string' ? inputText : prompt
+    const trimmed = text.trim()
     if (!trimmed || loading) return
 
     const timestamp = Date.now()
@@ -157,6 +161,14 @@ export default function ChatPage() {
     )))
   }
 
+  function handleBarcodeDetected(code) {
+    const normalized = `${code}`.trim()
+    if (!normalized) return
+    setScannerOpen(false)
+    setPrompt(normalized)
+    handleSend(normalized)
+  }
+
   function handleNewConversation() {
     if (loading) return
     const id = `conv-${Date.now()}`
@@ -198,10 +210,16 @@ export default function ChatPage() {
               onStop={handleStop}
               loading={loading}
               onClear={handleClear}
+              onOpenScanner={() => setScannerOpen(true)}
             />
           </main>
         </div>
       </div>
+      <BarcodeScannerModal
+        open={scannerOpen}
+        onClose={() => setScannerOpen(false)}
+        onDetected={handleBarcodeDetected}
+      />
     </div>
   )
 }

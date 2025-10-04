@@ -1,4 +1,4 @@
-import { API_ROOT, TAG_PREFIX } from './constants.js'
+import { API_ROOT, TAG_PREFIX, buildProductPageUrl } from './constants.js'
 
 function cleanTag(tag) {
   if (!tag) return ''
@@ -48,8 +48,18 @@ export function formatProductContext(product) {
   if (traces) lines.push(`Possible traces: ${traces}`)
   if (analysis) lines.push(`Ingredient analysis tags: ${analysis}`)
   if (ingredients) lines.push(`Ingredients summary: ${ingredients}`)
-  const sourceLink = product.link || product.url || (product.code ? `${API_ROOT}/product/${product.code}` : '')
-  if (sourceLink) lines.push(`Source: ${sourceLink}`)
+  const resolvedProductPage = product._resolvedProductPageUrl || ''
+  const fallbackProductPage = buildProductPageUrl(product.code)
+  const productPage = resolvedProductPage || fallbackProductPage
+  const worldPage = product.code ? `${API_ROOT}/product/${product.code}` : ''
+  const sourceLink = product.link || product.url || worldPage
+
+  if (productPage) {
+    lines.push(`OpenFoodFacts product page: ${productPage}`)
+  }
+  if (sourceLink && sourceLink !== productPage) {
+    lines.push(`Source: ${sourceLink}`)
+  }
 
   lines.push('Reminder: verify allergen information on the official packaging when in doubt.')
 

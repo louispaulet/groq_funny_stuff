@@ -1,11 +1,20 @@
-import { PaperAirplaneIcon, StopIcon, TrashIcon } from '@heroicons/react/24/solid'
+import { CameraIcon, PaperAirplaneIcon, StopIcon, TrashIcon } from '@heroicons/react/24/solid'
 
-export default function Composer({ value, onChange, onSend, onStop, loading, onClear, placeholder }) {
+export default function Composer({
+  value,
+  onChange,
+  onSend,
+  onStop,
+  loading,
+  onClear,
+  placeholder,
+  onOpenScanner,
+}) {
   return (
     <form
       onSubmit={(event) => {
         event.preventDefault()
-        if (!loading) onSend?.()
+        if (!loading) onSend?.(value)
       }}
       className="sticky bottom-0 w-full"
     >
@@ -19,7 +28,7 @@ export default function Composer({ value, onChange, onSend, onStop, loading, onC
           onKeyDown={(event) => {
             if (event.key === 'Enter' && !event.shiftKey) {
               event.preventDefault()
-              if (!loading) onSend?.()
+              if (!loading) onSend?.(value)
             }
           }}
         />
@@ -35,6 +44,16 @@ export default function Composer({ value, onChange, onSend, onStop, loading, onC
             </button>
           ) : (
             <>
+              {onOpenScanner && (
+                <button
+                  type="button"
+                  onClick={() => onOpenScanner?.()}
+                  className="inline-flex items-center rounded-xl bg-slate-100 px-3 py-2 text-slate-700 hover:bg-slate-200 dark:bg-slate-800/80 dark:text-slate-200 dark:hover:bg-slate-700"
+                  title="Scan barcode"
+                >
+                  <CameraIcon className="h-5 w-5" />
+                </button>
+              )}
               <button
                 type="button"
                 onClick={onClear}

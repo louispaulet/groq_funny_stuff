@@ -13,6 +13,7 @@ test('formats context with allergens, traces, and ingredients', () => {
     ingredients_analysis_tags: ['en:palm-oil:yes', 'en:vegan:no'],
     ingredients_text_en: 'Sugar, palm oil, hazelnuts, cocoa, skim milk, soy lecithin, vanillin',
     link: 'https://example.com/nutella',
+    _resolvedProductPageUrl: 'https://fr.openfoodfacts.org/produit/3017620425035/nutella-ferrero',
   }
 
   const context = formatProductContext(product)
@@ -23,6 +24,7 @@ test('formats context with allergens, traces, and ingredients', () => {
   assert.ok(context.includes('Possible traces: gluten'))
   assert.ok(context.includes('Ingredient analysis tags: palm-oil:yes, vegan:no'))
   assert.ok(context.includes('Ingredients summary: Sugar, palm oil, hazelnuts, cocoa, skim milk, soy lecithin, vanillin'))
+  assert.ok(context.includes('OpenFoodFacts product page: https://fr.openfoodfacts.org/produit/3017620425035/nutella-ferrero'))
   assert.ok(context.includes('Source: https://example.com/nutella'))
   assert.ok(context.includes('Reminder: verify allergen information'))
 })
@@ -45,6 +47,7 @@ test('truncates ingredients and builds fallback source link', () => {
   const product = {
     code: '999',
     product_name: 'Test Product',
+    _resolvedProductPageUrl: 'https://fr.openfoodfacts.org/produit/999/test-product',
     ingredients_text: longText,
   }
 
@@ -52,5 +55,6 @@ test('truncates ingredients and builds fallback source link', () => {
 
   const expectedSnippet = `${'a'.repeat(600)}…`
   assert.ok(context.includes(expectedSnippet))
+  assert.ok(context.includes('OpenFoodFacts product page: https://fr.openfoodfacts.org/produit/999/test-product'))
   assert.ok(context.includes('Source: https://world.openfoodfacts.org/product/999'))
 })

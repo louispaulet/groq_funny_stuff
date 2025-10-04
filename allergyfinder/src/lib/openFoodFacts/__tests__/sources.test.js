@@ -52,7 +52,7 @@ test('falls back to OpenFoodFacts product code when only barcode provided', () =
   assert.equal(sources.length, 1)
   assert.deepEqual(sources[0], {
     label: 'OpenFoodFacts product 12345',
-    url: 'https://world.openfoodfacts.org/product/12345',
+    url: 'https://fr.openfoodfacts.org/produit/12345',
     code: '12345',
   })
 })

@@ -1,6 +1,11 @@
 import candidateSchema from '../offCandidateSchema.js'
 
 export const API_ROOT = 'https://world.openfoodfacts.org'
+export const PRODUCT_PAGE_DEFAULT_LOCALE = 'fr'
+export const PRODUCT_PAGE_ROOTS = {
+  fr: 'https://fr.openfoodfacts.org/produit',
+  world: 'https://world.openfoodfacts.org/product',
+}
 export const CLASSIC_SEARCH_ENDPOINT = `${API_ROOT}/cgi/search.pl`
 export const PRODUCT_ENDPOINT = `${API_ROOT}/api/v2/product`
 export const SEARCH_FIELDS = [
@@ -37,3 +42,12 @@ export const STOPWORDS = new Set([
 export const DEFAULT_GROQ_MODEL = 'openai/gpt-oss-20b'
 
 export { candidateSchema }
+
+export function buildProductPageUrl(code, { locale = PRODUCT_PAGE_DEFAULT_LOCALE, slug = '' } = {}) {
+  const normalized = `${code || ''}`.trim()
+  if (!normalized) return ''
+  const root = PRODUCT_PAGE_ROOTS[locale] || PRODUCT_PAGE_ROOTS[PRODUCT_PAGE_DEFAULT_LOCALE] || PRODUCT_PAGE_ROOTS.world
+  if (!root) return ''
+  const suffix = slug ? `/${slug}` : ''
+  return `${root}/${normalized}${suffix}`
+}
