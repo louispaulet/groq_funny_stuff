@@ -1,15 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
-  <defs>
-    <linearGradient id="tileGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#14b8a6" />
-      <stop offset="100%" stop-color="#2563eb" />
-    </linearGradient>
-  </defs>
-  <rect width="64" height="64" rx="16" fill="url(#tileGradient)" />
-  <g fill="#f8fafc">
-    <rect x="14" y="16" width="8" height="32" rx="4" opacity="0.88" />
-    <rect x="28" y="12" width="8" height="40" rx="4" opacity="0.94" />
-    <rect x="42" y="16" width="8" height="32" rx="4" opacity="0.88" />
-  </g>
-  <rect x="8" y="8" width="48" height="48" rx="14" fill="none" stroke="rgba(15,23,42,0.18)" stroke-width="1.5" />
+  <rect width="64" height="64" rx="16" fill="#4f46e5" />
+  <text
+    x="32"
+    y="40"
+    text-anchor="middle"
+    fill="#f8fafc"
+    font-family="'Inter', 'Segoe UI', 'Helvetica Neue', sans-serif"
+    font-size="28"
+    font-weight="600"
+    letter-spacing="4"
+  >llI</text>
 </svg>

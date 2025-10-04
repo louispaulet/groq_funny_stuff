@@ -4,8 +4,7 @@ export default function AboutPage() {
   return (
     <div className="space-y-12">
       <section className="rounded-3xl bg-gradient-to-br from-slate-900 via-brand-700 to-indigo-600 px-8 py-12 text-white shadow-xl">
-        <div className="flex flex-col items-start gap-8 md:flex-row md:items-center md:justify-between">
-          <div className="max-w-3xl space-y-4">
+        <div className="max-w-3xl space-y-4">
           <p className="text-sm uppercase tracking-[0.3em] text-white/70">About Groq AllIn Studio</p>
           <h1 className="text-3xl font-semibold sm:text-4xl">Crafting a playful control room for every Groq chat 🤝</h1>
           <p className="text-base text-white/90">
@@ -17,10 +16,6 @@ export default function AboutPage() {
           >
             Back to Overview
           </Link>
-          </div>
-          <div className="flex shrink-0 items-center justify-center self-center rounded-3xl border border-white/40 bg-white/10 p-6 shadow-2xl backdrop-blur-sm md:self-auto">
-            <img src="/logo.svg" alt="Groq AllIn Studio logo" className="h-20 w-20 rounded-2xl" />
-          </div>
         </div>
       </section>
 
@@ -53,7 +48,7 @@ export default function AboutPage() {
         <ul className="mt-4 space-y-2 text-sm text-slate-600 dark:text-slate-400">
           <li>🌈 Shared color tokens keep AllergyFinder, STL Viewer, and the Pokédex distinct without jarring swaps.</li>
           <li>🧭 Navigation hugs the top so you can jump tabs muscle-memory style, no matter the screen size.</li>
-          <li>😄 Our favorite trio of lines glows inside a teal-to-indigo tile, so the logo stays playful without losing polish.</li>
+          <li>😄 The logo spells "llI" because that trio of lines makes us grin every time—playful branding on a serious engine.</li>
           <li>⚡️ Micro-interactions (hover lifts, quick fades) help you sense responsiveness even before the model replies.</li>
         </ul>
         <p className="mt-4 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
