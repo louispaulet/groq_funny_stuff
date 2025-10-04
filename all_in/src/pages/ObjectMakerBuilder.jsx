@@ -33,8 +33,8 @@ export default function ObjectMakerBuilder() {
           onValidate={state.validateStructure}
           objectType={state.objectType}
           setObjectType={state.setObjectType}
-          objectTitle={state.objectTitle}
-          setObjectTitle={state.setObjectTitle}
+          objectName={state.objectName}
+          setObjectName={state.setObjectName}
           createPrompt={state.createPrompt}
           setCreatePrompt={state.setCreatePrompt}
           systemText={state.systemText}

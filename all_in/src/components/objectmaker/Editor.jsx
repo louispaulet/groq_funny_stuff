@@ -28,8 +28,8 @@ export default function Editor({
   onValidate,
   objectType,
   setObjectType,
-  objectTitle,
-  setObjectTitle,
+  objectName,
+  setObjectName,
   createPrompt,
   setCreatePrompt,
   systemText,
@@ -115,12 +115,12 @@ export default function Editor({
           />
         </label>
         <label className="text-sm text-slate-600 dark:text-slate-300">
-          <span className="mr-1">Title</span>
+          <span className="mr-1">Object Name (optional)</span>
           <input
-            value={objectTitle}
-            onChange={(e) => setObjectTitle(e.target.value)}
+            value={objectName}
+            onChange={(e) => setObjectName(e.target.value)}
             className="rounded-md border border-slate-300 bg-white px-2 py-1 text-sm text-slate-800 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
-            placeholder="Margherita | Extra Spicy | Sedan"
+            placeholder="diavola"
           />
         </label>
         <button

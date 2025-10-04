@@ -22,7 +22,7 @@ export const DEFAULT_STRUCTURE = {
 export const DEFAULT_STRUCTURE_TEXT = JSON.stringify(DEFAULT_STRUCTURE, null, 2)
 export const DEFAULT_OBJECT_PROMPT = 'make a delicious spicy pizza that respects this schema'
 export const DEFAULT_OBJECT_TYPE = 'pizza'
-export const DEFAULT_OBJECT_TITLE = 'diavola'
+export const DEFAULT_OBJECT_NAME = ''
 
 function buildMessages(history, systemPrompt) {
   const sys = systemPrompt ? [{ role: 'system', content: systemPrompt }] : []
@@ -112,7 +112,7 @@ export function useObjectMakerBuilderState(experience) {
   const [createLoading, setCreateLoading] = useState(false)
   const [resultObj, setResultObj] = useState(null)
   const [objectType, setObjectType] = useState(DEFAULT_OBJECT_TYPE)
-  const [objectTitle, setObjectTitle] = useState(DEFAULT_OBJECT_TITLE)
+  const [objectName, setObjectName] = useState(DEFAULT_OBJECT_NAME)
   const [createPrompt, setCreatePrompt] = useState(DEFAULT_OBJECT_PROMPT)
   const [systemText, setSystemText] = useState(DEFAULT_SYSTEM_PROMPT)
   const [temperature, setTemperature] = useState('0')
@@ -244,7 +244,7 @@ export function useObjectMakerBuilderState(experience) {
       })
       setResultObj(payload)
       const derivedType = (effectiveType || payload?.type || structure?.type || 'object').toString()
-      const derivedTitle = (objectTitle || payload?.name || payload?.title || derivedType).toString()
+      const derivedTitle = (payload?.name || objectName || payload?.title || derivedType).toString()
       addZooEntry({
         id: `obj-${Date.now().toString(16)}`,
         type: derivedType,
@@ -282,8 +282,8 @@ export function useObjectMakerBuilderState(experience) {
     validateStructure,
     objectType,
     setObjectType,
-    objectTitle,
-    setObjectTitle,
+    objectName,
+    setObjectName,
     createPrompt,
     setCreatePrompt,
     systemText,
