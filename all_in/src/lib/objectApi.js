@@ -10,29 +10,6 @@ function getEnvValue(key) {
 
 const FALLBACK_BASE_URL = (getEnvValue('VITE_CHAT_BASE_URL') || 'https://groq-endpoint.louispaulet13.workers.dev').replace(/\/$/, '')
 
-function getStableUserId() {
-  const envUser = (
-    getEnvValue('VITE_OBJECTMAKER_USER') ||
-    getEnvValue('VITE_CHAT_USER') ||
-    getEnvValue('VITE_USER')
-  )
-  const s = (envUser || '').toString().trim()
-  if (s) return s
-  const key = 'allin_user_id'
-  try {
-    if (typeof localStorage !== 'undefined' && localStorage) {
-      let id = localStorage.getItem(key)
-      if (id && id.trim()) return id.trim()
-      id = `ui-${Math.random().toString(36).slice(2, 10)}`
-      localStorage.setItem(key, id)
-      return id
-    }
-  } catch (_) {
-    // ignore storage errors and fall back to ephemeral id
-  }
-  return `ui-${Math.random().toString(36).slice(2, 10)}`
-}
-
 function preview(text = '', length = 160) {
   const t = (text || '').toString().trim()
   return t.length <= length ? t : `${t.slice(0, length)}...`
@@ -41,16 +18,51 @@ function preview(text = '', length = 160) {
 function normalizeResponseSchema(schema) {
   if (!schema || typeof schema !== 'object') return schema
   try {
-    const s = JSON.parse(JSON.stringify(schema))
-    if (s.type === 'object') {
-      const props = s.properties && typeof s.properties === 'object' ? s.properties : {}
-      const keys = Object.keys(props)
-      if (!('additionalProperties' in s)) s.additionalProperties = false
-      const existingReq = Array.isArray(s.required) ? s.required.filter((k) => typeof k === 'string') : []
-      const requiredSet = new Set([...existingReq, ...keys])
-      s.required = Array.from(requiredSet)
+    const clone = JSON.parse(JSON.stringify(schema))
+
+    const visit = (node) => {
+      if (!node || typeof node !== 'object') return
+
+      if (node.type === 'object') {
+        if (node.additionalProperties !== false) node.additionalProperties = false
+        const props = node.properties && typeof node.properties === 'object' ? node.properties : {}
+        const keys = Object.keys(props)
+        if (keys.length) {
+          const existing = Array.isArray(node.required) ? node.required.filter((k) => typeof k === 'string') : []
+          const required = new Set([...existing, ...keys])
+          node.required = Array.from(required)
+        }
+        Object.values(props).forEach(visit)
+        const patternProps = node.patternProperties && typeof node.patternProperties === 'object' ? node.patternProperties : {}
+        Object.values(patternProps).forEach(visit)
+        const deps = node.dependencies && typeof node.dependencies === 'object' ? node.dependencies : {}
+        Object.values(deps).forEach((value) => {
+          if (value && typeof value === 'object') visit(value)
+        })
+      }
+
+      if (node.items) {
+        if (Array.isArray(node.items)) node.items.forEach(visit)
+        else visit(node.items)
+      }
+
+      for (const key of ['allOf', 'anyOf', 'oneOf']) {
+        if (Array.isArray(node[key])) node[key].forEach(visit)
+      }
+
+      for (const key of ['not', 'if', 'then', 'else']) {
+        if (node[key] && typeof node[key] === 'object') visit(node[key])
+      }
+
+      for (const defsKey of ['definitions', '$defs']) {
+        if (node[defsKey] && typeof node[defsKey] === 'object') {
+          Object.values(node[defsKey]).forEach(visit)
+        }
+      }
     }
-    return s
+
+    visit(clone)
+    return clone
   } catch {
     return schema
   }
@@ -62,11 +74,20 @@ function normalizeType(raw) {
   // Keep underscores, hyphens; collapse spaces to underscores
   return s
     .replace(/\s+/g, '_')
-    .replace(/[^a-zA-Z0-9_\-]/g, '')
+    .replace(/[^a-zA-Z0-9_-]/g, '')
     .toLowerCase()
 }
 
-export async function createRemoteObject({ baseUrl, structure, model, objectType, prompt, system } = {}) {
+export async function createRemoteObject({
+  baseUrl,
+  structure,
+  model,
+  objectType,
+  prompt,
+  system,
+  temperature,
+  strict,
+} = {}) {
   const base = (baseUrl || FALLBACK_BASE_URL || '').replace(/\/$/, '')
   if (!base) throw new Error('Missing service base URL for /obj')
 
@@ -99,14 +120,16 @@ export async function createRemoteObject({ baseUrl, structure, model, objectType
 
   // de-duplicate and ensure leading slash
   pathCandidates = Array.from(new Set(pathCandidates.filter(Boolean).map((p) => (p.startsWith('/') ? p : `/${p}`))))
-  const p = (prompt || '').toString()
+  const userPrompt = (prompt || '').toString().trim()
+  if (!userPrompt) throw new Error('Object prompt is required to call /obj')
   const defaultSystem = `You are an object maker. Produce a single JSON object that strictly conforms to the provided JSON Schema. Do not include commentary or markdown. Only return the JSON object.`
-  const sys = (system || defaultSystem).toString()
-  const user = getStableUserId()
+  const sys = (system || defaultSystem).toString().trim() || defaultSystem
   const schema = normalizeResponseSchema(structure)
-  const payloadBody = { schema, system: sys, user }
-  if (p) payloadBody.prompt = p
+  const payloadBody = { schema, system: sys, user: userPrompt }
+  const temperatureNumber = typeof temperature === 'number' ? temperature : Number.parseFloat(temperature)
+  if (Number.isFinite(temperatureNumber)) payloadBody.temperature = temperatureNumber
   if (model) payloadBody.model = model
+  if (typeof strict === 'boolean') payloadBody.strict = strict
   const bodyCandidates = [payloadBody]
 
   let lastError = null

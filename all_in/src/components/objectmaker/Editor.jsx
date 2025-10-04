@@ -34,6 +34,10 @@ export default function Editor({
   setCreatePrompt,
   systemText,
   setSystemText,
+  temperature,
+  setTemperature,
+  strictMode,
+  setStrictMode,
   onCreate,
   createLoading,
   error,
@@ -50,7 +54,7 @@ export default function Editor({
         placeholder='{"type":"object","properties":{"name":{"type":"string"},"toppings":{"type":"array","items":{"type":"string"}}}}'
       />
       <label className="block text-sm">
-        <span className="mr-1 text-slate-600 dark:text-slate-300">Object Prompt</span>
+        <span className="mr-1 text-slate-600 dark:text-slate-300">User Prompt</span>
         <input
           value={createPrompt}
           onChange={(e) => setCreatePrompt(e.target.value)}
@@ -59,7 +63,7 @@ export default function Editor({
         />
       </label>
       <label className="block text-sm">
-        <span className="mr-1 text-slate-600 dark:text-slate-300">System Instruction (optional)</span>
+        <span className="mr-1 text-slate-600 dark:text-slate-300">System Instruction</span>
         <input
           value={systemText}
           onChange={(e) => setSystemText(e.target.value)}
@@ -67,6 +71,32 @@ export default function Editor({
           placeholder="You create a pizza object that conforms strictly to the provided JSON Schema; return only JSON."
         />
       </label>
+      <div className="flex flex-wrap gap-3">
+        <label className="text-sm text-slate-600 dark:text-slate-300">
+          <span className="mr-1">Temperature</span>
+          <input
+            type="number"
+            value={temperature}
+            onChange={(e) => setTemperature(e.target.value)}
+            min="0"
+            max="2"
+            step="0.1"
+            className="mt-1 block w-24 rounded-md border border-slate-300 bg-white px-2 py-1 text-sm text-slate-800 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+          />
+        </label>
+        <label className="text-sm text-slate-600 dark:text-slate-300">
+          <span className="mr-1">Strict mode</span>
+          <select
+            value={strictMode}
+            onChange={(e) => setStrictMode(e.target.value)}
+            className="mt-1 block rounded-md border border-slate-300 bg-white px-2 py-1 text-sm text-slate-800 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+          >
+            <option value="auto">Auto (service decides)</option>
+            <option value="true">Force strict validation</option>
+            <option value="false">Relaxed validation</option>
+          </select>
+        </label>
+      </div>
       <div className="flex flex-wrap items-center gap-3">
         <button
           type="button"
