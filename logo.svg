@@ -1,16 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
-  <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#14b8a6"/>
-      <stop offset="100%" stop-color="#0ea5e9"/>
-    </linearGradient>
-  </defs>
-  <!-- Chat bubble -->
-  <path d="M12 10h40a8 8 0 0 1 8 8v14a8 8 0 0 1-8 8H30l-12 8v-8H12a8 8 0 0 1-8-8V18a8 8 0 0 1 8-8z" fill="url(#g)"/>
-  <!-- Cube (STL) -->
-  <g transform="translate(21 20)">
-    <path d="M11 2 22 8 11 14 0 8 11 2z" fill="#ffffff" fill-opacity="0.9"/>
-    <path d="M11 14V26L22 20V8L11 14z" fill="#ffffff" fill-opacity="0.8"/>
-    <path d="M11 14V26L0 20V8l11 6z" fill="#e2f3ff" fill-opacity="0.9"/>
-  </g>
+  <rect width="64" height="64" rx="16" fill="#4f46e5" />
+  <text
+    x="32"
+    y="40"
+    text-anchor="middle"
+    fill="#f8fafc"
+    font-family="'Inter', 'Segoe UI', 'Helvetica Neue', sans-serif"
+    font-size="28"
+    font-weight="600"
+    letter-spacing="4"
+  >llI</text>
 </svg>
