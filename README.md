@@ -1,5 +1,7 @@
 # groq_funny_stuff
 
+![Illustration banner showing the Groq AllIn Studio experiences](all_in/allin_illustration_banner.png)
+
 Groq AllIn Studio is the flagship experience in this repo: a single React workspace that bundles the Pokédex, AllergyFinder, and STL viewer demos behind one shell. The live deployment is available at https://groq-allin.thefrenchartist.dev/. The legacy folders remain for focused local work, but only `all_in` is packaged for production.
 
 ## Overview
