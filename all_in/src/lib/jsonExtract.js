@@ -3,7 +3,9 @@ export function tryParseJson(text) {
   try {
     const parsed = JSON.parse(text)
     if (parsed && typeof parsed === 'object') return parsed
-  } catch {}
+  } catch {
+    return null
+  }
   return null
 }
 

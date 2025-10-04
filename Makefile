@@ -11,6 +11,7 @@ run:
 
 test:
 	cd $(ALLIN_DIR) && npm run lint
+	cd $(ALLIN_DIR) && npm run test
 
 deploy:
 	cd $(ALLIN_DIR) && npm run deploy
