@@ -9,7 +9,7 @@ export default function ObjectMakerBuilder() {
   const state = useObjectMakerBuilderState(experience)
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="grid gap-6 md:grid-cols-12">
         <Settings
           baseUrl={state.baseUrl}
