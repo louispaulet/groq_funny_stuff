@@ -62,18 +62,40 @@ export default function BarcodeScannerModal({ open, onClose, onDetected }) {
     async function prepareDevices() {
       setError('')
       try {
+        if (!navigator?.mediaDevices?.getUserMedia) {
+          setError('This browser does not support camera access. Please try a different browser.')
+          setStatus('')
+          setInitializing(false)
+          return
+        }
+
+        setInitializing(true)
+        setStatus('Requesting camera access…')
+
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true })
+        stream.getTracks().forEach((track) => track.stop())
+        if (cancelled) return
+
         const videoInputs = await BrowserMultiFormatReader.listVideoInputDevices()
         if (cancelled) return
         setDevices(videoInputs)
         if (!videoInputs.length) {
           setError('No camera devices were detected. Please connect a camera and try again.')
+          setInitializing(false)
           return
         }
         setDeviceId((prev) => prev || videoInputs[0]?.deviceId || '')
+        setStatus('')
       } catch (err) {
         console.error('Barcode scanner: unable to enumerate video devices', err)
         if (!cancelled) {
-          setError('Unable to access the camera. Please check browser permissions and try again.')
+          if (err?.name === 'NotAllowedError' || err?.name === 'SecurityError') {
+            setError('Camera access was denied. Please allow camera permissions in your browser settings and try again.')
+          } else {
+            setError('Unable to access the camera. Please check browser permissions and try again.')
+          }
+          setStatus('')
+          setInitializing(false)
         }
       }
     }
