@@ -13,6 +13,7 @@ import ProfilePage from './pages/ProfilePage'
 import ObjectMakerNav from './components/objectmaker/ObjectMakerNav'
 import ObjectMakerBuilder from './pages/ObjectMakerBuilder'
 import ObjectMakerZoo from './pages/ObjectMakerZoo'
+import NewsAnalyzerPage from './pages/NewsAnalyzerPage'
 
 export default function App() {
   return (
@@ -60,6 +61,12 @@ export default function App() {
                     )}
                   />
                 </Fragment>
+              ) : experience.id === 'newsanalyzer' ? (
+                <Route
+                  key={experience.id}
+                  path={experience.path}
+                  element={<NewsAnalyzerPage />}
+                />
               ) : (
                 <Route
                   key={experience.id}
