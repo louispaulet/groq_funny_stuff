@@ -43,6 +43,7 @@ export default function NewsAnalyzerPage() {
   const classificationQueueRef = useRef([]);
   const processingRef = useRef(false);
   const isMountedRef = useRef(true);
+  const throttleTimeoutRef = useRef(null);
 
   useEffect(() => {
     classificationsRef.current = classifications;
@@ -52,6 +53,10 @@ export default function NewsAnalyzerPage() {
     isMountedRef.current = true;
     return () => {
       isMountedRef.current = false;
+      if (throttleTimeoutRef.current) {
+        clearTimeout(throttleTimeoutRef.current);
+        throttleTimeoutRef.current = null;
+      }
     };
   }, []);
 
@@ -96,8 +101,14 @@ export default function NewsAnalyzerPage() {
         }
       } finally {
         processingRef.current = false;
+        if (throttleTimeoutRef.current) {
+          clearTimeout(throttleTimeoutRef.current);
+        }
         if (isMountedRef.current) {
-          setTimeout(runNextClassification, 0);
+          throttleTimeoutRef.current = setTimeout(() => {
+            throttleTimeoutRef.current = null;
+            runNextClassification();
+          }, 1000);
         }
       }
     })();
