@@ -9,6 +9,7 @@ import {
   MAX_SAVED_CONVERSATIONS,
 } from '../../lib/allergyCookies'
 import { enhanceAssistantContent } from '../../lib/assistantPostprocess'
+import { buildFlavorFinderContext } from '../../lib/flavorFinder'
 import {
   PERSISTENT_EXPERIENCE_IDS,
   buildMessages,
@@ -241,7 +242,56 @@ export function useChatSession(experience) {
             .join('\n\n')
         }
       }
-      const chatMessages = buildMessages(systemPrompt, history)
+      let augmentedSystemPrompt = systemPrompt
+      if (experience?.id === 'allergyfinder') {
+        try {
+          const contextResult = await buildFlavorFinderContext(resolvedBase, trimmed, {
+            signal: controller.signal,
+          })
+          if (contextResult?.summary) {
+            setConversations((prev) => prev.map((conversation) => {
+              if (conversation.id !== activeId) return conversation
+              const nextMessages = [...conversation.messages]
+              const lastIndex = nextMessages.length - 1
+              if (lastIndex >= 0 && nextMessages[lastIndex].role === 'assistant') {
+                nextMessages[lastIndex] = {
+                  ...nextMessages[lastIndex],
+                  content: contextResult.summary,
+                  streaming: false,
+                  error: false,
+                }
+              }
+              return { ...conversation, messages: nextMessages }
+            }))
+          } else {
+            augmentedSystemPrompt = [augmentedSystemPrompt, 'I couldn\'t find any product with that barcode.']
+              .filter(Boolean)
+              .join('\n\n')
+          }
+        } catch (flavorError) {
+          if (flavorError?.name !== 'AbortError') {
+            console.error(
+              `[${experience?.logLabel || 'Chat'}] flavor finder lookup failed`,
+              flavorError,
+            )
+            setConversations((prev) => prev.map((conversation) => {
+              if (conversation.id !== activeId) return conversation
+              const nextMessages = [...conversation.messages]
+              const lastIndex = nextMessages.length - 1
+              if (lastIndex >= 0 && nextMessages[lastIndex].role === 'assistant') {
+                nextMessages[lastIndex] = {
+                  ...nextMessages[lastIndex],
+                  content: 'I couldn\'t find any product with that barcode.',
+                  streaming: false,
+                  error: true,
+                }
+              }
+              return { ...conversation, messages: nextMessages }
+            }))
+          }
+        }
+      }
+      const chatMessages = buildMessages(augmentedSystemPrompt, history)
       const result = await callRemoteChat(experience, chatMessages, {
         signal: controller.signal,
         model,
