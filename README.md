@@ -2,7 +2,7 @@
 
 ![Illustration banner showing the Groq AllIn Studio experiences](all_in/allin_illustration_banner.png)
 
-Groq AllIn Studio is the flagship experience in this repo: a single React workspace that bundles the Pokédex, AllergyFinder, and STL viewer demos behind one shell. The live deployment is available at https://groq-allin.thefrenchartist.dev/. The legacy folders remain for focused local work, but only `all_in` is packaged for production.
+Groq AllIn Studio is the flagship experience in this repo: a single React workspace that bundles the Pokédex, AllergyFinder, STL viewer, and News Analyzer demos behind one shell. The live deployment is available at https://groq-allin.thefrenchartist.dev/. The legacy folders remain for focused local work, but only `all_in` is packaged for production.
 
 ## Overview
 - `all_in/` contains the deployable Groq AllIn Studio workspace and is the recommended way to run the demos together.
@@ -36,7 +36,9 @@ Default ports when run directly: Pokédex 7860, Chat 7861, AllergyFinder 5173, S
 ### Groq AllIn Studio — React + Vite (primary target)
 Unified workspace with shared layout, navigation, and chat components. Switch between the embedded experiences via the top navigation. Configure per-experience chat endpoints with `.env.local` keys:
 - `VITE_CHAT_BASE_URL` — default chat endpoint (`/chat` appended automatically)
-- `VITE_ALLERGY_CHAT_BASE_URL`, `VITE_STL_CHAT_BASE_URL`, `VITE_POKEDEX_CHAT_BASE_URL` — optional overrides for each tab
+- `VITE_ALLERGY_CHAT_BASE_URL`, `VITE_STL_CHAT_BASE_URL`, `VITE_POKEDEX_CHAT_BASE_URL`, `VITE_NEWS_BASE_URL` — optional overrides for each tab
+
+**News Analyzer overview.** The News Analyzer workspace classifies the news of the day into “good” and “bad” buckets. It rotates through four GroqCloud-hosted LLMs—one request per second—to avoid HTTP429 (Too Many Requests) responses while still keeping the analysis stream steady. The interface already supports filtering by good or bad news, and an upcoming mixer will let you tune the blend to your preferred ratio. The underlying question the project explores: what balance of uplifting versus challenging stories helps someone feel informed without feeling overwhelmed?
 
 ### Legacy Gradio apps
 - **Remote Chat (`chat/`)** — minimal Gradio UI that forwards prompts to a remote worker. Environment flags: `CHAT_BASE_URL` (default `https://groq-endpoint.louispaulet13.workers.dev`) and `CHAT_REQUEST_TIMEOUT` (seconds).
