@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>News Aggregator Demo</title>
+    <style>
+      :root {
+        --bg: #030712;
+        --panel: rgba(17, 25, 40, 0.88);
+        --card: rgba(30, 41, 59, 0.72);
+        --accent: #7dd3fc;
+        --accent-strong: #38bdf8;
+        --muted: #94a3b8;
+        --text: #f8fafc;
+        --border: rgba(148, 163, 184, 0.2);
+        --ok: #4ade80;
+        --warn: #f97316;
+        --error: #f87171;
+        font-synthesis: none;
+        text-rendering: optimizeLegibility;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+        background: radial-gradient(circle at top, rgba(15, 118, 110, 0.18), transparent 55%),
+          radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.22), transparent 60%),
+          var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      header {
+        padding: 48px 24px 24px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+      }
+
+      header::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, rgba(56, 189, 248, 0.14), transparent 70%);
+        pointer-events: none;
+        mix-blend-mode: screen;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(2.2rem, 4vw, 3rem);
+        font-weight: 700;
+        letter-spacing: -0.02em;
+      }
+
+      p.sub {
+        color: var(--muted);
+        margin: 12px auto 0;
+        max-width: 620px;
+        font-size: 1rem;
+        line-height: 1.6;
+      }
+
+      main {
+        width: min(1200px, 92vw);
+        margin: 0 auto 80px;
+        flex: 1 1 auto;
+        display: grid;
+        gap: 20px;
+      }
+
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 22px;
+        padding: 28px;
+        backdrop-filter: blur(16px);
+        box-shadow: 0 24px 80px rgba(15, 23, 42, 0.35);
+      }
+
+      .controls {
+        display: grid;
+        gap: 24px;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      }
+
+      label {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        font-weight: 600;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-size: 0.76rem;
+      }
+
+      code {
+        background: rgba(148, 163, 184, 0.16);
+        padding: 2px 6px;
+        border-radius: 6px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+        font-size: 0.9em;
+      }
+
+      select,
+      input,
+      button {
+        font: inherit;
+        border-radius: 14px;
+        border: 1px solid rgba(148, 163, 184, 0.25);
+        padding: 12px 14px;
+        background: rgba(15, 23, 42, 0.8);
+        color: var(--text);
+        transition: border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+      }
+
+      select:focus-visible,
+      input:focus-visible,
+      button:focus-visible {
+        outline: 2px solid var(--accent-strong);
+        outline-offset: 2px;
+      }
+
+      button {
+        cursor: pointer;
+        background: linear-gradient(135deg, rgba(56, 189, 248, 0.95), rgba(8, 145, 178, 0.95));
+        border: none;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        box-shadow: 0 18px 40px rgba(2, 132, 199, 0.35);
+      }
+
+      button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 22px 42px rgba(2, 132, 199, 0.4);
+      }
+
+      button:disabled {
+        cursor: wait;
+        opacity: 0.7;
+        transform: none;
+        box-shadow: none;
+      }
+
+      .flex-row {
+        display: flex;
+        gap: 12px;
+      }
+
+      .flex-row > * {
+        flex: 1;
+      }
+
+      .stats {
+        margin-top: 22px;
+        font-size: 0.95rem;
+        color: var(--muted);
+      }
+
+      .stats strong {
+        color: var(--accent);
+      }
+
+      .status {
+        margin-top: 12px;
+        font-weight: 600;
+      }
+
+      .status.ok {
+        color: var(--ok);
+      }
+
+      .status.warn {
+        color: var(--warn);
+      }
+
+      .status.error {
+        color: var(--error);
+      }
+
+      details.diag {
+        margin-top: 18px;
+      }
+
+      details.diag summary {
+        cursor: pointer;
+        color: var(--muted);
+        font-size: 0.92rem;
+      }
+
+      pre.log {
+        margin-top: 12px;
+        border-radius: 16px;
+        background: rgba(15, 23, 42, 0.9);
+        padding: 16px;
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+        font-size: 0.82rem;
+        max-height: 240px;
+        overflow: auto;
+      }
+
+      dialog {
+        border: none;
+        padding: 0;
+        background: transparent;
+        color: var(--text);
+      }
+
+      dialog::backdrop {
+        background: rgba(2, 6, 23, 0.75);
+        backdrop-filter: blur(4px);
+      }
+
+      .grid {
+        display: grid;
+        gap: 18px;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      }
+
+      article.card {
+        background: var(--card);
+        border-radius: 20px;
+        padding: 20px;
+        border: 1px solid rgba(148, 163, 184, 0.22);
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        min-height: 180px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      article.card::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at top right, rgba(56, 189, 248, 0.18), transparent 65%);
+        opacity: 0;
+        transition: opacity 0.2s ease;
+      }
+
+      article.card:hover::before {
+        opacity: 1;
+      }
+
+      article.card a.title {
+        color: #e0f2fe;
+        font-weight: 700;
+        font-size: 1.08rem;
+        text-decoration: none;
+        line-height: 1.4;
+      }
+
+      article.card a.title:hover {
+        text-decoration: underline;
+      }
+
+      .meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        font-size: 0.82rem;
+        color: var(--muted);
+      }
+
+      .badges {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .badge {
+        border-radius: 999px;
+        border: 1px solid rgba(148, 163, 184, 0.35);
+        padding: 4px 10px;
+        font-size: 0.72rem;
+        color: #bae6fd;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      footer {
+        padding: 30px 18px 40px;
+        text-align: center;
+        color: var(--muted);
+        font-size: 0.85rem;
+      }
+
+      @media (max-width: 680px) {
+        .flex-row {
+          flex-direction: column;
+        }
+
+        header {
+          padding-top: 40px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Worker-powered News Feed</h1>
+      <p class="sub">
+        Explore the <code>/news/&lt;category&gt;</code> Cloudflare Worker route. Pick one or more categories, optionally filter by
+        keyword, and this demo will stream the aggregated JSON straight from the worker into a polished reading experience.
+      </p>
+    </header>
+
+    <main>
+      <section class="panel" aria-label="Controls">
+        <div class="controls">
+          <label>
+            Categories (⌘/Ctrl + click for multi)
+            <select id="categories" multiple size="8" aria-label="Choose news categories">
+              <option value="top" selected>Top Stories</option>
+              <option value="world" selected>World</option>
+              <option value="us">US</option>
+              <option value="business">Business</option>
+              <option value="technology" selected>Technology</option>
+              <option value="politics">Politics</option>
+              <option value="health">Health</option>
+              <option value="entertainment">Entertainment</option>
+              <option value="travel">Travel</option>
+              <option value="all">Everything</option>
+            </select>
+          </label>
+
+          <div class="flex-row">
+            <label>
+              Keyword filter (optional)
+              <input id="keyword" type="text" placeholder="e.g. climate, AI, markets" />
+            </label>
+            <label>
+              Result limit
+              <input id="limit" type="number" min="5" max="150" step="5" value="50" />
+            </label>
+          </div>
+
+          <label>
+            Worker base URL
+            <input
+              id="base-url"
+              type="url"
+              inputmode="url"
+              placeholder="https://groq-endpoint.example.workers.dev"
+              aria-describedby="base-url-hint"
+            />
+            <small
+              id="base-url-hint"
+              style="color: var(--muted); font-weight: 400; text-transform: none; letter-spacing: normal"
+            >
+              Defaults to this page's origin. When opening the file directly from disk, set your dev server URL (e.g.
+              <code>http://localhost:8787</code>).
+            </small>
+          </label>
+
+          <div class="flex-row">
+            <button id="load">Load headlines</button>
+            <button id="view-json" type="button">View raw JSON</button>
+          </div>
+        </div>
+
+        <div class="stats" id="stats">Ready. Select categories and fetch the freshest headlines.</div>
+        <div class="status" id="status" role="status" aria-live="polite"></div>
+
+        <details class="diag">
+          <summary>Diagnostics</summary>
+          <pre class="log" id="log"></pre>
+        </details>
+      </section>
+
+      <section class="grid" id="results" aria-live="polite"></section>
+    </main>
+
+    <footer>
+      <small>Headlines remain © their original publishers. Demo purpose only.</small>
+    </footer>
+
+    <dialog id="jsonModal">
+      <article class="panel" style="max-width: min(90vw, 720px);">
+        <header style="display: flex; justify-content: space-between; align-items: center; gap: 16px;">
+          <h2 style="margin: 0; font-size: 1.25rem;">Raw response</h2>
+          <button id="closeModal" type="button" style="padding: 8px 14px; font-size: 0.85rem;">Close</button>
+        </header>
+        <pre class="log" id="jsonDump" style="margin-top: 20px; max-height: 420px;"></pre>
+      </article>
+    </dialog>
+
+    <script>
+      const categoriesEl = document.querySelector('#categories');
+      const keywordEl = document.querySelector('#keyword');
+      const limitEl = document.querySelector('#limit');
+      const baseUrlEl = document.querySelector('#base-url');
+      const loadBtn = document.querySelector('#load');
+      const resultsEl = document.querySelector('#results');
+      const statsEl = document.querySelector('#stats');
+      const statusEl = document.querySelector('#status');
+      const logEl = document.querySelector('#log');
+      const viewJsonBtn = document.querySelector('#view-json');
+      const jsonModal = document.querySelector('#jsonModal');
+      const jsonDumpEl = document.querySelector('#jsonDump');
+      const closeModalBtn = document.querySelector('#closeModal');
+
+      const CATEGORY_LABELS = {
+        top: 'Top Stories',
+        world: 'World',
+        us: 'US',
+        business: 'Business',
+        technology: 'Technology',
+        politics: 'Politics',
+        health: 'Health',
+        entertainment: 'Entertainment',
+        travel: 'Travel',
+        all: 'Everything',
+      };
+
+      let lastPayload = null;
+
+      const defaultBaseUrl = (() => {
+        if (window.location.protocol === 'file:') {
+          return 'http://localhost:8787';
+        }
+
+        if (!window.location.origin || window.location.origin === 'null') {
+          return 'http://localhost:8787';
+        }
+
+        return window.location.origin;
+      })();
+
+      baseUrlEl.value = defaultBaseUrl;
+
+      function log(message) {
+        const time = new Date().toLocaleTimeString();
+        logEl.textContent += `[${time}] ${message}\n`;
+        logEl.scrollTop = logEl.scrollHeight;
+      }
+
+      function setStatus(message, tone = '') {
+        statusEl.textContent = message;
+        statusEl.className = `status ${tone}`.trim();
+      }
+
+      function getSelectedCategories() {
+        const values = Array.from(categoriesEl.selectedOptions).map((opt) => opt.value);
+        if (values.includes('all')) {
+          return ['all'];
+        }
+        return values.length ? values : ['top'];
+      }
+
+      function formatDate(iso) {
+        if (!iso) return '';
+        try {
+          return new Date(iso).toLocaleString();
+        } catch (error) {
+          return iso;
+        }
+      }
+
+      function renderItems(items) {
+        resultsEl.innerHTML = '';
+        if (!items.length) {
+          const empty = document.createElement('p');
+          empty.textContent = 'No headlines matched your filters. Try broadening the search.';
+          empty.style.color = 'var(--muted)';
+          empty.style.fontSize = '0.95rem';
+          resultsEl.appendChild(empty);
+          return;
+        }
+
+        const fragment = document.createDocumentFragment();
+        for (const item of items) {
+          const article = document.createElement('article');
+          article.className = 'card';
+
+          const titleLink = document.createElement('a');
+          titleLink.href = item.link || '#';
+          titleLink.textContent = item.title;
+          titleLink.target = '_blank';
+          titleLink.rel = 'noopener';
+          titleLink.className = 'title';
+
+          const meta = document.createElement('div');
+          meta.className = 'meta';
+          meta.textContent = [formatDate(item.publishedAt), item.sourceTitle].filter(Boolean).join(' • ');
+
+          const badges = document.createElement('div');
+          badges.className = 'badges';
+
+          if (item.sourceTitle) {
+            const badge = document.createElement('span');
+            badge.className = 'badge';
+            badge.textContent = item.sourceTitle;
+            badges.appendChild(badge);
+          }
+
+          if (item.link) {
+            try {
+              const hostname = new URL(item.link).hostname.replace(/^www\./, '');
+              const badge = document.createElement('span');
+              badge.className = 'badge';
+              badge.textContent = hostname;
+              badges.appendChild(badge);
+            } catch (error) {
+              // ignore URL parse errors
+            }
+          }
+
+          if (item.description) {
+            const summary = document.createElement('p');
+            summary.style.color = 'var(--muted)';
+            summary.style.fontSize = '0.92rem';
+            summary.style.lineHeight = '1.5';
+            summary.innerHTML = item.description;
+            article.append(titleLink, meta, badges, summary);
+          } else {
+            article.append(titleLink, meta, badges);
+          }
+
+          fragment.appendChild(article);
+        }
+
+        resultsEl.appendChild(fragment);
+      }
+
+      async function fetchNews() {
+        const categories = getSelectedCategories();
+        const keyword = keywordEl.value.trim();
+        const limit = Math.min(Math.max(parseInt(limitEl.value, 10) || 0, 5), 150);
+
+        const categoryPath = encodeURIComponent(categories.join(','));
+        const params = new URLSearchParams();
+        if (keyword) params.set('q', keyword);
+        if (limit) params.set('limit', String(limit));
+
+        let baseUrl = baseUrlEl.value.trim() || defaultBaseUrl;
+        if (baseUrl && !/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(baseUrl)) {
+          baseUrl = `https://${baseUrl}`;
+        }
+
+        let url;
+
+        try {
+          const base = new URL(baseUrl);
+          if (!/^https?:$/i.test(base.protocol)) {
+            throw new Error('Base URL must use http or https.');
+          }
+          url = new URL(`/news/${categoryPath}${params.toString() ? `?${params}` : ''}`, base).toString();
+        } catch (error) {
+          setStatus('Please provide a valid http(s) base URL for the worker.', 'error');
+          statsEl.textContent = 'Request aborted.';
+          renderItems([]);
+          log(`❌ Invalid base URL: ${baseUrl}`);
+          return;
+        }
+
+        log(`Requesting ${url}`);
+        loadBtn.disabled = true;
+        setStatus('Fetching news from the worker…', 'warn');
+
+        try {
+          const response = await fetch(url, { headers: { Accept: 'application/json' } });
+          const payload = await response.json();
+          lastPayload = payload;
+
+          const label = categories
+            .map((key) => CATEGORY_LABELS[key] || key)
+            .join(', ');
+
+          statsEl.innerHTML = `Fetched <strong>${payload.itemCount}</strong> headlines from <strong>${payload.feedCount}</strong> feed(s).`;
+
+          const fixtureCount = Array.isArray(payload.fixturesUsed) ? payload.fixturesUsed.length : 0;
+          let statusLevel = response.ok ? 'ok' : 'warn';
+          let statusText = response.ok
+            ? `Success! Showing ${label} news.`
+            : `Some feeds failed (${payload.failures.length}). Showing what we could recover.`;
+
+          if (fixtureCount > 0) {
+            statusLevel = 'warn';
+            statusText = `Served ${label} news with ${fixtureCount} fixture fallback${fixtureCount > 1 ? 's' : ''}.`;
+          }
+
+          setStatus(statusText, statusLevel);
+
+          if (payload.failures?.length) {
+            payload.failures.forEach((failure) => log(`⚠️ ${failure.feedUrl} → ${failure.error}`));
+          }
+
+          if (fixtureCount > 0) {
+            payload.fixturesUsed.forEach((feed) => log(`📀 Used fixture for ${feed}`));
+          }
+
+          renderItems(payload.items || []);
+        } catch (error) {
+          setStatus(`Error: ${error.message}`, 'error');
+          statsEl.textContent = 'Request failed.';
+          renderItems([]);
+          log(`❌ ${error.message}`);
+        } finally {
+          loadBtn.disabled = false;
+        }
+      }
+
+      function openJsonModal() {
+        if (!lastPayload) {
+          setStatus('No payload yet. Fetch the news first!', 'warn');
+          return;
+        }
+
+        jsonDumpEl.textContent = JSON.stringify(lastPayload, null, 2);
+        if (typeof jsonModal.showModal === 'function') {
+          jsonModal.showModal();
+        }
+      }
+
+      function closeModal() {
+        if (typeof jsonModal.close === 'function' && jsonModal.open) {
+          jsonModal.close();
+        }
+      }
+
+      loadBtn.addEventListener('click', fetchNews);
+      viewJsonBtn.addEventListener('click', openJsonModal);
+      closeModalBtn.addEventListener('click', closeModal);
+      jsonModal?.addEventListener('cancel', (event) => {
+        event.preventDefault();
+        closeModal();
+      });
+
+      statsEl.textContent = 'Ready. Select categories and fetch the freshest headlines.';
+      log('Idle. Waiting for your first request.');
+    </script>
+  </body>
+</html>

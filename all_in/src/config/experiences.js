@@ -1,9 +1,7 @@
-const importMetaEnv = typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env : undefined
 const processEnv = typeof globalThis !== 'undefined' && globalThis.process?.env ? globalThis.process.env : undefined
 
 function getEnvValue(key) {
   if (!key) return undefined
-  if (importMetaEnv && importMetaEnv[key] !== undefined) return importMetaEnv[key]
   if (processEnv && processEnv[key] !== undefined) return processEnv[key]
   return undefined
 }
@@ -29,7 +27,7 @@ export const experiences = [
     defaultModel: 'openai/gpt-oss-20b',
     modelOptions: ['openai/gpt-oss-20b', 'openai/gpt-oss-120b'],
     greeting: "Hi! Ask me about allergens in any food and I'll look it up for you.",
-    promptPlaceholder: 'Ask about allergens in a recipe or packaged food...',
+    promptPlaceholder: 'Ask about allergens in a recipe or packaged food...', 
     systemPrompt: [
       'You are an allergy assistant that uses product data to answer questions about food allergens.',
       'Use the provided context when it is relevant and be transparent about any gaps.',
@@ -94,7 +92,7 @@ export const experiences = [
     defaultModel: 'openai/gpt-oss-20b',
     modelOptions: ['openai/gpt-oss-20b', 'openai/gpt-oss-120b'],
     greeting: 'Hi! Ask me anything about STL models or 3D printing workflows.',
-    promptPlaceholder: 'Need help with an STL? Ask about fixes, slicing, or design tweaks...',
+    promptPlaceholder: 'Need help with an STL? Ask about fixes, slicing, or design tweaks...', 
     systemPrompt: [
       'You are a helpful AI assistant who understands STL files and 3D printing workflows.',
       'Provide concise, practical answers and include tips for viewing or tweaking STL content when relevant.',
@@ -132,6 +130,36 @@ export const experiences = [
     enableStlViewer: false,
     logLabel: 'Pokedex',
     defaultBaseUrl: (getEnvValue('VITE_POKEDEX_CHAT_BASE_URL') || FALLBACK_BASE_URL).replace(/\/$/, ''),
+  },
+  {
+    id: 'newsanalyzer',
+    path: '/newsanalyzer',
+    name: 'News Analyzer',
+    headline: 'Real-time News Analysis',
+    description: 'Explore and analyze real-time news feeds from various sources, powered by a Cloudflare Worker.',
+    badge: 'News',
+    heroGradient: 'from-blue-500 to-sky-600',
+    panelAccent: 'bg-blue-100 text-blue-900 dark:bg-blue-500/20 dark:text-blue-200',
+    navAccent: {
+      gradient: 'from-blue-500 to-sky-600',
+      hover:
+        'hover:bg-blue-500/10 hover:text-blue-600 hover:border-blue-400/60 dark:hover:bg-blue-500/20 dark:hover:text-blue-200 dark:hover:border-blue-400/60',
+      focus: 'focus-visible:ring-blue-500/40',
+    },
+    defaultModel: 'openai/gpt-oss-20b',
+    modelOptions: ['openai/gpt-oss-20b', 'openai/gpt-oss-120b'],
+    greeting: 'Welcome to the News Analyzer. Select your topics and let\'s see what\'s happening.',
+    promptPlaceholder: 'Ask a question about the news...', 
+    systemPrompt: [
+      'You are a news analysis assistant.',
+      'Use the provided news articles to answer questions and provide summaries.',
+      'Be neutral and objective in your analysis.',
+    ].join(' '),
+    allowBaseUrlOverride: true,
+    enableStlViewer: false,
+    enableBarcodeScanner: false,
+    logLabel: 'NewsAnalyzer',
+    defaultBaseUrl: (getEnvValue('VITE_NEWS_BASE_URL') || FALLBACK_BASE_URL).replace(/\/$/, ''),
   },
 ]
 
