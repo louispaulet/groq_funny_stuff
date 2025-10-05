@@ -233,6 +233,18 @@ export default function NewsAnalyzerPage() {
     }));
   }, []);
 
+  const handleActivateAllCategories = useCallback(() => {
+    setActivationCounts((prev) => {
+      const next = { ...prev };
+      CATEGORY_ORDER.forEach((category) => {
+        if ((news[category] || []).length) {
+          next[category] = (next[category] || 0) + 1;
+        }
+      });
+      return next;
+    });
+  }, [news]);
+
   return (
     <ExperiencePage
       experience={experience}
@@ -245,6 +257,7 @@ export default function NewsAnalyzerPage() {
         filter={filter}
         activationCounts={activationCounts}
         onActivateCategory={handleActivateCategory}
+        onActivateAllCategories={handleActivateAllCategories}
       />
     </ExperiencePage>
   );

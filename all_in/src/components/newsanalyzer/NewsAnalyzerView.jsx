@@ -39,13 +39,52 @@ export default function NewsAnalyzerView({
   filter,
   activationCounts,
   onActivateCategory,
+  onActivateAllCategories,
 }) {
   if (loading) {
     return <div className="p-4 text-center">Loading news...</div>;
   }
 
+  const categoriesWithItems = CATEGORY_ORDER.filter((category) => (news[category] || []).length > 0);
+  const allCategoriesActivated = categoriesWithItems.every((category) => (activationCounts?.[category] || 0) > 0);
+
   return (
     <div className="space-y-16">
+      <section className="rounded-3xl border border-slate-200 bg-white/80 p-6 shadow-sm backdrop-blur dark:border-slate-700 dark:bg-slate-900/60">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="space-y-2">
+            <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100">How classification unfolds</h2>
+            <p className="text-sm text-slate-600 dark:text-slate-300">
+              The top news section autoloads so you get an instant pulse, while the rest wait for you to tap{' '}
+              <span className="mx-1 rounded-full bg-slate-200 px-2 py-0.5 text-xs uppercase tracking-wide text-slate-700 dark:bg-slate-700 dark:text-slate-200">
+                Classify
+              </span>{' '}
+              when you&apos;re ready.
+            </p>
+            <p className="text-xs italic text-slate-500 dark:text-slate-400">
+              Curious note: our Groq API hummingbird spooks easily—hammering the auto-load can bump into rate limits.
+            </p>
+          </div>
+          <div className="shrink-0">
+            <button
+              type="button"
+              onClick={() => {
+                if (!allCategoriesActivated && onActivateAllCategories) {
+                  onActivateAllCategories();
+                }
+              }}
+              disabled={!categoriesWithItems.length || allCategoriesActivated}
+              className={`inline-flex items-center gap-2 rounded-full border border-blue-500 bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 dark:border-blue-400 dark:bg-blue-500 dark:hover:bg-blue-400 ${
+                !categoriesWithItems.length || allCategoriesActivated
+                  ? 'cursor-not-allowed opacity-60 hover:bg-blue-600 dark:hover:bg-blue-500'
+                  : ''
+              }`}
+            >
+              Autoload everything
+            </button>
+          </div>
+        </div>
+      </section>
       <section aria-label="Model legend" className="space-y-3">
         <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-slate-400">
           Model legend
