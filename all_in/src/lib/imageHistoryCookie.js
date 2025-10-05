@@ -1,6 +1,6 @@
 const HISTORY_COOKIE_NAME = 'allin_flux_image_history'
 const MONTH_IN_SECONDS = 60 * 60 * 24 * 30
-const HISTORY_LIMIT = 6
+const HISTORY_LIMIT = 60
 
 function getDocument() {
   return typeof document === 'undefined' ? null : document

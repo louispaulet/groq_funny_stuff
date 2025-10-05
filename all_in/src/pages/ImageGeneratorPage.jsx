@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { ArrowPathIcon, TrashIcon } from '@heroicons/react/24/outline'
 import { readImageHistory, writeImageHistory, clearImageHistory, IMAGE_HISTORY_COOKIE_LIMIT } from '../lib/imageHistoryCookie'
 
@@ -28,8 +29,6 @@ function HistoryItem({ entry, onSelect }) {
 
 export default function ImageGeneratorPage({ experience }) {
   const [prompt, setPrompt] = useState('train speeding through a neon cyberpunk tunnel')
-  const [steps, setSteps] = useState('')
-  const [count, setCount] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [result, setResult] = useState(null)
@@ -54,15 +53,6 @@ export default function ImageGeneratorPage({ experience }) {
 
     try {
       const requestUrl = new URL(`${apiBaseUrl.replace(/\/$/, '')}/flux/${encodeURIComponent(trimmedPrompt)}`)
-      const normalizedSteps = steps.trim()
-      const normalizedCount = count.trim()
-      if (normalizedSteps) {
-        requestUrl.searchParams.set('steps', normalizedSteps)
-      }
-      if (normalizedCount) {
-        requestUrl.searchParams.set('count', normalizedCount)
-      }
-
       const response = await fetch(requestUrl.toString())
       if (!response.ok) {
         throw new Error(`Generation failed with status ${response.status}`)
@@ -76,8 +66,6 @@ export default function ImageGeneratorPage({ experience }) {
       const normalizedPrompt = typeof payload.prompt === 'string' && payload.prompt.trim() ? payload.prompt.trim() : trimmedPrompt
       const nextResult = {
         prompt: normalizedPrompt,
-        steps: payload.steps,
-        count: payload.count,
         images: images.map((image, index) => ({
           url: image?.url || '',
           index: typeof image?.index === 'number' ? image.index : index,
@@ -87,12 +75,19 @@ export default function ImageGeneratorPage({ experience }) {
 
       setResult(nextResult)
 
-      const newEntry = {
-        prompt: normalizedPrompt,
-        url: nextResult.images[0].url,
-        timestamp: Date.now(),
-      }
-      const nextHistory = [newEntry, ...history.filter((item) => item.url !== newEntry.url)].slice(0, IMAGE_HISTORY_COOKIE_LIMIT)
+      const createdAt = Date.now()
+      const newEntries = nextResult.images
+        .filter((image) => image?.url)
+        .map((image, index) => ({
+          prompt: normalizedPrompt,
+          url: image.url,
+          timestamp: createdAt + index,
+        }))
+
+      const existingWithoutDuplicates = history.filter(
+        (item) => !newEntries.some((entry) => entry.url === item.url),
+      )
+      const nextHistory = [...newEntries, ...existingWithoutDuplicates].slice(0, IMAGE_HISTORY_COOKIE_LIMIT)
       setHistory(nextHistory)
       writeImageHistory(nextHistory)
     } catch (err) {
@@ -107,8 +102,6 @@ export default function ImageGeneratorPage({ experience }) {
     setPrompt(entry.prompt || '')
     setResult({
       prompt: entry.prompt,
-      steps: undefined,
-      count: undefined,
       images: [{ url: entry.url, index: 0 }],
       raw: null,
     })
@@ -144,33 +137,6 @@ export default function ImageGeneratorPage({ experience }) {
             </p>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <label className="space-y-2 text-sm text-slate-600 dark:text-slate-300">
-              <span className="font-medium">Steps (optional)</span>
-              <input
-                type="number"
-                min="1"
-                max="50"
-                value={steps}
-                onChange={(event) => setSteps(event.target.value)}
-                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-400/50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
-                placeholder="e.g. 4"
-              />
-            </label>
-            <label className="space-y-2 text-sm text-slate-600 dark:text-slate-300">
-              <span className="font-medium">Count (optional)</span>
-              <input
-                type="number"
-                min="1"
-                max="6"
-                value={count}
-                onChange={(event) => setCount(event.target.value)}
-                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-400/50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
-                placeholder="e.g. 2"
-              />
-            </label>
-          </div>
-
           <div className="flex flex-wrap items-center gap-3">
             <button
               type="submit"
@@ -180,6 +146,12 @@ export default function ImageGeneratorPage({ experience }) {
               <ArrowPathIcon className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} />
               {loading ? 'Generating…' : 'Generate image'}
             </button>
+            <Link
+              to="/imagegen/gallery"
+              className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-600 shadow-sm transition hover:border-brand-400 hover:text-brand-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200"
+            >
+              View gallery
+            </Link>
             {history.length > 0 ? (
               <button
                 type="button"
@@ -209,13 +181,6 @@ export default function ImageGeneratorPage({ experience }) {
                 <>
                   <div>
                     <h3 className="text-sm font-medium text-slate-700 dark:text-slate-200">{result.prompt}</h3>
-                    {result.steps || result.count ? (
-                      <p className="text-xs text-slate-500 dark:text-slate-400">
-                        {result.steps ? `steps: ${result.steps}` : ''}
-                        {result.steps && result.count ? ' · ' : ''}
-                        {result.count ? `count: ${result.count}` : ''}
-                      </p>
-                    ) : null}
                   </div>
                   <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-slate-100 dark:border-slate-700 dark:bg-slate-800">
                     <img src={result.images[0].url} alt={result.prompt} className="h-full w-full object-cover" loading="lazy" />
