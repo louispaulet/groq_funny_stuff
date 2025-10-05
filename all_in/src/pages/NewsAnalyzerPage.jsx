@@ -5,6 +5,7 @@ import ExperiencePage from './ExperiencePage';
 import NewsAnalyzerNav from '../components/newsanalyzer/NewsAnalyzerNav';
 import NewsAnalyzerView from '../components/newsanalyzer/NewsAnalyzerView';
 import { CATEGORY_ORDER } from '../components/newsanalyzer/constants';
+import { CLASSIFICATION_MODELS } from '../components/newsanalyzer/modelConfig';
 import { createRemoteObject } from '../lib/objectApi';
 
 const BASE_URL = 'https://groq-endpoint.louispaulet13.workers.dev/';
@@ -42,6 +43,7 @@ export default function NewsAnalyzerPage() {
   const classificationsRef = useRef(classifications);
   const classificationQueueRef = useRef([]);
   const processingRef = useRef(false);
+  const modelIndexRef = useRef(0);
   const isMountedRef = useRef(true);
   const throttleTimeoutRef = useRef(null);
 
@@ -68,6 +70,11 @@ export default function NewsAnalyzerPage() {
     processingRef.current = true;
     const { category, index, item } = nextTask;
     const key = `${category}-${index}`;
+    const modelsCount = CLASSIFICATION_MODELS.length;
+    const modelInfo = modelsCount ? CLASSIFICATION_MODELS[modelIndexRef.current % modelsCount] : null;
+    if (modelsCount) {
+      modelIndexRef.current = (modelIndexRef.current + 1) % modelsCount;
+    }
 
     (async () => {
       try {
@@ -75,6 +82,7 @@ export default function NewsAnalyzerPage() {
           structure: CLASSIFICATION_STRUCTURE,
           prompt: buildPrompt(item),
           strict: true,
+          model: modelInfo?.id,
         });
         const sentiment = typeof payload?.sentiment === 'string' ? payload.sentiment.toLowerCase() : null;
         const normalized = sentiment === 'good' || sentiment === 'bad' ? sentiment : null;
@@ -82,8 +90,12 @@ export default function NewsAnalyzerPage() {
           setClassifications((prev) => ({
             ...prev,
             [key]: {
+              ...(prev[key] || {}),
               sentiment: normalized,
               status: normalized ? 'complete' : 'error',
+              modelId: modelInfo?.id || null,
+              modelLabel: modelInfo?.label || null,
+              error: normalized ? null : prev[key]?.error || null,
             },
           }));
         }
@@ -93,8 +105,11 @@ export default function NewsAnalyzerPage() {
           setClassifications((prev) => ({
             ...prev,
             [key]: {
+              ...(prev[key] || {}),
               sentiment: null,
               status: 'error',
+              modelId: modelInfo?.id || null,
+              modelLabel: modelInfo?.label || null,
               error: error?.message || 'Classification failed',
             },
           }));
@@ -164,7 +179,7 @@ export default function NewsAnalyzerPage() {
         const key = `${category}-${index}`;
         if (!classificationsRef.current[key]) {
           newTasks.push({ category, index, item });
-          pendingUpdates[key] = { sentiment: null, status: 'pending' };
+          pendingUpdates[key] = { sentiment: null, status: 'pending', modelId: null, modelLabel: null };
         }
       });
     }
