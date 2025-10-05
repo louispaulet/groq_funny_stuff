@@ -1,4 +1,5 @@
 import { CATEGORY_LABELS, CATEGORY_ORDER } from './constants';
+import { CLASSIFICATION_MODELS, getClassificationModelById } from './modelConfig';
 
 function articleMatchesFilter(filter, classification) {
   if (filter === 'all') return true;
@@ -23,6 +24,22 @@ export default function NewsAnalyzerView({ news, loading, classifications, filte
 
   return (
     <div className="space-y-16">
+      <section aria-label="Model legend" className="space-y-3">
+        <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-slate-400">
+          Model legend
+        </h3>
+        <div className="flex flex-wrap items-center gap-4">
+          {CLASSIFICATION_MODELS.map((model) => (
+            <span
+              key={model.id}
+              className="inline-flex items-center gap-2 text-sm text-gray-600 dark:text-slate-300"
+            >
+              <span className={`h-3 w-3 rounded-full ${model.dotClass}`} aria-hidden="true"></span>
+              <span>{model.label}</span>
+            </span>
+          ))}
+        </div>
+      </section>
       {CATEGORY_ORDER.map((category) => {
         const items = (news[category] || []).slice(0, 10);
         if (!items.length) return null;
@@ -43,6 +60,7 @@ export default function NewsAnalyzerView({ news, loading, classifications, filte
                 const classification = classifications?.[key];
                 if (!articleMatchesFilter(filter, classification)) return null;
                 const sentimentClass = getSentimentStyles(classification?.sentiment);
+                const modelInfo = getClassificationModelById(classification?.modelId);
 
                 return (
                   <article
@@ -61,7 +79,7 @@ export default function NewsAnalyzerView({ news, loading, classifications, filte
                       <div className="mt-3 text-sm text-gray-500 dark:text-slate-400">
                         {new Date(item.publishedAt).toLocaleString()} • {item.sourceTitle}
                       </div>
-                      <div className="mt-3 flex items-center gap-2 text-sm">
+                      <div className="mt-3 flex items-center gap-3 text-sm">
                         <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-1 text-xs font-medium uppercase tracking-wide text-slate-600 dark:bg-slate-700 dark:text-slate-200">
                           {classification?.sentiment
                             ? `${classification.sentiment} news`
@@ -69,6 +87,12 @@ export default function NewsAnalyzerView({ news, loading, classifications, filte
                               ? 'classifying…'
                               : 'not classified'}
                         </span>
+                        {modelInfo && (
+                          <span className="inline-flex items-center gap-2 text-xs text-gray-500 dark:text-slate-400">
+                            <span className={`h-2.5 w-2.5 rounded-full ${modelInfo.dotClass}`} aria-hidden="true"></span>
+                            <span>{modelInfo.label}</span>
+                          </span>
+                        )}
                         {classification?.status === 'error' && (
                           <span className="text-xs text-rose-500">Classification failed</span>
                         )}
