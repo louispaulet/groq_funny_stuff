@@ -35,7 +35,7 @@ export default function AboutPage() {
           <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">2. Cloudflare worker backend ☁️</h2>
           <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-400">
             ☁️ A dedicated Cloudflare Worker powers the Groq backend. Every chat in the studio tunnels through this worker, which
-            enriches prompts with tools like OpenFoodFacts lookups before relaying Groq responses.
+            enriches prompts with tools like product lookups before relaying Groq responses.
           </p>
         </article>
         <article className="space-y-3 rounded-2xl border border-slate-200 bg-white/80 p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/70">
@@ -52,7 +52,7 @@ export default function AboutPage() {
         <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Why the worker matters 🛠️</h2>
         <p className="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
           Louis designed the worker to carry its own intelligence. Beyond proxying Groq models, it can query product data when a
-          chat session asks about allergens, providing the same OpenFoodFacts evidence that powers the dedicated AllergyFinder
+          chat session asks about allergens, providing the same product evidence that powers the dedicated AllergyFinder
           experience. 🧠
         </p>
         <p className="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
@@ -71,7 +71,7 @@ export default function AboutPage() {
           </li>
           <li>
             <span className="font-semibold text-slate-800 dark:text-slate-200">GET /flavor-finder/&lt;food&gt;</span> — helper route
-            that fetches OpenFoodFacts entries directly, useful for debugging the worker&apos;s ingredient sourcing without spinning
+            that fetches product entries directly, useful for debugging the worker&apos;s ingredient sourcing without spinning
             up the UI. 🔎
           </li>
           <li>

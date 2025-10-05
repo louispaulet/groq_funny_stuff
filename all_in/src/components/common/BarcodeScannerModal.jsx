@@ -177,7 +177,7 @@ export default function BarcodeScannerModal({ open, onClose, onDetected }) {
           <div>
             <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Scan a barcode</h2>
             <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
-              Allow camera access so we can scan the product barcode and look it up on OpenFoodFacts for you.
+              Allow camera access so we can scan the product barcode and look it up for you.
             </p>
           </div>
 

@@ -249,7 +249,22 @@ export function useChatSession(experience) {
             signal: controller.signal,
           })
           if (contextResult?.summary) {
-            augmentedSystemPrompt = [augmentedSystemPrompt, contextResult.summary]
+            setConversations((prev) => prev.map((conversation) => {
+              if (conversation.id !== activeId) return conversation
+              const nextMessages = [...conversation.messages]
+              const lastIndex = nextMessages.length - 1
+              if (lastIndex >= 0 && nextMessages[lastIndex].role === 'assistant') {
+                nextMessages[lastIndex] = {
+                  ...nextMessages[lastIndex],
+                  content: contextResult.summary,
+                  streaming: false,
+                  error: false,
+                }
+              }
+              return { ...conversation, messages: nextMessages }
+            }))
+          } else {
+            augmentedSystemPrompt = [augmentedSystemPrompt, 'I couldn\'t find any product with that barcode.']
               .filter(Boolean)
               .join('\n\n')
           }
@@ -259,6 +274,20 @@ export function useChatSession(experience) {
               `[${experience?.logLabel || 'Chat'}] flavor finder lookup failed`,
               flavorError,
             )
+            setConversations((prev) => prev.map((conversation) => {
+              if (conversation.id !== activeId) return conversation
+              const nextMessages = [...conversation.messages]
+              const lastIndex = nextMessages.length - 1
+              if (lastIndex >= 0 && nextMessages[lastIndex].role === 'assistant') {
+                nextMessages[lastIndex] = {
+                  ...nextMessages[lastIndex],
+                  content: 'I couldn\'t find any product with that barcode.',
+                  streaming: false,
+                  error: true,
+                }
+              }
+              return { ...conversation, messages: nextMessages }
+            }))
           }
         }
       }

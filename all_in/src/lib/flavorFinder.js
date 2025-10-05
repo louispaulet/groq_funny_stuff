@@ -33,6 +33,7 @@ async function fetchFlavorFinderProduct(baseUrl, code, { signal } = {}) {
   const trimmedBase = typeof baseUrl === 'string' ? baseUrl.trim().replace(/\/$/, '') : ''
   if (!trimmedBase || !code) return null
   const url = `${trimmedBase}/flavor-finder/${encodeURIComponent(code)}`
+  console.log(`Calling flavor finder API: ${url}`)
 
   let response
   try {
@@ -54,6 +55,8 @@ async function fetchFlavorFinderProduct(baseUrl, code, { signal } = {}) {
   } catch {
     payload = null
   }
+
+  console.log('Flavor finder response:', payload)
 
   if (!response.ok) {
     const error = new Error(`Flavor Finder returned ${response.status}`)
