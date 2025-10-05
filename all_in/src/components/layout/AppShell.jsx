@@ -73,7 +73,14 @@ export default function AppShell({ children }) {
             <NavLink to="/" className={defaultNavClasses} end>
               Overview
             </NavLink>
-            {experiences.filter(experience => experience.id !== 'objectmaker' && experience.id !== 'stlviewer').map((experience) => (
+            {experiences
+              .filter(
+                experience =>
+                  experience.id !== 'objectmaker' &&
+                  experience.id !== 'stlviewer' &&
+                  experience.id !== 'sixdegrees',
+              )
+              .map((experience) => (
               <NavLink
                 key={experience.id}
                 to={experience.path}

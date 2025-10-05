@@ -161,6 +161,36 @@ export const experiences = [
     logLabel: 'NewsAnalyzer',
     defaultBaseUrl: (getEnvValue('VITE_NEWS_BASE_URL') || FALLBACK_BASE_URL).replace(/\/$/, ''),
   },
+  {
+    id: 'sixdegrees',
+    path: '/six-degrees',
+    name: 'Six Degrees Of',
+    headline: 'Watch a message morph through six parody passes.',
+    description:
+      'Start with any sentence and see how Groq remixes it into six escalating parodies, delivered one beat at a time.',
+    badge: 'Remix',
+    heroGradient: 'from-fuchsia-500 to-purple-600',
+    panelAccent: 'bg-fuchsia-100 text-fuchsia-900 dark:bg-fuchsia-500/20 dark:text-fuchsia-200',
+    navAccent: {
+      gradient: 'from-fuchsia-500 to-purple-600',
+      hover:
+        'hover:bg-fuchsia-500/10 hover:text-fuchsia-600 hover:border-fuchsia-400/60 dark:hover:bg-fuchsia-500/20 dark:hover:text-fuchsia-200 dark:hover:border-fuchsia-400/60',
+      focus: 'focus-visible:ring-fuchsia-500/40',
+    },
+    defaultModel: 'openai/gpt-oss-20b',
+    modelOptions: ['openai/gpt-oss-20b', 'openai/gpt-oss-120b'],
+    systemPrompt: [
+      'You are a playful parody writer. When given any text you respond with a witty parody of it.',
+      'Keep responses concise (2-4 sentences) and ensure they clearly riff on the original idea.',
+      "Match the length of the original message as closely as possible—no more than about 20% longer than the user's input.",
+      'Avoid quoting the original verbatim; reshape it with humor and creative twists.',
+    ].join(' '),
+    allowBaseUrlOverride: false,
+    enableStlViewer: false,
+    enableBarcodeScanner: false,
+    logLabel: 'SixDegrees',
+    defaultBaseUrl: FALLBACK_BASE_URL,
+  },
 ]
 
 export function getExperienceById(id) {
