@@ -33,7 +33,7 @@ export default function NewsAnalyzerView({ news, loading }) {
               <article key={index} className="bg-white dark:bg-slate-800 rounded-lg shadow-lg overflow-hidden transform hover:-translate-y-1 transition-transform duration-300">
                 <div className="p-6">
                   <a href={item.link} target="_blank" rel="noopener noreferrer" className="text-2xl font-serif text-gray-800 dark:text-slate-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-300">
-                    {item.title}
+                    {item.title.replace(/Fixture:/g, '')}
                   </a>
                   <div className="mt-3 text-sm text-gray-500 dark:text-slate-400">
                     {new Date(item.publishedAt).toLocaleString()} • {item.sourceTitle}
