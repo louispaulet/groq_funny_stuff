@@ -14,6 +14,7 @@ import ObjectMakerNav from './components/objectmaker/ObjectMakerNav'
 import ObjectMakerBuilder from './pages/ObjectMakerBuilder'
 import ObjectMakerZoo from './pages/ObjectMakerZoo'
 import NewsAnalyzerPage from './pages/NewsAnalyzerPage'
+import SixDegreesPage from './pages/SixDegreesPage'
 
 export default function App() {
   return (
@@ -66,6 +67,12 @@ export default function App() {
                   key={experience.id}
                   path={experience.path}
                   element={<NewsAnalyzerPage />}
+                />
+              ) : experience.id === 'sixdegrees' ? (
+                <Route
+                  key={experience.id}
+                  path={experience.path}
+                  element={<SixDegreesPage />}
                 />
               ) : (
                 <Route
