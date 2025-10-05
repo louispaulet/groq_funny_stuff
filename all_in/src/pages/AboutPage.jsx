@@ -75,6 +75,11 @@ export default function AboutPage() {
             up the UI. 🔎
           </li>
           <li>
+            <span className="font-semibold text-slate-800 dark:text-slate-200">GET /news/&lt;category&gt;</span> — curated news feed
+            powering the News Analyzer experience. The worker aggregates trusted sources per category and returns normalized
+            JSON so the UI can render headlines instantly. 🗞️
+          </li>
+          <li>
             <span className="font-semibold text-slate-800 dark:text-slate-200">POST /obj/&lt;type&gt; (and /object*/ variants)</span> —
             structured generation endpoint consumed by Object Maker. It accepts a JSON schema, user prompt, and optional model
             parameters, then returns a compliant object. 🧩
