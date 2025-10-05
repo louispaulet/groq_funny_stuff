@@ -68,7 +68,6 @@ export default function NewsAnalyzerPage() {
         const { payload } = await createRemoteObject({
           structure: CLASSIFICATION_STRUCTURE,
           prompt: buildPrompt(item),
-          objectType: 'news-sentiment',
           strict: true,
         });
         const sentiment = typeof payload?.sentiment === 'string' ? payload.sentiment.toLowerCase() : null;
@@ -112,7 +111,7 @@ export default function NewsAnalyzerPage() {
           const url = `${BASE_URL}news/${category}`;
           const response = await fetch(url, { headers: { Accept: 'application/json' } });
           const payload = await response.json();
-          allNews[category] = (payload.items || []).slice(0, 5);
+          allNews[category] = (payload.items || []).slice(0, 10);
         } catch (error) {
           console.error(`Failed to fetch news for category: ${category}`, error);
           allNews[category] = [];

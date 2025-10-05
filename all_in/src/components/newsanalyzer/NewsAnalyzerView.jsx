@@ -24,7 +24,7 @@ export default function NewsAnalyzerView({ news, loading, classifications, filte
   return (
     <div className="space-y-16">
       {CATEGORY_ORDER.map((category) => {
-        const items = (news[category] || []).slice(0, 5);
+        const items = (news[category] || []).slice(0, 10);
         if (!items.length) return null;
 
         return (
