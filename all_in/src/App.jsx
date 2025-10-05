@@ -15,6 +15,9 @@ import ObjectMakerBuilder from './pages/ObjectMakerBuilder'
 import ObjectMakerZoo from './pages/ObjectMakerZoo'
 import NewsAnalyzerPage from './pages/NewsAnalyzerPage'
 import SixDegreesPage from './pages/SixDegreesPage'
+import ImageGeneratorPage from './pages/ImageGeneratorPage'
+import ImageGalleryPage from './pages/ImageGalleryPage'
+import ImageGeneratorNav from './components/imagegen/ImageGeneratorNav'
 
 export default function App() {
   return (
@@ -58,6 +61,25 @@ export default function App() {
                     element={(
                       <ExperiencePage experience={experience} navigation={<ObjectMakerNav />}>
                         <ObjectMakerZoo />
+                      </ExperiencePage>
+                    )}
+                  />
+                </Fragment>
+              ) : experience.id === 'imagegen' ? (
+                <Fragment key={experience.id}>
+                  <Route
+                    path={experience.path}
+                    element={(
+                      <ExperiencePage experience={experience} navigation={<ImageGeneratorNav />}>
+                        <ImageGeneratorPage experience={experience} />
+                      </ExperiencePage>
+                    )}
+                  />
+                  <Route
+                    path={`${experience.path}/gallery`}
+                    element={(
+                      <ExperiencePage experience={experience} navigation={<ImageGeneratorNav />}>
+                        <ImageGalleryPage />
                       </ExperiencePage>
                     )}
                   />

@@ -132,6 +132,30 @@ export const experiences = [
     defaultBaseUrl: (getEnvValue('VITE_POKEDEX_CHAT_BASE_URL') || FALLBACK_BASE_URL).replace(/\/$/, ''),
   },
   {
+    id: 'imagegen',
+    path: '/imagegen',
+    name: 'Flux Image Lab',
+    headline: 'Prompt → Flux image in seconds',
+    description:
+      'Send prompts to the Groq-hosted Flux endpoint, preview the returned image, and keep a cookie-backed gallery of recent hits.',
+    badge: 'Images',
+    heroGradient: 'from-sky-500 to-cyan-600',
+    panelAccent: 'bg-sky-100 text-sky-900 dark:bg-sky-500/20 dark:text-sky-200',
+    navAccent: {
+      gradient: 'from-sky-500 to-cyan-600',
+      hover:
+        'hover:bg-sky-500/10 hover:text-sky-600 hover:border-sky-400/60 dark:hover:bg-sky-500/20 dark:hover:text-sky-200 dark:hover:border-sky-400/60',
+      focus: 'focus-visible:ring-sky-500/40',
+    },
+    defaultModel: 'flux-image-endpoint',
+    modelOptions: ['Flux image endpoint'],
+    imageApiBaseUrl: (getEnvValue('VITE_IMAGE_API_BASE_URL') || FALLBACK_BASE_URL).replace(/\/$/, ''),
+    allowBaseUrlOverride: false,
+    enableStlViewer: false,
+    enableBarcodeScanner: false,
+    logLabel: 'ImageGen',
+  },
+  {
     id: 'newsanalyzer',
     path: '/newsanalyzer',
     name: 'News Analyzer',
