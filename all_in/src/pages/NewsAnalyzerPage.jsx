@@ -7,6 +7,7 @@ import NewsAnalyzerView from '../components/newsanalyzer/NewsAnalyzerView';
 import { CATEGORY_ORDER } from '../components/newsanalyzer/constants';
 import { CLASSIFICATION_MODELS } from '../components/newsanalyzer/modelConfig';
 import { createRemoteObject } from '../lib/objectApi';
+import { incrementNewsClassificationCount } from '../lib/newsAnalyzerStats';
 
 const BASE_URL = 'https://groq-endpoint.louispaulet13.workers.dev/';
 const CLASSIFICATION_STRUCTURE = {
@@ -87,17 +88,24 @@ export default function NewsAnalyzerPage() {
         const sentiment = typeof payload?.sentiment === 'string' ? payload.sentiment.toLowerCase() : null;
         const normalized = sentiment === 'good' || sentiment === 'bad' ? sentiment : null;
         if (isMountedRef.current) {
-          setClassifications((prev) => ({
-            ...prev,
-            [key]: {
-              ...(prev[key] || {}),
-              sentiment: normalized,
-              status: normalized ? 'complete' : 'error',
-              modelId: modelInfo?.id || null,
-              modelLabel: modelInfo?.label || null,
-              error: normalized ? null : prev[key]?.error || null,
-            },
-          }));
+          setClassifications((prev) => {
+            const previousStatus = prev[key]?.status;
+            const nextStatus = normalized ? 'complete' : 'error';
+            if (normalized && previousStatus !== 'complete') {
+              incrementNewsClassificationCount();
+            }
+            return {
+              ...prev,
+              [key]: {
+                ...(prev[key] || {}),
+                sentiment: normalized,
+                status: nextStatus,
+                modelId: modelInfo?.id || null,
+                modelLabel: modelInfo?.label || null,
+                error: normalized ? null : prev[key]?.error || null,
+              },
+            };
+          });
         }
       } catch (error) {
         console.error('Failed to classify article', error);

@@ -21,6 +21,11 @@ export function readZooEntries() {
   }
 }
 
+export function countZooEntries() {
+  const entries = readZooEntries()
+  return Array.isArray(entries) ? entries.length : 0
+}
+
 export function writeZooEntries(entries) {
   const ls = getStorage()
   if (!ls) return
