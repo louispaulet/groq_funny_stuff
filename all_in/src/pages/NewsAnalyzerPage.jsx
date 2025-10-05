@@ -49,6 +49,7 @@ export default function NewsAnalyzerPage() {
   }, [classifications]);
 
   useEffect(() => {
+    isMountedRef.current = true;
     return () => {
       isMountedRef.current = false;
     };
@@ -103,33 +104,44 @@ export default function NewsAnalyzerPage() {
   }, []);
 
   useEffect(() => {
+    let cancelled = false;
+
     const fetchAllNews = async () => {
       setLoading(true);
       const allNews = {};
-      for (const category of CATEGORY_ORDER) {
-        try {
-          const url = `${BASE_URL}news/${category}`;
-          const response = await fetch(url, { headers: { Accept: 'application/json' } });
-          const payload = await response.json();
-          allNews[category] = (payload.items || []).slice(0, 10);
-        } catch (error) {
-          console.error(`Failed to fetch news for category: ${category}`, error);
-          allNews[category] = [];
-        }
-      }
+
+      await Promise.all(
+        CATEGORY_ORDER.map(async (category) => {
+          try {
+            const url = `${BASE_URL}news/${category}`;
+            const response = await fetch(url, { headers: { Accept: 'application/json' } });
+            const payload = await response.json();
+            allNews[category] = (payload?.items || []).slice(0, 10);
+          } catch (error) {
+            console.error(`Failed to fetch news for category: ${category}`, error);
+            allNews[category] = [];
+          }
+        }),
+      );
+
+      if (cancelled || !isMountedRef.current) return;
+
       classificationQueueRef.current = [];
       processingRef.current = false;
-      if (isMountedRef.current) {
-        setClassifications({});
-        setNews(allNews);
-        setLoading(false);
-      }
+      setClassifications({});
+      setNews(allNews);
+      setLoading(false);
     };
 
     fetchAllNews();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
+    if (loading) return;
     if (!Object.keys(news).length) return;
 
     const newTasks = [];
@@ -151,7 +163,7 @@ export default function NewsAnalyzerPage() {
     setClassifications((prev) => ({ ...prev, ...pendingUpdates }));
     classificationQueueRef.current.push(...newTasks);
     runNextClassification();
-  }, [news, runNextClassification]);
+  }, [loading, news, runNextClassification]);
 
   return (
     <ExperiencePage
