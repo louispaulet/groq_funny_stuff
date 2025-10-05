@@ -41,6 +41,7 @@ export default function NewsAnalyzerPage() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
   const [classifications, setClassifications] = useState({});
+  const [activationCounts, setActivationCounts] = useState({});
   const classificationsRef = useRef(classifications);
   const classificationQueueRef = useRef([]);
   const processingRef = useRef(false);
@@ -162,7 +163,14 @@ export default function NewsAnalyzerPage() {
 
       classificationQueueRef.current = [];
       processingRef.current = false;
+      if (throttleTimeoutRef.current) {
+        clearTimeout(throttleTimeoutRef.current);
+        throttleTimeoutRef.current = null;
+      }
       setClassifications({});
+      classificationsRef.current = {};
+      const firstCategory = CATEGORY_ORDER[0];
+      setActivationCounts(firstCategory ? { [firstCategory]: 1 } : {});
       setNews(allNews);
       setLoading(false);
     };
@@ -174,30 +182,56 @@ export default function NewsAnalyzerPage() {
     };
   }, []);
 
+  const classifyCategory = useCallback(
+    (category) => {
+      const items = news[category] || [];
+      if (!items.length) return;
+
+      const newTasks = [];
+      const pendingUpdates = {};
+
+      items.forEach((item, index) => {
+        const key = `${category}-${index}`;
+        const existing = classificationsRef.current[key];
+        if (existing?.status === 'complete' || existing?.status === 'pending') {
+          return;
+        }
+        newTasks.push({ category, index, item });
+        pendingUpdates[key] = {
+          sentiment: null,
+          status: 'pending',
+          modelId: null,
+          modelLabel: null,
+          error: null,
+        };
+      });
+
+      if (!newTasks.length) return;
+
+      setClassifications((prev) => ({ ...prev, ...pendingUpdates }));
+      classificationQueueRef.current.push(...newTasks);
+      runNextClassification();
+    },
+    [news, runNextClassification],
+  );
+
   useEffect(() => {
     if (loading) return;
     if (!Object.keys(news).length) return;
 
-    const newTasks = [];
-    const pendingUpdates = {};
+    Object.entries(activationCounts).forEach(([category, count]) => {
+      if (count > 0) {
+        classifyCategory(category);
+      }
+    });
+  }, [activationCounts, classifyCategory, loading, news]);
 
-    for (const category of CATEGORY_ORDER) {
-      const items = news[category] || [];
-      items.forEach((item, index) => {
-        const key = `${category}-${index}`;
-        if (!classificationsRef.current[key]) {
-          newTasks.push({ category, index, item });
-          pendingUpdates[key] = { sentiment: null, status: 'pending', modelId: null, modelLabel: null };
-        }
-      });
-    }
-
-    if (!newTasks.length) return;
-
-    setClassifications((prev) => ({ ...prev, ...pendingUpdates }));
-    classificationQueueRef.current.push(...newTasks);
-    runNextClassification();
-  }, [loading, news, runNextClassification]);
+  const handleActivateCategory = useCallback((category) => {
+    setActivationCounts((prev) => ({
+      ...prev,
+      [category]: (prev[category] || 0) + 1,
+    }));
+  }, []);
 
   return (
     <ExperiencePage
@@ -209,6 +243,8 @@ export default function NewsAnalyzerPage() {
         loading={loading}
         classifications={classifications}
         filter={filter}
+        activationCounts={activationCounts}
+        onActivateCategory={handleActivateCategory}
       />
     </ExperiencePage>
   );

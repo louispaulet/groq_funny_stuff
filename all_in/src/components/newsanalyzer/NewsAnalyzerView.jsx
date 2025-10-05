@@ -1,6 +1,21 @@
 import { CATEGORY_LABELS, CATEGORY_ORDER } from './constants';
 import { CLASSIFICATION_MODELS, getClassificationModelById } from './modelConfig';
 
+function getCategoryProgress(category, items, classifications) {
+  return items.reduce(
+    (acc, _item, index) => {
+      const classification = classifications?.[`${category}-${index}`];
+      if (!classification) return acc;
+
+      if (classification.status === 'pending') acc.hasPending = true;
+      if (classification.status === 'complete') acc.hasComplete = true;
+      if (classification.status === 'error') acc.hasError = true;
+      return acc;
+    },
+    { hasPending: false, hasComplete: false, hasError: false },
+  );
+}
+
 function articleMatchesFilter(filter, classification) {
   if (filter === 'all') return true;
   if (!classification || !classification.sentiment) return false;
@@ -17,7 +32,14 @@ function getSentimentStyles(sentiment) {
   return 'bg-white dark:bg-slate-800 border border-transparent';
 }
 
-export default function NewsAnalyzerView({ news, loading, classifications, filter }) {
+export default function NewsAnalyzerView({
+  news,
+  loading,
+  classifications,
+  filter,
+  activationCounts,
+  onActivateCategory,
+}) {
   if (loading) {
     return <div className="p-4 text-center">Loading news...</div>;
   }
@@ -44,6 +66,28 @@ export default function NewsAnalyzerView({ news, loading, classifications, filte
         const items = (news[category] || []).slice(0, 10);
         if (!items.length) return null;
 
+        const { hasPending, hasComplete, hasError } = getCategoryProgress(category, items, classifications);
+        const activationCount = activationCounts?.[category] || 0;
+        const isActivated = activationCount > 0;
+        let buttonLabel = 'Classify';
+        let buttonDisabled = !items.length;
+
+        if (isActivated) {
+          if (hasPending) {
+            buttonLabel = 'Classifying…';
+            buttonDisabled = true;
+          } else if (hasError) {
+            buttonLabel = 'Retry classification';
+            buttonDisabled = false;
+          } else if (hasComplete) {
+            buttonLabel = 'Classified';
+            buttonDisabled = true;
+          } else {
+            buttonLabel = 'Classify';
+            buttonDisabled = !items.length;
+          }
+        }
+
         return (
           <section key={category}>
             <div className="relative mb-8">
@@ -53,6 +97,22 @@ export default function NewsAnalyzerView({ news, loading, classifications, filte
               <div className="relative flex justify-center">
                 <span className="bg-white dark:bg-slate-900 px-4 text-2xl font-serif text-gray-500 dark:text-gray-400">{CATEGORY_LABELS[category]}</span>
               </div>
+            </div>
+            <div className="mb-6 flex justify-end">
+              <button
+                type="button"
+                onClick={() => {
+                  if (!buttonDisabled && onActivateCategory) {
+                    onActivateCategory(category);
+                  }
+                }}
+                disabled={buttonDisabled}
+                className={`inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-600 shadow-sm transition-colors hover:border-slate-400 hover:text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-500 dark:hover:text-white ${
+                  buttonDisabled ? 'cursor-not-allowed opacity-60 hover:border-slate-300 hover:text-slate-600 dark:hover:border-slate-600 dark:hover:text-slate-200' : ''
+                }`}
+              >
+                {buttonLabel}
+              </button>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
               {items.map((item, index) => {
