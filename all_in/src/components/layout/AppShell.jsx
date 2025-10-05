@@ -14,7 +14,7 @@ function ThemeToggle() {
       title="Toggle theme"
     >
       {dark ? <SunIcon className="h-5 w-5" /> : <MoonIcon className="h-5 w-5" />}
-      <span className="hidden sm:inline">{dark ? 'Light mode' : 'Dark mode'}</span>
+      <span className="hidden sm:inline">{dark ? 'Light mode' : 'Dark mode'}</span>
     </button>
   )
 }

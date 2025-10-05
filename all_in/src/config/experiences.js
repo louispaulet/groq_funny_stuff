@@ -134,7 +134,7 @@ export const experiences = [
   {
     id: 'newsanalyzer',
     path: '/newsanalyzer',
-    name: 'News Analyzer',
+    name: 'News Analyzer',
     headline: 'Real-time News Analysis',
     description: 'Explore and analyze real-time news feeds from various sources, powered by a Cloudflare Worker.',
     badge: 'News',
