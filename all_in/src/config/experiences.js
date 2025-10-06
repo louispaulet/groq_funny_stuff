@@ -156,6 +156,37 @@ export const experiences = [
     logLabel: 'ImageGen',
   },
   {
+    id: 'pizzamaker',
+    path: '/pizza-maker',
+    name: 'Pizza Maker',
+    headline: 'Design your dream pie, then let Groq plate it.',
+    description:
+      'Select sauces, cheeses, toppings, and art direction. Groq converts your build into a luxe image prompt and renders the pie.',
+    badge: 'Culinary',
+    heroGradient: 'from-orange-500 to-red-500',
+    panelAccent: 'bg-orange-100 text-orange-900 dark:bg-orange-500/20 dark:text-orange-200',
+    navAccent: {
+      gradient: 'from-orange-500 to-red-500',
+      hover:
+        'hover:bg-orange-500/10 hover:text-orange-600 hover:border-orange-400/60 dark:hover:bg-orange-500/20 dark:hover:text-orange-200 dark:hover:border-orange-400/60',
+      focus: 'focus-visible:ring-orange-500/40',
+    },
+    defaultModel: 'openai/gpt-oss-20b',
+    modelOptions: ['openai/gpt-oss-20b', 'openai/gpt-oss-120b'],
+    greeting: 'Craving something specific? Dial in your toppings and we will stage the perfect pizza photo.',
+    promptPlaceholder: 'Describe the pizza mood you want to capture…',
+    systemPrompt: [
+      'You are a culinary art director who helps users plan photorealistic pizza imagery.',
+      'Reference the provided configuration faithfully and suggest plating or styling ideas when asked.',
+    ].join(' '),
+    allowBaseUrlOverride: false,
+    enableStlViewer: false,
+    enableBarcodeScanner: false,
+    logLabel: 'PizzaMaker',
+    imageApiBaseUrl: (getEnvValue('VITE_IMAGE_API_BASE_URL') || FALLBACK_BASE_URL).replace(/\/$/, ''),
+    defaultBaseUrl: FALLBACK_BASE_URL,
+  },
+  {
     id: 'newsanalyzer',
     path: '/newsanalyzer',
     name: 'News Analyzer',

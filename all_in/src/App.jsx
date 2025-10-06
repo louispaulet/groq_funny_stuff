@@ -18,6 +18,7 @@ import SixDegreesPage from './pages/SixDegreesPage'
 import ImageGeneratorPage from './pages/ImageGeneratorPage'
 import ImageGalleryPage from './pages/ImageGalleryPage'
 import ImageGeneratorNav from './components/imagegen/ImageGeneratorNav'
+import PizzaMakerPage from './pages/PizzaMakerPage'
 
 export default function App() {
   return (
@@ -84,6 +85,16 @@ export default function App() {
                     )}
                   />
                 </Fragment>
+              ) : experience.id === 'pizzamaker' ? (
+                <Route
+                  key={experience.id}
+                  path={experience.path}
+                  element={(
+                    <ExperiencePage experience={experience}>
+                      <PizzaMakerPage experience={experience} />
+                    </ExperiencePage>
+                  )}
+                />
               ) : experience.id === 'newsanalyzer' ? (
                 <Route
                   key={experience.id}
