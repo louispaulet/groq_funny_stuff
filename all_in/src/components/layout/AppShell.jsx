@@ -78,7 +78,9 @@ export default function AppShell({ children }) {
                 experience =>
                   experience.id !== 'objectmaker' &&
                   experience.id !== 'stlviewer' &&
-                  experience.id !== 'sixdegrees',
+                  experience.id !== 'sixdegrees' &&
+                  experience.id !== 'imagegen' &&
+                  experience.id !== 'pizzamaker',
               )
               .map((experience) => (
               <NavLink
