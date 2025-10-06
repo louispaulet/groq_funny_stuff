@@ -3,6 +3,8 @@ import { ArrowPathIcon, TrashIcon } from '@heroicons/react/24/outline'
 import { callRemoteChat } from '../lib/remoteChat'
 import { CAR_GALLERY_LIMIT, clearCarGallery, readCarGallery, writeCarGallery } from '../lib/carGalleryCookie'
 
+const CUSTOM_BRAND_VALUE = '__custom__'
+
 const BRAND_OPTIONS = [
   { value: 'Tesla', label: 'Tesla' },
   { value: 'Lamborghini', label: 'Lamborghini' },
@@ -11,6 +13,7 @@ const BRAND_OPTIONS = [
   { value: 'Bugatti', label: 'Bugatti' },
   { value: 'Aston Martin', label: 'Aston Martin' },
   { value: 'Pagani', label: 'Pagani' },
+  { value: CUSTOM_BRAND_VALUE, label: 'Custom (follow your prompt)' },
 ]
 
 const BODY_STYLE_OPTIONS = [
@@ -157,7 +160,8 @@ function summarizeConfiguration({
 }
 
 export default function CarMakerPage({ experience }) {
-  const [brand, setBrand] = useState(BRAND_OPTIONS[0].value)
+  const [brandChoice, setBrandChoice] = useState(BRAND_OPTIONS[0].value)
+  const [customBrand, setCustomBrand] = useState('')
   const [color, setColor] = useState('candy apple red')
   const [wheelCount, setWheelCount] = useState('4')
   const [bodyStyle, setBodyStyle] = useState(BODY_STYLE_OPTIONS[0].value)
@@ -182,6 +186,11 @@ export default function CarMakerPage({ experience }) {
   const [imageUrl, setImageUrl] = useState('')
   const [gallery, setGallery] = useState([])
 
+  const resolvedBrand =
+    brandChoice === CUSTOM_BRAND_VALUE
+      ? customBrand.trim() || 'bespoke concept car brand guided by the prompt'
+      : brandChoice
+
   useEffect(() => {
     setGallery(readCarGallery())
   }, [])
@@ -189,7 +198,7 @@ export default function CarMakerPage({ experience }) {
   const summary = useMemo(
     () =>
       summarizeConfiguration({
-        brand,
+        brand: resolvedBrand,
         color,
         wheelCount,
         bodyStyle,
@@ -202,7 +211,7 @@ export default function CarMakerPage({ experience }) {
         finishingNotes,
       }),
     [
-      brand,
+      resolvedBrand,
       color,
       wheelCount,
       bodyStyle,
@@ -248,7 +257,7 @@ export default function CarMakerPage({ experience }) {
 
     try {
       const template = createTemplatePayload({
-        brand,
+        brand: resolvedBrand,
         color,
         wheelCount: wheelCount.trim(),
         bodyStyle,
@@ -343,8 +352,8 @@ export default function CarMakerPage({ experience }) {
             </label>
             <select
               id="car-brand"
-              value={brand}
-              onChange={(event) => setBrand(event.target.value)}
+              value={brandChoice}
+              onChange={(event) => setBrandChoice(event.target.value)}
               className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-400/40 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
             >
               {BRAND_OPTIONS.map((option) => (
@@ -353,6 +362,27 @@ export default function CarMakerPage({ experience }) {
                 </option>
               ))}
             </select>
+            {brandChoice === CUSTOM_BRAND_VALUE ? (
+              <div className="mt-3 space-y-2">
+                <label
+                  htmlFor="car-brand-custom"
+                  className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400"
+                >
+                  Custom brand direction
+                </label>
+                <input
+                  id="car-brand-custom"
+                  type="text"
+                  value={customBrand}
+                  onChange={(event) => setCustomBrand(event.target.value)}
+                  placeholder="e.g. art-deco inspired electric marque"
+                  className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-400/40 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+                />
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Leave blank to let Groq invent a marque that matches your prompt.
+                </p>
+              </div>
+            ) : null}
           </div>
 
           <div>
