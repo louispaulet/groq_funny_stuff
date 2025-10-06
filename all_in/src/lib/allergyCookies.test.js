@@ -9,43 +9,7 @@ import {
   writeAllergyConversationsCookie,
   writeSavedConversations,
 } from './allergyCookies'
-
-function installCookieStub() {
-  let store = {}
-  const cookieDescriptor = {
-    configurable: true,
-    get() {
-      return Object.entries(store)
-        .map(([key, value]) => `${key}=${value}`)
-        .join('; ')
-    },
-    set(value) {
-      if (typeof value !== 'string') return
-      const [pair, ...attrs] = value.split(';')
-      const [rawName, ...rest] = pair.split('=')
-      const name = rawName.trim()
-      const encodedValue = rest.join('=').trim()
-      if (!name) return
-      const normalizedAttrs = attrs.map((item) => item.trim().toLowerCase())
-      if (normalizedAttrs.some((attr) => attr === 'max-age=0')) {
-        delete store[name]
-        return
-      }
-      store[name] = encodedValue
-    },
-  }
-  Object.defineProperty(globalThis, 'document', {
-    configurable: true,
-    value: {},
-  })
-  Object.defineProperty(globalThis.document, 'cookie', cookieDescriptor)
-
-  return {
-    reset() {
-      store = {}
-    },
-  }
-}
+import { installCookieStub } from './testCookieStub'
 
 const cookieStub = installCookieStub()
 
@@ -117,5 +81,63 @@ describe('allergy conversation persistence', () => {
 
     clearSavedConversations('pokedex')
     expect(readChatCounts().pokedex).toBe(0)
+  })
+
+  test('persists complete conversations without cropping messages', () => {
+    const long = 'x'.repeat(1200)
+    const messages = Array.from({ length: 10 }, (_, index) => ({
+      role: index % 2 === 0 ? 'user' : 'assistant',
+      content: `${long}-${index}`,
+      timestamp: Date.now() + index,
+    }))
+
+    writeSavedConversations('stlviewer', [
+      {
+        id: 'deep-history',
+        title: 'Full chat',
+        messages,
+      },
+    ])
+
+    const saved = readSavedConversations('stlviewer')
+    expect(saved).toHaveLength(1)
+    expect(saved[0].messages).toHaveLength(messages.length)
+    expect(saved[0].messages[0].content).toBe(`${long}-0`)
+    expect(saved[0].messages.at(-1).content).toBe(`${long}-9`)
+  })
+
+  test('stores all conversations and keeps ordering stable', () => {
+    const conversations = Array.from({ length: 5 }, (_, index) => ({
+      id: `c-${index}`,
+      title: `Conversation ${index}`,
+      messages: [
+        { role: 'user', content: `hi-${index}`, timestamp: Date.now() + index },
+      ],
+    }))
+
+    writeSavedConversations('pokedex', conversations)
+
+    const saved = readSavedConversations('pokedex')
+    expect(saved).toHaveLength(conversations.length)
+    expect(saved.map((conversation) => conversation.id)).toEqual(
+      conversations.map((conversation) => conversation.id),
+    )
+  })
+
+  test('splits oversized payloads across chunked cookies', () => {
+    const giantMessage = 'g'.repeat(6000)
+    writeSavedConversations('pokedex', [
+      {
+        id: 'giant',
+        title: 'Huge chat',
+        messages: [
+          { role: 'user', content: giantMessage, timestamp: Date.now() },
+        ],
+      },
+    ])
+
+    const cookies = cookieStub.snapshot()
+    const keys = Object.keys(cookies).filter((key) => key.startsWith('allin_conversations_pokedex'))
+    expect(keys.length).toBeGreaterThan(1)
   })
 })
