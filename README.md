@@ -8,6 +8,8 @@ Groq AllIn Studio is the flagship experience in this repo: a single React worksp
 - `all_in/` contains the deployable Groq AllIn Studio workspace and is the recommended way to run the demos together.
 - The root `Makefile` provides install/run/test/deploy/clean commands for the Groq AllIn Studio workspace.
 - Production deployments target Groq AllIn Studio.
+- Keep the existing top navigation tabs as-is. When new experiences are added, surface them on the overview page instead of
+  adding new buttons to the navbar.
 
 ## Prerequisites
 - Node.js 18+ and npm for Groq AllIn Studio.
