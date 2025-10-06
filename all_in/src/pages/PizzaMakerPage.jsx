@@ -1,6 +1,12 @@
-import { useMemo, useState } from 'react'
-import { ArrowPathIcon } from '@heroicons/react/24/outline'
+import { useEffect, useMemo, useState } from 'react'
+import { ArrowPathIcon, TrashIcon } from '@heroicons/react/24/outline'
 import { callRemoteChat } from '../lib/remoteChat'
+import {
+  PIZZA_GALLERY_LIMIT,
+  clearPizzaGallery,
+  readPizzaGallery,
+  writePizzaGallery,
+} from '../lib/pizzaGalleryCookie'
 
 const SIZE_OPTIONS = [
   { value: 'personal', label: 'Personal (8")' },
@@ -133,6 +139,11 @@ export default function PizzaMakerPage({ experience }) {
   const [error, setError] = useState('')
   const [promptResult, setPromptResult] = useState('')
   const [imageUrl, setImageUrl] = useState('')
+  const [gallery, setGallery] = useState([])
+
+  useEffect(() => {
+    setGallery(readPizzaGallery())
+  }, [])
 
   const summary = useMemo(
     () =>
@@ -150,6 +161,15 @@ export default function PizzaMakerPage({ experience }) {
   )
 
   const apiBaseUrl = (experience?.imageApiBaseUrl || 'https://groq-endpoint.louispaulet13.workers.dev').replace(/\/$/, '')
+
+  function formatTimestamp(timestamp) {
+    const date = new Date(timestamp)
+    if (Number.isNaN(date.getTime())) return ''
+    return date.toLocaleString(undefined, {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    })
+  }
 
   function toggleCheese(cheese) {
     setCheeses((current) => {
@@ -224,6 +244,21 @@ export default function PizzaMakerPage({ experience }) {
       }
 
       setImageUrl(image)
+
+      const createdAt = Date.now()
+      const entry = {
+        prompt: nextPrompt,
+        url: image,
+        summary,
+        timestamp: createdAt,
+      }
+
+      setGallery((current) => {
+        const filtered = current.filter((item) => item.url !== entry.url)
+        const nextGallery = [entry, ...filtered].slice(0, PIZZA_GALLERY_LIMIT)
+        writePizzaGallery(nextGallery)
+        return nextGallery
+      })
     } catch (err) {
       setImageUrl('')
       setPromptResult('')
@@ -231,6 +266,11 @@ export default function PizzaMakerPage({ experience }) {
     } finally {
       setLoading(false)
     }
+  }
+
+  function handleClearGallery() {
+    clearPizzaGallery()
+    setGallery([])
   }
 
   return (
@@ -485,6 +525,59 @@ export default function PizzaMakerPage({ experience }) {
             ) : (
               <p className="px-6 text-center text-sm text-slate-500 dark:text-slate-400">
                 Your pizza masterpiece will appear here once the image service finishes rendering.
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white/80 shadow-sm dark:border-slate-700 dark:bg-slate-900/60">
+          <div className="flex items-center justify-between gap-3 border-b border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-600 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200">
+            <span>Saved pizza gallery</span>
+            {gallery.length > 0 ? (
+              <button
+                type="button"
+                onClick={handleClearGallery}
+                className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm transition hover:border-red-400 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400/40 focus-visible:ring-offset-1 focus-visible:ring-offset-white dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-red-400 dark:hover:text-red-300"
+              >
+                <TrashIcon className="h-4 w-4" />
+                Clear gallery
+              </button>
+            ) : null}
+          </div>
+          <div className="p-5">
+            {gallery.length > 0 ? (
+              <div className="grid gap-4 sm:grid-cols-2">
+                {gallery.map((entry) => (
+                  <article
+                    key={`${entry.url}-${entry.timestamp}`}
+                    className="overflow-hidden rounded-2xl border border-slate-200 bg-white/80 shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg dark:border-slate-700 dark:bg-slate-900/70"
+                  >
+                    <div className="relative h-40 w-full overflow-hidden border-b border-slate-200 bg-slate-100 dark:border-slate-700 dark:bg-slate-800">
+                      <img src={entry.url} alt={entry.prompt || 'Saved pizza render'} className="h-full w-full object-cover" loading="lazy" />
+                    </div>
+                    <div className="space-y-2 p-4">
+                      <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-100">{entry.prompt || 'Saved pizza prompt'}</h3>
+                      {entry.summary ? (
+                        <p className="text-xs text-slate-500 dark:text-slate-400">{entry.summary}</p>
+                      ) : null}
+                      <div className="flex flex-wrap items-center justify-between gap-2 text-[0.7rem] text-slate-400 dark:text-slate-500">
+                        <span>{formatTimestamp(entry.timestamp)}</span>
+                        <a
+                          href={entry.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1 rounded-full border border-slate-300 px-2 py-1 text-[0.7rem] font-medium text-slate-600 transition hover:border-brand-400 hover:text-brand-600 dark:border-slate-600 dark:text-slate-200"
+                        >
+                          Open ↗
+                        </a>
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-slate-500 dark:text-slate-400">
+                Every generated pizza is saved to a browser cookie so you can revisit it later. Bake a pie to see it here.
               </p>
             )}
           </div>
