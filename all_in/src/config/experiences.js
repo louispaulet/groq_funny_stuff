@@ -187,6 +187,37 @@ export const experiences = [
     defaultBaseUrl: FALLBACK_BASE_URL,
   },
   {
+    id: 'carmaker',
+    path: '/car-maker',
+    name: 'Car Maker',
+    headline: 'Style a hero car and Groq will stage the scene.',
+    description:
+      'Select the brand, finish, camera angle, and cinematic backdrop. Groq transforms it into a luxe prompt and renders the ride.',
+    badge: 'Automotive',
+    heroGradient: 'from-slate-900 via-sky-800 to-cyan-600',
+    panelAccent: 'bg-slate-900 text-white dark:bg-slate-900 dark:text-slate-100',
+    navAccent: {
+      gradient: 'from-slate-900 via-sky-800 to-cyan-600',
+      hover:
+        'hover:bg-slate-900/10 hover:text-slate-900 hover:border-slate-700/60 dark:hover:bg-slate-900/30 dark:hover:text-slate-100 dark:hover:border-slate-500/60',
+      focus: 'focus-visible:ring-slate-900/40',
+    },
+    defaultModel: 'openai/gpt-oss-20b',
+    modelOptions: ['openai/gpt-oss-20b', 'openai/gpt-oss-120b'],
+    greeting: 'Ready to spec a show-stopping hero car? Tune the exterior and I will help stage it.',
+    promptPlaceholder: 'Describe the vibe you want for this hero car shot…',
+    systemPrompt: [
+      'You are an automotive concept stylist who helps users craft photorealistic hero car imagery.',
+      'Only discuss visible exterior design, stance, lighting, and setting.',
+    ].join(' '),
+    allowBaseUrlOverride: false,
+    enableStlViewer: false,
+    enableBarcodeScanner: false,
+    logLabel: 'CarMaker',
+    imageApiBaseUrl: (getEnvValue('VITE_IMAGE_API_BASE_URL') || FALLBACK_BASE_URL).replace(/\/$/, ''),
+    defaultBaseUrl: FALLBACK_BASE_URL,
+  },
+  {
     id: 'newsanalyzer',
     path: '/newsanalyzer',
     name: 'News Analyzer',

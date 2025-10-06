@@ -19,6 +19,7 @@ import ImageGeneratorPage from './pages/ImageGeneratorPage'
 import ImageGalleryPage from './pages/ImageGalleryPage'
 import ImageGeneratorNav from './components/imagegen/ImageGeneratorNav'
 import PizzaMakerPage from './pages/PizzaMakerPage'
+import CarMakerPage from './pages/CarMakerPage'
 
 export default function App() {
   return (
@@ -92,6 +93,16 @@ export default function App() {
                   element={(
                     <ExperiencePage experience={experience}>
                       <PizzaMakerPage experience={experience} />
+                    </ExperiencePage>
+                  )}
+                />
+              ) : experience.id === 'carmaker' ? (
+                <Route
+                  key={experience.id}
+                  path={experience.path}
+                  element={(
+                    <ExperiencePage experience={experience}>
+                      <CarMakerPage experience={experience} />
                     </ExperiencePage>
                   )}
                 />
