@@ -18,6 +18,7 @@ import {
   clearNewsClassificationCount,
   readNewsClassificationCount,
 } from '../../lib/newsAnalyzerStats'
+import { clearPizzaGallery, countPizzaGalleryEntries } from '../../lib/pizzaGalleryCookie'
 
 const CHAT_EXPERIENCE_LABELS = {
   allergyfinder: 'AllergyFinder',
@@ -56,6 +57,7 @@ export default function UserProfile() {
   const [allergyItems, setAllergyItems] = useState(() => parseAllergyList(readAllergyCookie()))
   const [objectCount, setObjectCount] = useState(() => countZooEntries())
   const [newsClassificationCount, setNewsClassificationCount] = useState(() => readNewsClassificationCount())
+  const [pizzaGalleryCount, setPizzaGalleryCount] = useState(0)
 
   useEffect(() => {
     let stored = readUserProfileName()
@@ -73,6 +75,7 @@ export default function UserProfile() {
     setAllergyItems(parseAllergyList(readAllergyCookie()))
     setObjectCount(countZooEntries())
     setNewsClassificationCount(readNewsClassificationCount())
+    setPizzaGalleryCount(countPizzaGalleryEntries())
   }
 
   function handleRegenerateProfile() {
@@ -113,6 +116,11 @@ export default function UserProfile() {
 
   function handleResetNewsStats() {
     clearNewsClassificationCount()
+    refreshStats()
+  }
+
+  function handleClearPizzaGallery() {
+    clearPizzaGallery()
     refreshStats()
   }
 
@@ -160,6 +168,17 @@ export default function UserProfile() {
       onReset: handleClearObjectMaker,
       resetLabel: 'Delete saved objects',
       footnote: 'Removes every object stored in the Object Maker Zoo on this device.',
+    },
+    {
+      id: 'pizzamaker',
+      label: 'Pizza Maker',
+      icon: '🍕',
+      value: pizzaGalleryCount,
+      description: 'Pizzas saved to your cookie-backed gallery.',
+      cta: { to: '/pizza-maker', label: 'Open Pizza Maker' },
+      onReset: handleClearPizzaGallery,
+      resetLabel: 'Clear pizza gallery',
+      footnote: 'Deletes every saved pizza render stored in browser cookies.',
     },
     {
       id: 'newsanalyzer',
