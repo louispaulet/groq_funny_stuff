@@ -1,3 +1,13 @@
+import {
+  clearChunkedCookie,
+  deleteCookie,
+  getDocument,
+  readChunkedCookie,
+  readCookieValue,
+  writeChunkedCookie,
+  writeCookie,
+} from './cookieUtils'
+
 const ALLERGY_COOKIE_NAME = 'allergy_notes'
 const ALLERGY_CONVERSATIONS_COOKIE_NAME = 'allergyfinder_conversations'
 const USER_PROFILE_COOKIE_NAME = 'allin_profile_name'
@@ -7,37 +17,8 @@ const EXPERIENCE_COOKIE_PREFIX = 'allin_conversations_'
 const KNOWN_EXPERIENCE_IDS = ['allergyfinder', 'stlviewer', 'pokedex']
 
 const YEAR_IN_SECONDS = 60 * 60 * 24 * 365
-export const MAX_SAVED_CONVERSATIONS = 2
-const MAX_SAVED_MESSAGES = 6
-const MAX_MESSAGE_LENGTH = 220
-const COOKIE_MAX_SIZE = 3500
-
-function getDocument() {
-  return typeof document === 'undefined' ? null : document
-}
-
-function readCookieValue(name) {
-  const doc = getDocument()
-  if (!doc || !doc.cookie) return ''
-  const cookies = doc.cookie.split('; ')
-  const target = cookies.find((cookie) => cookie.startsWith(`${name}=`))
-  if (!target) return ''
-  return target.split('=').slice(1).join('=')
-}
-
-function writeCookie(name, value, maxAgeSeconds = YEAR_IN_SECONDS) {
-  const doc = getDocument()
-  if (!doc) return
-  const encoded = encodeURIComponent(value)
-  const attributes = [`path=/`, `max-age=${maxAgeSeconds}`]
-  doc.cookie = `${name}=${encoded}; ${attributes.join('; ')}`
-}
-
-function deleteCookie(name) {
-  const doc = getDocument()
-  if (!doc) return
-  doc.cookie = `${name}=; path=/; max-age=0`
-}
+const CHAT_COUNT_MAX_SIZE = 3500
+export const MAX_SAVED_CONVERSATIONS = Number.POSITIVE_INFINITY
 
 export function readAllergyCookie() {
   try {
@@ -62,15 +43,18 @@ export function countAllergyEntries() {
 
 function sanitizeMessageForStorage(message) {
   const role = message?.role === 'assistant' ? 'assistant' : 'user'
-  const rawContent = typeof message?.content === 'string' ? message.content : ''
-  const content = rawContent.slice(0, MAX_MESSAGE_LENGTH)
+  const content = typeof message?.content === 'string' ? message.content : ''
   if (!content) return null
   const timestamp = typeof message?.timestamp === 'number' && Number.isFinite(message.timestamp)
     ? Math.round(message.timestamp)
     : Date.now()
   const record = { role, content, timestamp }
   if (message?.sources && Array.isArray(message.sources) && message.sources.length > 0) {
-    record.sources = message.sources.slice(0, 2)
+    try {
+      record.sources = JSON.parse(JSON.stringify(message.sources))
+    } catch {
+      record.sources = message.sources.filter((source) => typeof source === 'string')
+    }
   }
   if (message?.error) {
     record.error = true
@@ -81,10 +65,7 @@ function sanitizeMessageForStorage(message) {
 function sanitizeConversationForStorage(conversation) {
   if (!conversation) return null
   const rawMessages = Array.isArray(conversation.messages) ? conversation.messages : []
-  const messages = rawMessages
-    .slice(-MAX_SAVED_MESSAGES)
-    .map(sanitizeMessageForStorage)
-    .filter(Boolean)
+  const messages = rawMessages.map(sanitizeMessageForStorage).filter(Boolean)
   if (messages.length === 0) return null
   const title = typeof conversation.title === 'string' && conversation.title.trim()
     ? conversation.title.trim().slice(0, 60)
@@ -104,7 +85,6 @@ function buildConversationPayload(conversations) {
   const rawList = Array.isArray(conversations) ? conversations : []
   return rawList
     .filter(Boolean)
-    .slice(0, MAX_SAVED_CONVERSATIONS)
     .map(sanitizeConversationForStorage)
     .filter(Boolean)
 }
@@ -118,10 +98,13 @@ function getConversationCookieName(experienceId) {
 
 export function readSavedConversations(experienceId) {
   const name = getConversationCookieName(experienceId)
-  const raw = readCookieValue(name)
+  const raw = readChunkedCookie(name) || (() => {
+    const legacy = readCookieValue(name)
+    return legacy ? decodeURIComponent(legacy) : ''
+  })()
   if (!raw) return []
   try {
-    const parsed = JSON.parse(decodeURIComponent(raw))
+    const parsed = JSON.parse(raw)
     return buildConversationPayload(parsed)
   } catch {
     return []
@@ -132,26 +115,17 @@ export function writeSavedConversations(experienceId, conversations) {
   const name = getConversationCookieName(experienceId)
   const payload = buildConversationPayload(conversations)
   if (payload.length === 0) {
-    deleteCookie(name)
+    clearChunkedCookie(name)
     clearChatCount(experienceId)
     return
   }
-  let serialized = JSON.stringify(payload)
-  if (serialized.length > COOKIE_MAX_SIZE) {
-    const trimmed = payload.slice(0, 1)
-    serialized = JSON.stringify(trimmed)
-    if (serialized.length > COOKIE_MAX_SIZE) {
-      deleteCookie(name)
-      return
-    }
-  }
-  writeCookie(name, serialized)
+  writeChunkedCookie(name, payload, { maxAgeSeconds: YEAR_IN_SECONDS })
   ensureChatCountAtLeast(experienceId, payload.length)
 }
 
 export function clearSavedConversations(experienceId) {
   const name = getConversationCookieName(experienceId)
-  deleteCookie(name)
+  clearChunkedCookie(name)
   clearChatCount(experienceId)
 }
 
@@ -187,7 +161,7 @@ function writeChatCountMap(map) {
   }
   try {
     const serialized = JSON.stringify(map)
-    if (serialized.length > COOKIE_MAX_SIZE) {
+    if (serialized.length > CHAT_COUNT_MAX_SIZE) {
       deleteCookie(CHAT_COUNT_COOKIE_NAME)
       return
     }
