@@ -156,6 +156,30 @@ export const experiences = [
     logLabel: 'ImageGen',
   },
   {
+    id: 'svglab',
+    path: '/svg-lab',
+    name: 'SVG Prompt Lab',
+    headline: 'Sketch vector art from pure text instructions.',
+    description:
+      'Feed prompts into the /svg worker endpoint, preview the returned artwork inline, and keep a cookie-backed gallery of your favorite prompts.',
+    badge: 'Vector',
+    heroGradient: 'from-violet-500 to-purple-600',
+    panelAccent: 'bg-violet-100 text-violet-900 dark:bg-violet-500/20 dark:text-violet-200',
+    navAccent: {
+      gradient: 'from-violet-500 to-purple-600',
+      hover:
+        'hover:bg-violet-500/10 hover:text-violet-600 hover:border-violet-400/60 dark:hover:bg-violet-500/20 dark:hover:text-violet-200 dark:hover:border-violet-400/60',
+      focus: 'focus-visible:ring-violet-500/40',
+    },
+    defaultModel: 'svg-route',
+    modelOptions: ['SVG worker route'],
+    allowBaseUrlOverride: false,
+    enableStlViewer: false,
+    enableBarcodeScanner: false,
+    logLabel: 'SVGLab',
+    svgApiBaseUrl: (getEnvValue('VITE_SVG_API_BASE_URL') || FALLBACK_BASE_URL).replace(/\/$/, ''),
+  },
+  {
     id: 'pizzamaker',
     path: '/pizza-maker',
     name: 'Pizza Maker',
