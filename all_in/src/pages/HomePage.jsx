@@ -104,7 +104,7 @@ const detailedCopyById = {
 
 const experienceLookup = Object.fromEntries(experiences.map((experience) => [experience.id, experience]))
 
-const experienceCategories = [
+const baseExperienceCategories = [
   {
     id: 'specialists',
     title: 'Specialist Assistants',
@@ -130,6 +130,26 @@ const experienceCategories = [
     experienceIds: ['pokedex', 'sixdegrees'],
   },
 ]
+
+const categorizedExperienceIds = new Set(
+  baseExperienceCategories.flatMap((category) => category.experienceIds)
+)
+
+const uncategorizedExperienceIds = experiences
+  .map((experience) => experience.id)
+  .filter((experienceId) => !categorizedExperienceIds.has(experienceId))
+
+const experienceCategories = uncategorizedExperienceIds.length
+  ? [
+      ...baseExperienceCategories,
+      {
+        id: 'fresh',
+        title: 'Fresh Drops',
+        description: 'New experiments and utilities that just landed in the studio.',
+        experienceIds: uncategorizedExperienceIds,
+      },
+    ]
+  : baseExperienceCategories
 
 export default function HomePage() {
 
