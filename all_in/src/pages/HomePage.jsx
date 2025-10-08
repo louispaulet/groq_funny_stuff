@@ -102,27 +102,98 @@ const detailedCopyById = {
   ),
 }
 
+const experienceLookup = Object.fromEntries(experiences.map((experience) => [experience.id, experience]))
+
+const baseExperienceCategories = [
+  {
+    id: 'specialists',
+    title: 'Specialist Assistants',
+    description: 'Domain experts that deliver answers with context, transparency, and speed.',
+    experienceIds: ['allergyfinder', 'newsanalyzer'],
+  },
+  {
+    id: 'makers',
+    title: 'Makers & Builders',
+    description: 'Structured creativity labs for schemas, meshes, and programmable visuals.',
+    experienceIds: ['objectmaker', 'stlviewer', 'svglab'],
+  },
+  {
+    id: 'visuals',
+    title: 'Visual Launchpads',
+    description: 'Image-first workflows that stage cinematic scenes and product-ready art.',
+    experienceIds: ['imagegen', 'pizzamaker', 'carmaker'],
+  },
+  {
+    id: 'play',
+    title: 'Play & Discovery',
+    description: 'Lighthearted sandboxes for fandoms, remixing, and storytelling breaks.',
+    experienceIds: ['pokedex', 'sixdegrees'],
+  },
+]
+
+const categorizedExperienceIds = new Set(
+  baseExperienceCategories.flatMap((category) => category.experienceIds)
+)
+
+const uncategorizedExperienceIds = experiences
+  .map((experience) => experience.id)
+  .filter((experienceId) => !categorizedExperienceIds.has(experienceId))
+
+const experienceCategories = uncategorizedExperienceIds.length
+  ? [
+      ...baseExperienceCategories,
+      {
+        id: 'fresh',
+        title: 'Fresh Drops',
+        description: 'New experiments and utilities that just landed in the studio.',
+        experienceIds: uncategorizedExperienceIds,
+      },
+    ]
+  : baseExperienceCategories
+
 export default function HomePage() {
 
   return (
     <div className="space-y-12">
       <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-brand-600 to-indigo-700 px-8 py-12 text-white shadow-xl">
-        <div className="max-w-3xl space-y-4">
-          <p className="text-sm uppercase tracking-[0.3em] text-white/80">Groq Studio</p>
-          <h1 className="text-3xl font-semibold sm:text-4xl">All experiences in one workspace.</h1>
-          <p className="text-base text-white/90">
-            Explore specialized assistants for nutrition, 3D printing, and Pokémon knowledge with a shared interface and a
-            streamlined workflow. ⚡️
-          </p>
-          <div className="flex flex-wrap gap-3 pt-2">
-            {experiences.map((experience) => (
-              <Link
-                key={experience.id}
-                to={experience.path}
-                className="inline-flex items-center rounded-full bg-white/90 px-4 py-2 text-sm font-medium text-slate-900 transition hover:bg-white"
+        <div className="max-w-5xl space-y-6">
+          <div className="space-y-2">
+            <p className="text-sm uppercase tracking-[0.3em] text-white/80">Groq Studio</p>
+            <h1 className="text-3xl font-semibold sm:text-4xl">All experiences in one workspace.</h1>
+            <p className="text-base text-white/90">
+              Launch the assistants that fit your workflow—whether you are prototyping JSON schemas, staging cinematic imagery,
+              or diving into trusted domain research. ⚡️
+            </p>
+          </div>
+          <div className="grid gap-4 pt-2 sm:grid-cols-2">
+            {experienceCategories.map((category) => (
+              <div
+                key={category.id}
+                className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/10 p-5 shadow-sm backdrop-blur transition hover:border-white/20 hover:bg-white/15"
               >
-                {experience.name}
-              </Link>
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/5 via-white/0 to-white/10 opacity-0 transition group-hover:opacity-100" aria-hidden />
+                <div className="relative space-y-3">
+                  <div>
+                    <h2 className="text-lg font-semibold text-white">{category.title}</h2>
+                    <p className="text-sm text-white/80">{category.description}</p>
+                  </div>
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    {category.experienceIds
+                      .map((experienceId) => experienceLookup[experienceId])
+                      .filter(Boolean)
+                      .map((experience) => (
+                        <Link
+                          key={experience.id}
+                          to={experience.path}
+                          className="inline-flex items-center gap-1 rounded-full bg-white/90 px-3 py-1.5 text-xs font-semibold text-slate-900 transition hover:bg-white"
+                        >
+                          <span>{experience.name}</span>
+                          <span aria-hidden>↗</span>
+                        </Link>
+                      ))}
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
         </div>
@@ -130,11 +201,11 @@ export default function HomePage() {
       </section>
 
       <section className="space-y-10">
-        <header className="space-y-2">
-          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Explore the workspaces ✨</h2>
+        <header className="space-y-3">
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Deep dive into each workspace ✨</h2>
           <p className="text-sm text-slate-600 dark:text-slate-400">
-            Each experience shares the same chat shell yet brings its own data sources, inline tools, and best practices. Dive in to
-            see how focused assistants feel when they are tuned for a specific workflow. 🎯
+            Every experience shares the core Groq Studio shell, but the long-form briefs below highlight their data sources,
+            inline tools, and standout workflows so you can choose the right copilot for the moment. 🎯
           </p>
         </header>
         <div className="space-y-8">
@@ -144,24 +215,40 @@ export default function HomePage() {
             return (
               <article
                 key={experience.id}
-                className="space-y-4 rounded-3xl border border-slate-200 bg-white p-8 shadow-sm transition hover:shadow-lg dark:border-slate-800 dark:bg-slate-900"
+                className="group relative overflow-hidden rounded-3xl border border-slate-200 bg-white/90 p-8 shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl dark:border-slate-800 dark:bg-slate-900"
               >
-                <div className="flex flex-wrap items-center gap-3">
-                  <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${experience.panelAccent}`}>
-                    {experience.badge}
-                  </span>
-                  <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">{experience.name}</h3>
-                  <Link
-                    to={experience.path}
-                    className="inline-flex items-center gap-2 rounded-full border border-slate-300 px-3 py-1 text-sm font-medium text-slate-700 transition hover:border-brand-500 hover:text-brand-600 dark:border-slate-700 dark:text-slate-200"
-                  >
-                    Enter workspace
-                    <span aria-hidden>→</span>
-                  </Link>
+                <div
+                  className="pointer-events-none absolute inset-0 opacity-0 transition-opacity group-hover:opacity-100"
+                  aria-hidden
+                >
+                  <div className="absolute -top-20 right-0 h-40 w-40 rounded-full bg-brand-500/10 blur-3xl" />
+                  <div className="absolute -bottom-24 left-6 h-36 w-36 rounded-full bg-slate-400/10 blur-3xl" />
                 </div>
-                <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{experience.headline}</p>
-                <div className="space-y-3 text-sm text-slate-600 dark:text-slate-300">{detailedCopy}</div>
-                <div className="text-xs uppercase tracking-wider text-slate-400 dark:text-slate-500">{experience.modelOptions.join(' • ')}</div>
+                <div className="relative space-y-5">
+                  <div className="flex flex-wrap items-center gap-4">
+                    <div className="flex flex-col gap-2">
+                      <div className={`h-1 w-16 rounded-full bg-gradient-to-r ${experience.heroGradient}`} aria-hidden />
+                      <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">{experience.name}</h3>
+                    </div>
+                    <span
+                      className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${experience.panelAccent}`}
+                    >
+                      {experience.badge}
+                    </span>
+                    <Link
+                      to={experience.path}
+                      className="ml-auto inline-flex items-center gap-2 rounded-full border border-slate-300 px-3 py-1 text-sm font-medium text-slate-700 transition hover:border-brand-500 hover:bg-brand-50 hover:text-brand-600 dark:border-slate-700 dark:text-slate-200 dark:hover:border-brand-400/60 dark:hover:bg-brand-500/10"
+                    >
+                      Enter workspace
+                      <span aria-hidden>→</span>
+                    </Link>
+                  </div>
+                  <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{experience.headline}</p>
+                  <div className="space-y-3 text-sm leading-relaxed text-slate-600 dark:text-slate-300">{detailedCopy}</div>
+                  <div className="text-xs uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                    {experience.modelOptions.join(' • ')}
+                  </div>
+                </div>
               </article>
             )
           })}
