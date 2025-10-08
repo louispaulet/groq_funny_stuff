@@ -325,11 +325,16 @@ export default function FlagFoundryPage({ experience }) {
     })
   }, [])
 
-  useEffect(() => () => {
-    cancelledRef.current = true
-    Object.values(timeoutsRef.current).forEach((timeoutId) => {
-      if (timeoutId) clearTimeout(timeoutId)
-    })
+  useEffect(() => {
+    cancelledRef.current = false
+    const timeouts = timeoutsRef.current
+
+    return () => {
+      cancelledRef.current = true
+      Object.values(timeouts).forEach((timeoutId) => {
+        if (timeoutId) clearTimeout(timeoutId)
+      })
+    }
   }, [])
 
   const updateEntry = useCallback((continentId, index, patch) => {
