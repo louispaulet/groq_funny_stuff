@@ -80,6 +80,7 @@ export default function AppShell({ children }) {
                   experience.id !== 'stlviewer' &&
                   experience.id !== 'sixdegrees' &&
                   experience.id !== 'imagegen' &&
+                  experience.id !== 'svglab' &&
                   experience.id !== 'pizzamaker' &&
                   experience.id !== 'carmaker',
               )

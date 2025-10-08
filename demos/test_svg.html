@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>SVG Preview Demo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      :root {
+        color-scheme: light dark;
+        font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+        background: radial-gradient(circle at top left, #0f172a, #020617 55%);
+        color: #e2e8f0;
+      }
+
+      body {
+        margin: 2rem auto 4rem;
+        max-width: 720px;
+        padding: 0 1.25rem;
+      }
+
+      h1 {
+        font-size: 2.25rem;
+        margin-bottom: 0.75rem;
+        font-weight: 700;
+      }
+
+      p {
+        margin-bottom: 1.5rem;
+        line-height: 1.6;
+        color: rgba(226, 232, 240, 0.86);
+      }
+
+      label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        letter-spacing: 0.01em;
+      }
+
+      input[type="text"] {
+        width: 100%;
+        padding: 0.85rem 1.1rem;
+        border-radius: 0.9rem;
+        border: 1px solid rgba(148, 163, 184, 0.45);
+        background: rgba(15, 23, 42, 0.82);
+        color: inherit;
+        font-size: 1rem;
+        transition: border 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      input[type="text"]:focus {
+        outline: none;
+        border-color: #38bdf8;
+        box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25);
+      }
+
+      button {
+        margin-top: 1rem;
+        padding: 0.75rem 1.6rem;
+        border-radius: 0.85rem;
+        border: none;
+        background: linear-gradient(135deg, #38bdf8, #a855f7);
+        color: #0f172a;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+      }
+
+      button:disabled {
+        cursor: not-allowed;
+        opacity: 0.6;
+        transform: none;
+        box-shadow: none;
+      }
+
+      button:not(:disabled):hover {
+        transform: translateY(-1px);
+        box-shadow: 0 12px 28px rgba(56, 189, 248, 0.3);
+      }
+
+      #status {
+        margin-top: 1.25rem;
+        min-height: 1.5rem;
+        font-size: 0.95rem;
+      }
+
+      #results {
+        margin-top: 2rem;
+        display: grid;
+        gap: 1.5rem;
+      }
+
+      .preview-card {
+        display: grid;
+        gap: 1.1rem;
+        background: rgba(15, 23, 42, 0.6);
+        border-radius: 1rem;
+        padding: 1.25rem;
+        border: 1px solid rgba(148, 163, 184, 0.22);
+      }
+
+      .preview-card img {
+        width: 100%;
+        border-radius: 0.9rem;
+        background: rgba(15, 23, 42, 0.35);
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.45);
+      }
+
+      textarea {
+        width: 100%;
+        min-height: 140px;
+        border-radius: 0.9rem;
+        border: 1px solid rgba(148, 163, 184, 0.25);
+        background: rgba(15, 23, 42, 0.8);
+        color: inherit;
+        padding: 0.75rem 1rem;
+        font-family: ui-monospace, SFMono-Regular, SFMono, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+        font-size: 0.85rem;
+        resize: vertical;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>SVG Prompt Preview</h1>
+    <p>
+      Enter a short description to request <code>/svg/&lt;prompt&gt;</code>. The worker returns structured JSON with the raw SVG
+      markup and a base64 data URL. This page renders the SVG inline and exposes the response payload for easy copying.
+    </p>
+
+    <label for="prompt">Prompt text</label>
+    <input
+      id="prompt"
+      type="text"
+      value="Groq Endpoint demo"
+      autocomplete="off"
+      placeholder="What message should the SVG card display?"
+    />
+    <button id="generate">Generate SVG</button>
+
+    <div id="status" role="status" aria-live="polite"></div>
+    <section id="results" aria-live="polite"></section>
+
+    <script>
+      const promptInput = document.getElementById('prompt');
+      const generateButton = document.getElementById('generate');
+      const statusNode = document.getElementById('status');
+      const results = document.getElementById('results');
+
+      const API_ORIGIN = window.location.protocol.startsWith('http')
+        ? ''
+        : 'http://localhost:8787';
+
+      async function fetchSvg() {
+        const prompt = promptInput.value.trim();
+        if (!prompt) {
+          statusNode.textContent = 'Please enter a prompt to render the SVG card.';
+          promptInput.focus();
+          return;
+        }
+
+        statusNode.textContent = 'Requesting SVG...';
+        results.innerHTML = '';
+        generateButton.disabled = true;
+
+        try {
+          const response = await fetch(`${API_ORIGIN}/svg/${encodeURIComponent(prompt)}`);
+
+          if (!response.ok) {
+            const problem = await response.json().catch(() => ({ error: 'Unknown error' }));
+            throw new Error(problem.error || 'The worker returned an error.');
+          }
+
+          const payload = await response.json();
+          statusNode.textContent = 'SVG generated successfully!';
+
+          const card = document.createElement('article');
+          card.className = 'preview-card';
+
+          const image = document.createElement('img');
+          image.src = payload.dataUrl;
+          image.alt = `SVG preview for prompt: ${payload.prompt}`;
+          card.appendChild(image);
+
+          const textarea = document.createElement('textarea');
+          textarea.readOnly = true;
+          textarea.value = JSON.stringify(payload, null, 2);
+          card.appendChild(textarea);
+
+          results.appendChild(card);
+        } catch (error) {
+          console.error(error);
+          statusNode.textContent = error.message || 'Failed to generate the SVG.';
+        } finally {
+          generateButton.disabled = false;
+        }
+      }
+
+      generateButton.addEventListener('click', fetchSvg);
+      promptInput.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' && !event.shiftKey) {
+          event.preventDefault();
+          fetchSvg();
+        }
+      });
+    </script>
+  </body>
+</html>
