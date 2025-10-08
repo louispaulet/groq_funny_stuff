@@ -180,6 +180,30 @@ export const experiences = [
     svgApiBaseUrl: (getEnvValue('VITE_SVG_API_BASE_URL') || FALLBACK_BASE_URL).replace(/\/$/, ''),
   },
   {
+    id: 'flagfoundry',
+    path: '/flag-foundry',
+    name: 'Flag Foundry',
+    headline: 'Throttle /svg calls to rebuild national flags.',
+    description:
+      'Queue flag prompts for the SVG worker, loading a new European flag every second with a Unicode reference for accuracy checks.',
+    badge: 'Atlas',
+    heroGradient: 'from-sky-500 to-blue-600',
+    panelAccent: 'bg-sky-100 text-sky-900 dark:bg-sky-500/20 dark:text-sky-200',
+    navAccent: {
+      gradient: 'from-sky-500 to-blue-600',
+      hover:
+        'hover:bg-sky-500/10 hover:text-sky-600 hover:border-sky-400/60 dark:hover:bg-sky-500/20 dark:hover:text-sky-200 dark:hover:border-sky-400/60',
+      focus: 'focus-visible:ring-sky-500/40',
+    },
+    defaultModel: 'svg-route',
+    modelOptions: ['SVG worker route'],
+    allowBaseUrlOverride: false,
+    enableStlViewer: false,
+    enableBarcodeScanner: false,
+    logLabel: 'FlagFoundry',
+    svgApiBaseUrl: (getEnvValue('VITE_SVG_API_BASE_URL') || FALLBACK_BASE_URL).replace(/\/$/, ''),
+  },
+  {
     id: 'pizzamaker',
     path: '/pizza-maker',
     name: 'Pizza Maker',

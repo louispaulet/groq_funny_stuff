@@ -76,6 +76,16 @@ const detailedCopyById = {
       </p>
     </>
   ),
+  flagfoundry: (
+    <>
+      <p>
+        🚩 Flag Foundry adapts the SVG Prompt Lab flow for vexillology fans. It queues precise prompts for the <code className="rounded bg-slate-900/80 px-1 py-0.5 text-[0.7rem] text-white">/svg</code> route and waits one second between calls so you can watch European flags appear one by one.
+      </p>
+      <p>
+        Each card pairs the AI generated SVG with a Unicode-rendered reference flag using <code className="rounded bg-slate-900/80 px-1 py-0.5 text-[0.7rem] text-white">react-country-flag</code>, making it easy to compare palettes and ratios while the gallery fills in real time. 🌍
+      </p>
+    </>
+  ),
   sixdegrees: (
     <>
       <p>

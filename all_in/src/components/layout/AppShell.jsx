@@ -81,6 +81,7 @@ export default function AppShell({ children }) {
                   experience.id !== 'sixdegrees' &&
                   experience.id !== 'imagegen' &&
                   experience.id !== 'svglab' &&
+                  experience.id !== 'flagfoundry' &&
                   experience.id !== 'pizzamaker' &&
                   experience.id !== 'carmaker',
               )

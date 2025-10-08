@@ -21,6 +21,7 @@ import ImageGeneratorNav from './components/imagegen/ImageGeneratorNav'
 import PizzaMakerPage from './pages/PizzaMakerPage'
 import CarMakerPage from './pages/CarMakerPage'
 import SvgPlaygroundPage from './pages/SvgPlaygroundPage'
+import FlagFoundryPage from './pages/FlagFoundryPage'
 
 export default function App() {
   return (
@@ -94,6 +95,16 @@ export default function App() {
                   element={(
                     <ExperiencePage experience={experience}>
                       <SvgPlaygroundPage experience={experience} />
+                    </ExperiencePage>
+                  )}
+                />
+              ) : experience.id === 'flagfoundry' ? (
+                <Route
+                  key={experience.id}
+                  path={experience.path}
+                  element={(
+                    <ExperiencePage experience={experience}>
+                      <FlagFoundryPage experience={experience} />
                     </ExperiencePage>
                   )}
                 />
