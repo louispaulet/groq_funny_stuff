@@ -171,10 +171,16 @@ const baseExperienceCategories = [
     experienceIds: ['allergyfinder', 'newsanalyzer'],
   },
   {
-    id: 'makers',
-    title: 'Makers & Builders',
-    description: 'Structured creativity labs for schemas, meshes, and programmable visuals.',
-    experienceIds: ['objectmaker', 'stlviewer', 'svglab'],
+    id: 'builders',
+    title: 'Schema & 3D Labs',
+    description: 'Structured creativity hubs for JSON schematics and printable meshes.',
+    experienceIds: ['objectmaker', 'stlviewer'],
+  },
+  {
+    id: 'svg',
+    title: 'SVG Studios',
+    description: 'Vector-first workspaces for programmatic art and evolving flags.',
+    experienceIds: ['svglab', 'flagfoundry'],
   },
   {
     id: 'visuals',
