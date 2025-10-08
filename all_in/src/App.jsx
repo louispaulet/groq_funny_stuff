@@ -20,6 +20,7 @@ import ImageGalleryPage from './pages/ImageGalleryPage'
 import ImageGeneratorNav from './components/imagegen/ImageGeneratorNav'
 import PizzaMakerPage from './pages/PizzaMakerPage'
 import CarMakerPage from './pages/CarMakerPage'
+import SvgPlaygroundPage from './pages/SvgPlaygroundPage'
 
 export default function App() {
   return (
@@ -86,6 +87,16 @@ export default function App() {
                     )}
                   />
                 </Fragment>
+              ) : experience.id === 'svglab' ? (
+                <Route
+                  key={experience.id}
+                  path={experience.path}
+                  element={(
+                    <ExperiencePage experience={experience}>
+                      <SvgPlaygroundPage experience={experience} />
+                    </ExperiencePage>
+                  )}
+                />
               ) : experience.id === 'pizzamaker' ? (
                 <Route
                   key={experience.id}
