@@ -16,6 +16,21 @@ const detailedCopyById = {
       </p>
     </>
   ),
+  imagegen: (
+    <>
+      <p>
+        🎬 Flux Image Lab sends prompts directly to Groq-hosted Flux endpoints and streams back high-fidelity renders within a
+        heartbeat. Dial in lens styles, lighting, and art direction while the assistant suggests extra flourish—think props,
+        color palettes, or camera modifiers that make the output pop. Every render lands in a sticky gallery so you can remix a
+        prior shot with one click. 🖼️
+      </p>
+      <p>
+        The workspace is tuned for creative sprints: it keeps your last prompt ready, exposes seed values for reproducibility,
+        and exports image metadata for downstream pipelines. Whether you are art directing concept pieces or prototyping
+        marketing visuals, Flux Image Lab compresses the ideation cycle down to seconds. ⚡️
+      </p>
+    </>
+  ),
   objectmaker: (
     <>
       <p>
@@ -86,6 +101,26 @@ const detailedCopyById = {
       </p>
     </>
   ),
+  pizzamaker: (
+    <>
+      <p>
+        🍕 Pizza Maker feels like running your own test kitchen. Choose sauces, cheeses, toppings, and surface treatments while the assistant suggests inventive combinations—truffle honey on a blistered crust, charred broccolini with smoked mozzarella, or a Detroit-style corner slice with an HDR drizzle. Every configuration becomes a lush prompt that Groq sends to the Flux image backend for plating. 🔥
+      </p>
+      <p>
+        As soon as the render lands, you can tweak the brief and spin up variants to compare crust textures, camera angles, or prop styling. Save favorites, export the art direction notes, and share a mood board with your team. It is ideal for restaurants, food stylists, or anyone craving a hyper-real hero shot. 📸
+      </p>
+    </>
+  ),
+  carmaker: (
+    <>
+      <p>
+        🚗 Car Maker doubles as a concept studio for automotive storytellers. Start by selecting a marque, paint finish, and performance stance, then layer in cinematic lighting cues like dusk reflections or rain-slick asphalt. The assistant keeps recommendations grounded in automotive vocabulary—splitters, wheel fitment, aero kits—so each prompt reads like a creative brief a photographer would love. 🌆
+      </p>
+      <p>
+        Once generated, swap environments, colorways, or camera focal lengths to craft an entire campaign from a single session. The gallery remembers your best looks and surfaces the prompt metadata for future shoots. Great for designers pitching concept decks, agencies iterating mood boards, or fans dreaming up their next build. 🏁
+      </p>
+    </>
+  ),
   sixdegrees: (
     <>
       <p>
@@ -100,6 +135,30 @@ const detailedCopyById = {
       </p>
     </>
   ),
+  newsanalyzer: (
+    <>
+      <p>
+        🗞️ News Analyzer connects to a Cloudflare Worker that aggregates live articles, quotes, and metadata from across the web. Start by filtering the beats you care about—markets, climate, geopolitics—and the assistant contextualizes the incoming headlines with timelines, related coverage, and source links. It is a rapid way to separate the signal from the noise. 📊
+      </p>
+      <p>
+        Ask for comparisons, bullet summaries, or follow-up questions and the assistant grounds responses in the fetched documents, noting when context is thin or evolving. Pin the conversations you want to revisit and export briefings for stakeholders. Analysts, comms teams, and curious readers all get a high-velocity newsroom companion. 📰
+      </p>
+    </>
+  ),
+}
+
+const tagsById = {
+  allergyfinder: ['chat-based', 'data-connected', 'safety-first'],
+  imagegen: ['image-based', 'flux-powered', 'gallery-backed'],
+  objectmaker: ['chat-based', 'schema-first', 'automation-ready'],
+  stlviewer: ['chat-based', '3d-workflow', 'viewer-embedded'],
+  pokedex: ['chat-based', 'fandom', 'api-powered'],
+  svglab: ['text-to-svg', 'gallery-backed', 'promptable'],
+  flagfoundry: ['image-based', 'svg-automation', 'slow-drip'],
+  pizzamaker: ['image-based', 'guided-prompts', 'culinary'],
+  carmaker: ['image-based', 'cinematic', 'automotive'],
+  newsanalyzer: ['chat-based', 'data-connected', 'real-time'],
+  sixdegrees: ['chat-based', 'humor', 'sequential'],
 }
 
 const experienceLookup = Object.fromEntries(experiences.map((experience) => [experience.id, experience]))
@@ -211,6 +270,7 @@ export default function HomePage() {
         <div className="space-y-8">
           {experiences.map((experience) => {
             const detailedCopy = detailedCopyById[experience.id] ?? <p>{experience.description}</p>
+            const tags = tagsById[experience.id] ?? []
 
             return (
               <article
@@ -245,6 +305,18 @@ export default function HomePage() {
                   </div>
                   <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{experience.headline}</p>
                   <div className="space-y-3 text-sm leading-relaxed text-slate-600 dark:text-slate-300">{detailedCopy}</div>
+                  {tags.length > 0 && (
+                    <div className="flex flex-wrap gap-2 pt-2">
+                      {tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="inline-flex items-center rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:border-slate-700 dark:text-slate-300"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                   <div className="text-xs uppercase tracking-wider text-slate-400 dark:text-slate-500">
                     {experience.modelOptions.join(' • ')}
                   </div>
