@@ -38,6 +38,11 @@ function HistoryItem({ entry, onSelect }) {
       </div>
       <div>
         <p className="line-clamp-2 text-sm font-medium text-slate-700 dark:text-slate-200">{entry.prompt || 'Saved request'}</p>
+        {entry.route ? (
+          <p className="text-[0.65rem] uppercase tracking-wide text-slate-400 dark:text-slate-500">
+            {entry.route === 'svg_deluxe' ? 'Deluxe /svg_deluxe (oss-120B)' : 'Standard /svg (Llama 3 70B)'}
+          </p>
+        ) : null}
         {entry.timestamp ? (
           <p className="text-xs text-slate-500 dark:text-slate-400">{formatTimestamp(entry.timestamp)}</p>
         ) : null}
@@ -53,6 +58,7 @@ export default function SvgPlaygroundPage({ experience }) {
   const [result, setResult] = useState(null)
   const [history, setHistory] = useState([])
   const [copied, setCopied] = useState(false)
+  const [useDeluxeRoute, setUseDeluxeRoute] = useState(false)
 
   useEffect(() => {
     setHistory(readSvgHistory())
@@ -65,6 +71,7 @@ export default function SvgPlaygroundPage({ experience }) {
   }, [copied])
 
   const apiBaseUrl = experience?.svgApiBaseUrl || experience?.defaultBaseUrl || 'https://groq-endpoint.louispaulet13.workers.dev'
+  const routeSegment = useDeluxeRoute ? 'svg_deluxe' : 'svg'
 
   async function handleSubmit(event) {
     event.preventDefault()
@@ -78,7 +85,9 @@ export default function SvgPlaygroundPage({ experience }) {
     setError('')
 
     try {
-      const requestUrl = new URL(`${apiBaseUrl.replace(/\/$/, '')}/svg/${encodeURIComponent(trimmedPrompt)}`)
+      const requestUrl = new URL(
+        `${apiBaseUrl.replace(/\/$/, '')}/${routeSegment}/${encodeURIComponent(trimmedPrompt)}`,
+      )
       const response = await fetch(requestUrl.toString())
       if (!response.ok) {
         let message = `Generation failed with status ${response.status}`
@@ -112,6 +121,7 @@ export default function SvgPlaygroundPage({ experience }) {
         dataUrl,
         svgMarkup,
         raw: payload,
+        route: routeSegment,
       }
 
       setResult(nextResult)
@@ -122,6 +132,7 @@ export default function SvgPlaygroundPage({ experience }) {
         dataUrl,
         svgMarkup,
         timestamp: createdAt,
+        route: routeSegment,
       }
 
       const existingWithoutDuplicate = history.filter(
@@ -140,11 +151,13 @@ export default function SvgPlaygroundPage({ experience }) {
   function handleSelectHistory(entry) {
     if (!entry) return
     setPrompt(entry.prompt || '')
+    setUseDeluxeRoute(entry.route === 'svg_deluxe')
     setResult({
       prompt: entry.prompt,
       dataUrl: computeDataUrl(entry),
       svgMarkup: entry.svgMarkup || '',
       raw: null,
+      route: entry.route || 'svg',
     })
   }
 
@@ -184,8 +197,28 @@ export default function SvgPlaygroundPage({ experience }) {
               placeholder="Describe what the SVG should contain..."
             />
             <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-              Requests are sent to <code className="rounded bg-slate-100 px-1 py-0.5 text-[0.7rem] text-slate-700 dark:bg-slate-800 dark:text-slate-200">{`${apiBaseUrl}/svg/<prompt>`}</code>. We encode the prompt so spaces and punctuation are preserved.
+              Requests are sent to{' '}
+              <code className="rounded bg-slate-100 px-1 py-0.5 text-[0.7rem] text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                {`${apiBaseUrl}/${routeSegment}/<prompt>`}
+              </code>
+              . We encode the prompt so spaces and punctuation are preserved.
             </p>
+            <label
+              htmlFor="svglab-deluxe"
+              className="mt-3 flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 bg-slate-50/70 px-3 py-3 text-sm text-slate-600 shadow-sm transition hover:border-brand-300 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-300"
+            >
+              <input
+                id="svglab-deluxe"
+                type="checkbox"
+                checked={useDeluxeRoute}
+                onChange={(event) => setUseDeluxeRoute(event.target.checked)}
+                className="mt-1 h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500 dark:border-slate-600 dark:bg-slate-900"
+              />
+              <span>
+                Use the <code className="rounded bg-slate-200 px-1 py-0.5 text-[0.7rem] text-slate-700 dark:bg-slate-900 dark:text-slate-200">/svg_deluxe</code> route for{' '}
+                oss-120B generations with an 8,192-token canvas suitable for animated SVGs.
+              </span>
+            </label>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
@@ -237,6 +270,13 @@ export default function SvgPlaygroundPage({ experience }) {
                       </button>
                     ) : null}
                   </div>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Served via {result.route === 'svg_deluxe' ? 'oss-120B' : 'Llama 3 70B'} on the{' '}
+                    <code className="rounded bg-slate-100 px-1 py-0.5 text-[0.65rem] text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                      /{result.route || 'svg'}
+                    </code>{' '}
+                    endpoint.
+                  </p>
                   <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-slate-100 dark:border-slate-700 dark:bg-slate-800">
                     <img src={result.dataUrl} alt={result.prompt} className="h-full w-full object-contain" loading="lazy" />
                   </div>
