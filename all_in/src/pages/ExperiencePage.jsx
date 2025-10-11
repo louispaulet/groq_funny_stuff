@@ -7,6 +7,8 @@ export default function ExperiencePage({ experience, children, navigation }) {
     )
   }
 
+  const HeroContent = experience.heroContent
+
   return (
     <div className="space-y-8">
       <section
@@ -17,8 +19,14 @@ export default function ExperiencePage({ experience, children, navigation }) {
             {experience.badge}
           </span>
           <h1 className="text-3xl font-semibold sm:text-4xl">{experience.name}</h1>
-          <p className="text-base text-white/90">{experience.headline}</p>
-          <p className="text-sm text-white/80">{experience.description}</p>
+          {HeroContent ? (
+            <HeroContent experience={experience} />
+          ) : (
+            <>
+              <p className="text-base text-white/90">{experience.headline}</p>
+              <p className="text-sm text-white/80">{experience.description}</p>
+            </>
+          )}
         </div>
         <div className="absolute -right-20 bottom-0 top-0 w-64 bg-white/10 blur-3xl" aria-hidden />
       </section>

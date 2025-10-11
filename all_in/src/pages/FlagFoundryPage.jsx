@@ -446,50 +446,19 @@ export default function FlagFoundryPage({ experience }) {
 
   return (
     <div className="space-y-8">
-      <section className="space-y-4 rounded-2xl border border-slate-200 bg-white/80 p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900/60">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div className="space-y-2">
-            <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100">Global Flag Foundry</h2>
-            <p className="text-sm text-slate-600 dark:text-slate-300">
-              🚩 Flag Foundry is pitched like a FAANG lab demo: a crisp visualization of how an LLM navigates vexillological
-              structure inside a dense{' '}
-              <a
-                href="https://en.wikipedia.org/wiki/Latent_space"
-                className="underline decoration-dotted underline-offset-2"
-                target="_blank"
-                rel="noreferrer"
-              >
-                latent space
-              </a>{' '}
-              with just enough flair to feel like a keynote teaser.
-            </p>
-            <p className="text-sm text-slate-600 dark:text-slate-300">
-              🧠 This page is about understanding what an LLM knows about a flag in a few tokens. The model is{' '}
-              <a
-                href="https://en.wikipedia.org/wiki/LLaMA_(language_model)"
-                className="underline decoration-dotted underline-offset-2"
-                target="_blank"
-                rel="noreferrer"
-              >
-                LLaMA&nbsp;3&nbsp;70B
-              </a>
-              , operating under a 1024-token constraint — the simpler the flag, the easier it is to honor that boundary without
-              smearing the hypothesis space.
-            </p>
-          </div>
-          <div className="space-y-2">
-            <button
-              type="button"
-              onClick={handleGenerateAll}
-              className="inline-flex items-center justify-center rounded-full border border-brand-500/20 bg-brand-500/10 px-5 py-2 text-sm font-semibold text-brand-700 transition hover:bg-brand-500/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 dark:border-brand-400/30 dark:bg-brand-400/10 dark:text-brand-200 dark:hover:bg-brand-400/20"
-            >
-              Generate every flag
-            </button>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Please remember API rate limits — this triggers hundreds of sequential calls, so let the queue finish before
-              retrying.
-            </p>
-          </div>
+      <section className="rounded-2xl border border-slate-200 bg-white/80 p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900/60">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <button
+            type="button"
+            onClick={handleGenerateAll}
+            className="inline-flex items-center justify-center rounded-full border border-brand-500/20 bg-brand-500/10 px-5 py-2 text-sm font-semibold text-brand-700 transition hover:bg-brand-500/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 dark:border-brand-400/30 dark:bg-brand-400/10 dark:text-brand-200 dark:hover:bg-brand-400/20"
+          >
+            Generate every flag
+          </button>
+          <p className="text-xs text-slate-500 dark:text-slate-400 sm:max-w-xs">
+            Please remember API rate limits — this triggers hundreds of sequential calls, so let the queue finish before
+            retrying.
+          </p>
         </div>
       </section>
       {CONTINENTS.map((continent) => {

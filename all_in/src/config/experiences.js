@@ -1,3 +1,5 @@
+import FlagFoundryHeroContent from '../components/flagfoundry/FlagFoundryHeroContent'
+
 const processEnv = typeof globalThis !== 'undefined' && globalThis.process?.env ? globalThis.process.env : undefined
 
 function getEnvValue(key) {
@@ -189,6 +191,7 @@ export const experiences = [
     badge: 'Atlas',
     heroGradient: 'from-sky-500 to-blue-600',
     panelAccent: 'bg-sky-100 text-sky-900 dark:bg-sky-500/20 dark:text-sky-200',
+    heroContent: FlagFoundryHeroContent,
     navAccent: {
       gradient: 'from-sky-500 to-blue-600',
       hover:
