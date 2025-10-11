@@ -187,7 +187,7 @@ export const experiences = [
     name: 'Flag Foundry',
     headline: 'Throttle /svg calls to rebuild national flags.',
     description:
-      'Queue flag prompts for the SVG worker, loading a new European flag every second with a Unicode reference for accuracy checks.',
+      'Queue flag prompts for the SVG worker, loading a new European flag every two seconds with a Unicode reference for accuracy checks.',
     badge: 'Atlas',
     heroGradient: 'from-sky-500 to-blue-600',
     panelAccent: 'bg-sky-100 text-sky-900 dark:bg-sky-500/20 dark:text-sky-200',

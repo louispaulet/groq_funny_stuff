@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import ReactCountryFlag from 'react-country-flag'
 
-const LOAD_INTERVAL_MS = 1000
+const LOAD_INTERVAL_MS = 2000
 const createEntry = (country) => ({ country, status: 'idle', prompt: '', dataUrl: '', error: '' })
 const buildDataUrl = (payload) => {
   const inline = typeof payload?.dataUrl === 'string' ? payload.dataUrl.trim() : ''
@@ -502,4 +502,3 @@ export default function FlagFoundryPage({ experience }) {
     </div>
   )
 }
-

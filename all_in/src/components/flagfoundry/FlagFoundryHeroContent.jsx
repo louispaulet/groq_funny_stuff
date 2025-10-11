@@ -16,8 +16,8 @@ export default function FlagFoundryHeroContent() {
         {' '}with just enough flair to feel like a keynote teaser.
       </p>
       <p className="text-sm text-white/80">
-        Queue flag prompts for the SVG worker, streaming a fresh European flag every second with a Unicode reference so accuracy
-        checks stay fast and grounded.
+        Queue flag prompts for the SVG worker, streaming a fresh European flag every two seconds with a Unicode reference so
+        accuracy checks stay fast and grounded.
       </p>
       <p className="text-sm text-white/80">
         🧠 This page is about understanding what an LLM knows about a flag in a few tokens. The model is{' '}
