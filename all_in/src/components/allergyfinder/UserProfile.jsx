@@ -195,40 +195,38 @@ export default function UserProfile() {
 
   return (
     <div className="space-y-12">
-      <section className="relative overflow-hidden rounded-4xl border border-brand-400/40 bg-gradient-to-br from-brand-500 via-emerald-500 to-brand-600 p-8 text-white shadow-2xl">
-        <div className="absolute right-[-12rem] top-[-6rem] h-56 w-56 rounded-full bg-emerald-200/30 blur-3xl" aria-hidden="true" />
-        <div className="absolute bottom-[-10rem] left-[-8rem] h-64 w-64 rounded-full bg-emerald-300/20 blur-3xl" aria-hidden="true" />
-        <div className="relative space-y-6">
-          <div>
-            <span className="inline-flex items-center rounded-full bg-emerald-950/40 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-100">
+      <section className="rounded-4xl border border-slate-200 bg-white p-8 shadow-md dark:border-slate-700 dark:bg-slate-900">
+        <div className="space-y-6">
+          <div className="space-y-3">
+            <span className="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-600 dark:bg-slate-800 dark:text-slate-200">
               Profile
             </span>
-            <h2 className="mt-4 text-3xl font-semibold sm:text-4xl">User Preferences &amp; Activity</h2>
-            <p className="mt-2 max-w-2xl text-sm text-white/80">
-              We generate a private alias so you can explore each experience without sharing personal details. Everything
-              here lives only in your browser.
+            <h2 className="text-3xl font-semibold text-slate-900 sm:text-4xl dark:text-white">User Preferences &amp; Activity</h2>
+            <p className="max-w-2xl text-sm text-slate-600 dark:text-slate-300">
+              We generate a private alias so you can explore each experience without sharing personal details. Everything here
+              lives only in your browser.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-4">
-            <div className="rounded-3xl border border-white/10 bg-emerald-950/50 px-6 py-4 text-lg font-semibold text-emerald-100 shadow-lg backdrop-blur">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-6 py-4 text-lg font-semibold text-slate-900 shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
               {profileName || 'No profile name stored'}
             </div>
             <button
               type="button"
               onClick={handleRegenerateProfile}
-              className="inline-flex items-center rounded-full bg-emerald-950/40 px-4 py-2 text-sm font-medium text-emerald-100 transition hover:bg-emerald-900/70"
+              className="inline-flex items-center rounded-full bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700 dark:bg-slate-700 dark:hover:bg-slate-600"
             >
               Generate New Alias 🎲
             </button>
             <button
               type="button"
               onClick={handleFlushProfile}
-              className="inline-flex items-center rounded-full border border-white/20 bg-emerald-950/30 px-4 py-2 text-sm font-semibold text-emerald-100 transition hover:bg-red-500/80 hover:text-white"
+              className="inline-flex items-center rounded-full border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-600 transition hover:border-red-300 hover:bg-red-50 dark:border-red-600/60 dark:bg-slate-900 dark:text-red-200 dark:hover:bg-red-900/20"
             >
               Remove Profile Cookie 🗑️
             </button>
           </div>
-          <p className="rounded-3xl border border-white/10 bg-emerald-950/40 px-4 py-3 text-xs text-emerald-100 shadow-inner">
+          <p className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs text-slate-600 shadow-inner dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
             Important: Removing the profile cookie deletes the saved alias immediately. The next time you open this page a new
             randomly generated name will appear.
           </p>
