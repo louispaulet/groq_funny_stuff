@@ -47,12 +47,6 @@ const detailedCopyById = {
         demonstrate how reliable JSON scaffolding unlocks downstream tooling: the sharper the schema, the more dependable the
         generated objects. Image generation integrations are planned, but today is about perfecting the structured prompt. 🗂️
       </p>
-      <p>
-        New in the Object Maker wing: the <strong>BHP — Bank Holiday Planner</strong>. Feed it your available paid leave days and
-        a country’s bank holidays and it calls the <code className="rounded bg-slate-900/80 px-1 py-0.5 text-[0.7rem] text-white">/obj</code>
-        route with a vacation-optimization schema. The assistant returns PTO blocks that maximize uninterrupted time off while
-        comparing the haul against a random leave-day strategy. ✈️
-      </p>
     </>
   ),
   stlviewer: (
@@ -269,6 +263,52 @@ export default function HomePage() {
           </div>
         </div>
         <div className="absolute -right-24 -top-24 h-56 w-56 rounded-full bg-white/10 blur-3xl" aria-hidden />
+      </section>
+
+      <section className="relative overflow-hidden rounded-[2.75rem] bg-gradient-to-br from-emerald-500 via-cyan-500 to-sky-500 px-8 py-10 text-white shadow-xl">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.25),_transparent_55%)]" aria-hidden />
+        <div className="relative z-10 grid gap-8 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:items-center">
+          <div className="space-y-4">
+            <p className="text-xs uppercase tracking-[0.35em] text-white/80">Spotlight · New utility</p>
+            <h2 className="text-2xl font-semibold sm:text-3xl">BHP — Bank Holiday Planner</h2>
+            <p className="text-sm leading-relaxed text-white/80">
+              Optimize your paid leave around official bank holidays for the USA, UK, France, Spain, and Italy. BHP prepares a
+              strict
+              <code className="mx-1 rounded bg-white/20 px-1 py-0.5 text-[0.7rem] font-semibold text-white">/obj</code>
+              schema request so the assistant can return PTO blocks, totals, and a comparison against randomly scattered leave
+              days.
+            </p>
+            <div className="flex flex-wrap items-center gap-3">
+              <Link
+                to="/bank-holiday-planner"
+                className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-emerald-700 shadow transition hover:bg-emerald-50"
+              >
+                Launch planner
+                <span aria-hidden>→</span>
+              </Link>
+              <span className="inline-flex items-center gap-2 rounded-full bg-white/20 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white/80">
+                Calendar heatmap included
+              </span>
+            </div>
+          </div>
+          <div className="relative hidden justify-center lg:flex">
+            <div className="grid grid-cols-14 gap-[3px] rounded-3xl bg-white/20 p-5 shadow-lg">
+              {Array.from({ length: 84 }).map((_, index) => {
+                const leave = index === 26 || index === 27 || index === 61
+                const holiday = index % 13 === 0 || index % 17 === 0
+                const span = !leave && !holiday && index % 7 > 3
+                const className = leave
+                  ? 'bg-amber-300'
+                  : holiday
+                    ? 'bg-emerald-300'
+                    : span
+                      ? 'bg-teal-300/70'
+                      : 'bg-emerald-900/40'
+                return <span key={index} className={`h-3 w-3 rounded-sm ${className}`} />
+              })}
+            </div>
+          </div>
+        </div>
       </section>
 
       <section className="space-y-10">
