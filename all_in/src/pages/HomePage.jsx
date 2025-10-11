@@ -281,7 +281,7 @@ export default function HomePage() {
             return (
               <article
                 key={experience.id}
-                className="group relative overflow-hidden rounded-3xl border border-slate-200 bg-white/90 p-8 shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl dark:border-slate-800 dark:bg-slate-900"
+                className="group relative overflow-hidden rounded-3xl border border-slate-200 bg-white/90 p-8 shadow-sm transition hover:shadow-xl dark:border-slate-800 dark:bg-slate-900"
               >
                 <div
                   className="pointer-events-none absolute inset-0 opacity-0 transition-opacity group-hover:opacity-100"
