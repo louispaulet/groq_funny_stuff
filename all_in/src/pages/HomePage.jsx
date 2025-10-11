@@ -265,9 +265,9 @@ export default function HomePage() {
         <div className="absolute -right-24 -top-24 h-56 w-56 rounded-full bg-white/10 blur-3xl" aria-hidden />
       </section>
 
-      <section className="relative overflow-hidden rounded-[2.75rem] bg-gradient-to-br from-emerald-500 via-cyan-500 to-sky-500 px-8 py-10 text-white shadow-xl">
+      <section className="relative mx-auto max-w-6xl overflow-hidden rounded-[2.75rem] bg-gradient-to-br from-emerald-500 via-cyan-500 to-sky-500 px-6 py-8 text-white shadow-xl sm:px-8 sm:py-10">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.25),_transparent_55%)]" aria-hidden />
-        <div className="relative z-10 grid gap-8 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:items-center">
+        <div className="relative z-10 grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] lg:items-center">
           <div className="space-y-4">
             <p className="text-xs uppercase tracking-[0.35em] text-white/80">Spotlight · New utility</p>
             <h2 className="text-2xl font-semibold sm:text-3xl">BHP — Bank Holiday Planner</h2>
@@ -292,20 +292,32 @@ export default function HomePage() {
             </div>
           </div>
           <div className="relative hidden justify-center lg:flex">
-            <div className="grid grid-cols-14 gap-[3px] rounded-3xl bg-white/20 p-5 shadow-lg">
-              {Array.from({ length: 84 }).map((_, index) => {
-                const leave = index === 26 || index === 27 || index === 61
-                const holiday = index % 13 === 0 || index % 17 === 0
-                const span = !leave && !holiday && index % 7 > 3
-                const className = leave
-                  ? 'bg-amber-300'
-                  : holiday
-                    ? 'bg-emerald-300'
-                    : span
-                      ? 'bg-teal-300/70'
-                      : 'bg-emerald-900/40'
-                return <span key={index} className={`h-3 w-3 rounded-sm ${className}`} />
-              })}
+            <div className="relative w-full max-w-xs rounded-3xl border border-white/25 bg-white/10 p-6 text-left shadow-lg">
+              <div className="absolute -top-10 right-6 h-20 w-20 rounded-full bg-white/10 blur-2xl" aria-hidden />
+              <p className="text-xs uppercase tracking-[0.35em] text-white/70">Sample itinerary</p>
+              <div className="mt-4 space-y-4">
+                <div className="rounded-2xl bg-white/10 p-3 shadow-sm">
+                  <p className="text-xs uppercase tracking-[0.4em] text-white/60">Stretch</p>
+                  <p className="text-lg font-semibold text-white">Apr 27 → May 12</p>
+                  <p className="text-xs text-white/70">Wrap two long weekends into a 16 day break.</p>
+                </div>
+                <dl className="grid grid-cols-2 gap-3 text-white">
+                  <div>
+                    <dt className="text-[0.65rem] uppercase tracking-[0.3em] text-white/60">PTO Used</dt>
+                    <dd className="text-xl font-semibold">6 days</dd>
+                  </div>
+                  <div>
+                    <dt className="text-[0.65rem] uppercase tracking-[0.3em] text-white/60">Coverage</dt>
+                    <dd className="text-xl font-semibold">16 days</dd>
+                  </div>
+                  <div className="col-span-2">
+                    <dt className="text-[0.65rem] uppercase tracking-[0.3em] text-white/60">Next best option</dt>
+                    <dd className="text-sm text-white/75">
+                      4 PTO days · 11 days off total — BHP highlights why the top plan wins.
+                    </dd>
+                  </div>
+                </dl>
+              </div>
             </div>
           </div>
         </div>
