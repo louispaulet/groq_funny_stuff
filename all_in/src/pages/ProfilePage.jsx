@@ -2,20 +2,31 @@ import UserProfile from '../components/allergyfinder/UserProfile'
 
 export default function ProfilePage() {
   return (
-    <div className="space-y-8">
-      <section className="rounded-3xl border border-brand-200 bg-gradient-to-r from-brand-500/10 to-brand-600/10 px-8 py-10 text-slate-900 shadow-lg dark:border-brand-500/30 dark:from-brand-500/20 dark:to-brand-700/20 dark:text-slate-100">
-        <div className="space-y-3">
-          <span className="inline-flex items-center rounded-full bg-white/70 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-brand-700 dark:bg-slate-900/60 dark:text-brand-200">
-            Profile
-          </span>
-          <h1 className="text-3xl font-semibold sm:text-4xl">User Preferences & Stats</h1>
-          <p className="max-w-2xl text-sm text-slate-700 dark:text-slate-300">
-            Manage your generated alias, review chat counters across experiences, and clear local cookies for allergy notes and
-            saved conversations. Everything shown here lives only in your browser — we do not store personal health information,
-            we keep no server-side logs, and this workspace is operated with GDPR compliance in mind.
-          </p>
+    <div className="space-y-10">
+      <header className="rounded-4xl border border-slate-200 bg-white py-10 pl-10 pr-8 shadow-sm dark:border-slate-800 dark:bg-slate-950">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+          <div className="space-y-3">
+            <span className="inline-flex items-center rounded-full bg-slate-900/90 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-100 dark:bg-slate-800 dark:text-slate-200">
+              Dashboard
+            </span>
+            <div className="space-y-2">
+              <h1 className="text-3xl font-bold text-slate-900 sm:text-4xl dark:text-white">Profile Control Center</h1>
+              <p className="max-w-xl text-sm text-slate-600 dark:text-slate-300">
+                Review your generated alias, local activity, and saved preferences. You own the data on this page—every action
+                here updates information stored only in your browser.
+              </p>
+            </div>
+          </div>
+          <div className="rounded-3xl border border-slate-200/80 bg-slate-50 px-6 py-4 text-left text-sm text-slate-600 shadow-inner dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
+            <p className="font-semibold text-slate-900 dark:text-slate-100">Privacy Snapshot</p>
+            <ul className="mt-2 space-y-1">
+              <li>• No cloud sync or external storage.</li>
+              <li>• Cookies stay on this device.</li>
+              <li>• Reset tools clear data instantly.</li>
+            </ul>
+          </div>
         </div>
-      </section>
+      </header>
 
       <UserProfile />
     </div>
