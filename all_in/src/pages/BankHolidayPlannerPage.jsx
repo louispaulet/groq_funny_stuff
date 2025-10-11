@@ -498,8 +498,14 @@ export default function BankHolidayPlannerPage() {
               </Link>
             </div>
           </div>
-          <div className="hidden min-h-[160px] rounded-3xl border border-emerald-300/20 bg-emerald-950/40 p-4 shadow-lg lg:flex lg:items-center lg:justify-center">
-            <CalendarHeatmap year={plannerYear} holidays={holidays} recommendations={result?.recommendations} />
+          <div className="hidden relative min-h-[160px] overflow-hidden rounded-3xl border border-emerald-200/40 bg-white/10 p-4 shadow-lg backdrop-blur-sm lg:flex lg:items-center lg:justify-center">
+            <div
+              className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.28),_transparent_65%)]"
+              aria-hidden
+            />
+            <div className="relative z-10 w-full">
+              <CalendarHeatmap year={plannerYear} holidays={holidays} recommendations={result?.recommendations} />
+            </div>
           </div>
         </div>
       </section>
