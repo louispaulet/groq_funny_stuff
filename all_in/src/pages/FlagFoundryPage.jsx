@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import ReactCountryFlag from 'react-country-flag'
 
-const LOAD_INTERVAL_MS = 1000
+const LOAD_INTERVAL_MS = 2000
 const createEntry = (country) => ({ country, status: 'idle', prompt: '', dataUrl: '', error: '' })
 const buildDataUrl = (payload) => {
   const inline = typeof payload?.dataUrl === 'string' ? payload.dataUrl.trim() : ''
@@ -446,28 +446,19 @@ export default function FlagFoundryPage({ experience }) {
 
   return (
     <div className="space-y-8">
-      <section className="space-y-4 rounded-2xl border border-slate-200 bg-white/80 p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900/60">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div className="space-y-2">
-            <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100">Global Flag Foundry</h2>
-            <p className="text-sm text-slate-600 dark:text-slate-300">
-              Every continent is organized below. Europe auto-starts, while the others wait for your signal so you can pace API
-              usage and savor the gallery fills.
-            </p>
-          </div>
-          <div className="space-y-2">
-            <button
-              type="button"
-              onClick={handleGenerateAll}
-              className="inline-flex items-center justify-center rounded-full border border-brand-500/20 bg-brand-500/10 px-5 py-2 text-sm font-semibold text-brand-700 transition hover:bg-brand-500/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 dark:border-brand-400/30 dark:bg-brand-400/10 dark:text-brand-200 dark:hover:bg-brand-400/20"
-            >
-              Generate every flag
-            </button>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Please remember API rate limits — this triggers hundreds of sequential calls, so let the queue finish before
-              retrying.
-            </p>
-          </div>
+      <section className="rounded-2xl border border-slate-200 bg-white/80 p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900/60">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <button
+            type="button"
+            onClick={handleGenerateAll}
+            className="inline-flex items-center justify-center rounded-full border border-brand-500/20 bg-brand-500/10 px-5 py-2 text-sm font-semibold text-brand-700 transition hover:bg-brand-500/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 dark:border-brand-400/30 dark:bg-brand-400/10 dark:text-brand-200 dark:hover:bg-brand-400/20"
+          >
+            Generate every flag
+          </button>
+          <p className="text-xs text-slate-500 dark:text-slate-400 sm:max-w-xs">
+            Please remember API rate limits — this triggers hundreds of sequential calls, so let the queue finish before
+            retrying.
+          </p>
         </div>
       </section>
       {CONTINENTS.map((continent) => {
@@ -511,4 +502,3 @@ export default function FlagFoundryPage({ experience }) {
     </div>
   )
 }
-
