@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import DOMPurify from 'dompurify'
 import { ArrowPathIcon, ClipboardDocumentIcon, TrashIcon } from '@heroicons/react/24/outline'
 import { clearSvgHistory, readSvgHistory, writeSvgHistory, SVG_HISTORY_COOKIE_LIMIT } from '../lib/svgHistoryCookie'
 
@@ -10,6 +11,26 @@ function computeDataUrl({ dataUrl, svgMarkup }) {
     return `data:image/svg+xml;utf8,${encodeURIComponent(svgMarkup.trim())}`
   }
   return ''
+}
+
+const SANITIZER_CONFIG = {
+  USE_PROFILES: { svg: true, svgFilters: true },
+  ADD_TAGS: ['animate', 'animateMotion', 'animateTransform', 'mpath'],
+  ADD_ATTR: [
+    'attributeName',
+    'attributeType',
+    'begin',
+    'by',
+    'calcMode',
+    'dur',
+    'href',
+    'keySplines',
+    'keyTimes',
+    'repeatCount',
+    'to',
+    'values',
+    'xlink:href',
+  ],
 }
 
 function formatTimestamp(timestamp) {
@@ -59,6 +80,27 @@ export default function SvgPlaygroundPage({ experience }) {
   const [history, setHistory] = useState([])
   const [copied, setCopied] = useState(false)
   const [useDeluxeRoute, setUseDeluxeRoute] = useState(false)
+
+  const sanitizedSvgMarkup = useMemo(() => {
+    if (typeof window === 'undefined') return ''
+    if (!result?.svgMarkup) return ''
+    return DOMPurify.sanitize(result.svgMarkup, SANITIZER_CONFIG)
+  }, [result?.svgMarkup])
+
+  const iframeMarkup = useMemo(() => {
+    if (!sanitizedSvgMarkup) return ''
+    return `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8" /><style>
+      :root { color-scheme: light dark; }
+      body {
+        margin: 0;
+        display: grid;
+        place-items: center;
+        min-height: 100vh;
+        background: transparent;
+      }
+      svg { width: 100%; height: 100%; }
+    </style></head><body>${sanitizedSvgMarkup}</body></html>`
+  }, [sanitizedSvgMarkup])
 
   useEffect(() => {
     setHistory(readSvgHistory())
@@ -278,7 +320,16 @@ export default function SvgPlaygroundPage({ experience }) {
                     endpoint.
                   </p>
                   <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-slate-100 dark:border-slate-700 dark:bg-slate-800">
-                    <img src={result.dataUrl} alt={result.prompt} className="h-full w-full object-contain" loading="lazy" />
+                    {sanitizedSvgMarkup ? (
+                      <iframe
+                        title={result.prompt}
+                        srcDoc={iframeMarkup}
+                        sandbox=""
+                        className="h-80 w-full rounded-lg bg-white/40 dark:bg-slate-900/40"
+                      />
+                    ) : (
+                      <img src={result.dataUrl} alt={result.prompt} className="h-full w-full object-contain" loading="lazy" />
+                    )}
                   </div>
                   {result.raw ? (
                     <details className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs text-slate-600 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-300">
