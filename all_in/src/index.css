@@ -8,6 +8,7 @@ html, body, #root {
 
 body {
   @apply bg-gradient-to-br from-slate-50 to-slate-100 text-slate-900 antialiased;
+  overflow-x: hidden;
 }
 
 .dark body {
