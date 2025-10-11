@@ -33,6 +33,50 @@ const SANITIZER_CONFIG = {
   ],
 }
 
+function parseAbsoluteLength(value) {
+  if (typeof value !== 'string') return null
+  const trimmed = value.trim()
+  if (!trimmed || trimmed.endsWith('%')) return null
+  const parsed = Number.parseFloat(trimmed)
+  if (!Number.isFinite(parsed) || parsed <= 0) return null
+  return parsed
+}
+
+function extractSvgAspectRatio(svgMarkup) {
+  if (typeof window === 'undefined') return null
+  if (typeof svgMarkup !== 'string' || !svgMarkup.trim()) return null
+  try {
+    const parser = new DOMParser()
+    const doc = parser.parseFromString(svgMarkup, 'image/svg+xml')
+    const svg = doc.querySelector('svg')
+    if (!svg) return null
+
+    const width = parseAbsoluteLength(svg.getAttribute('width'))
+    const height = parseAbsoluteLength(svg.getAttribute('height'))
+    if (width && height) {
+      return width / height
+    }
+
+    const viewBoxRaw = svg.getAttribute('viewBox') || svg.getAttribute('viewbox')
+    if (viewBoxRaw) {
+      const parts = viewBoxRaw
+        .split(/[\s,]+/)
+        .map((part) => Number.parseFloat(part))
+        .filter((num) => Number.isFinite(num))
+      if (parts.length === 4) {
+        const [, , vbWidth, vbHeight] = parts
+        if (vbWidth > 0 && vbHeight > 0) {
+          return vbWidth / vbHeight
+        }
+      }
+    }
+
+    return null
+  } catch {
+    return null
+  }
+}
+
 function formatTimestamp(timestamp) {
   const date = new Date(timestamp)
   if (Number.isNaN(date.getTime())) return ''
@@ -87,18 +131,31 @@ export default function SvgPlaygroundPage({ experience }) {
     return DOMPurify.sanitize(result.svgMarkup, SANITIZER_CONFIG)
   }, [result?.svgMarkup])
 
+  const svgAspectRatio = useMemo(() => extractSvgAspectRatio(sanitizedSvgMarkup), [sanitizedSvgMarkup])
+
   const iframeMarkup = useMemo(() => {
     if (!sanitizedSvgMarkup) return ''
     return `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8" /><style>
       :root { color-scheme: light dark; }
-      body {
+      html, body {
         margin: 0;
-        display: grid;
-        place-items: center;
-        min-height: 100vh;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
         background: transparent;
       }
-      svg { width: 100%; height: 100%; }
+      body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      svg {
+        width: 100%;
+        height: auto;
+        max-width: 100%;
+        max-height: 100%;
+      }
     </style></head><body>${sanitizedSvgMarkup}</body></html>`
   }, [sanitizedSvgMarkup])
 
@@ -319,13 +376,20 @@ export default function SvgPlaygroundPage({ experience }) {
                     </code>{' '}
                     endpoint.
                   </p>
-                  <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-slate-100 dark:border-slate-700 dark:bg-slate-800">
+                  <div
+                    className="relative w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-100 dark:border-slate-700 dark:bg-slate-800"
+                    style={{ aspectRatio: svgAspectRatio || 1 }}
+                  >
                     {sanitizedSvgMarkup ? (
                       <iframe
+                        key={result.svgMarkup}
                         title={result.prompt}
                         srcDoc={iframeMarkup}
                         sandbox=""
-                        className="h-80 w-full rounded-lg bg-white/40 dark:bg-slate-900/40"
+                        className="h-full w-full bg-white/40 dark:bg-slate-900/40"
+                        scrolling="no"
+                        loading="lazy"
+                        style={{ border: 'none' }}
                       />
                     ) : (
                       <img src={result.dataUrl} alt={result.prompt} className="h-full w-full object-contain" loading="lazy" />
