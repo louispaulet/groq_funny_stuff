@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import DOMPurify from 'dompurify'
 import { ArrowPathIcon, ClipboardDocumentIcon, TrashIcon } from '@heroicons/react/24/outline'
 import { clearSvgHistory, readSvgHistory, writeSvgHistory, SVG_HISTORY_COOKIE_LIMIT } from '../lib/svgHistoryCookie'
 
@@ -10,6 +11,70 @@ function computeDataUrl({ dataUrl, svgMarkup }) {
     return `data:image/svg+xml;utf8,${encodeURIComponent(svgMarkup.trim())}`
   }
   return ''
+}
+
+const SANITIZER_CONFIG = {
+  USE_PROFILES: { svg: true, svgFilters: true },
+  ADD_TAGS: ['animate', 'animateMotion', 'animateTransform', 'mpath'],
+  ADD_ATTR: [
+    'attributeName',
+    'attributeType',
+    'begin',
+    'by',
+    'calcMode',
+    'dur',
+    'href',
+    'keySplines',
+    'keyTimes',
+    'repeatCount',
+    'to',
+    'values',
+    'xlink:href',
+  ],
+}
+
+function parseAbsoluteLength(value) {
+  if (typeof value !== 'string') return null
+  const trimmed = value.trim()
+  if (!trimmed || trimmed.endsWith('%')) return null
+  const parsed = Number.parseFloat(trimmed)
+  if (!Number.isFinite(parsed) || parsed <= 0) return null
+  return parsed
+}
+
+function extractSvgAspectRatio(svgMarkup) {
+  if (typeof window === 'undefined') return null
+  if (typeof svgMarkup !== 'string' || !svgMarkup.trim()) return null
+  try {
+    const parser = new DOMParser()
+    const doc = parser.parseFromString(svgMarkup, 'image/svg+xml')
+    const svg = doc.querySelector('svg')
+    if (!svg) return null
+
+    const width = parseAbsoluteLength(svg.getAttribute('width'))
+    const height = parseAbsoluteLength(svg.getAttribute('height'))
+    if (width && height) {
+      return width / height
+    }
+
+    const viewBoxRaw = svg.getAttribute('viewBox') || svg.getAttribute('viewbox')
+    if (viewBoxRaw) {
+      const parts = viewBoxRaw
+        .split(/[\s,]+/)
+        .map((part) => Number.parseFloat(part))
+        .filter((num) => Number.isFinite(num))
+      if (parts.length === 4) {
+        const [, , vbWidth, vbHeight] = parts
+        if (vbWidth > 0 && vbHeight > 0) {
+          return vbWidth / vbHeight
+        }
+      }
+    }
+
+    return null
+  } catch {
+    return null
+  }
 }
 
 function formatTimestamp(timestamp) {
@@ -38,6 +103,11 @@ function HistoryItem({ entry, onSelect }) {
       </div>
       <div>
         <p className="line-clamp-2 text-sm font-medium text-slate-700 dark:text-slate-200">{entry.prompt || 'Saved request'}</p>
+        {entry.route ? (
+          <p className="text-[0.65rem] uppercase tracking-wide text-slate-400 dark:text-slate-500">
+            {entry.route === 'svg_deluxe' ? 'Deluxe /svg_deluxe (oss-120B)' : 'Standard /svg (Llama 3 70B)'}
+          </p>
+        ) : null}
         {entry.timestamp ? (
           <p className="text-xs text-slate-500 dark:text-slate-400">{formatTimestamp(entry.timestamp)}</p>
         ) : null}
@@ -53,6 +123,41 @@ export default function SvgPlaygroundPage({ experience }) {
   const [result, setResult] = useState(null)
   const [history, setHistory] = useState([])
   const [copied, setCopied] = useState(false)
+  const [useDeluxeRoute, setUseDeluxeRoute] = useState(false)
+
+  const sanitizedSvgMarkup = useMemo(() => {
+    if (typeof window === 'undefined') return ''
+    if (!result?.svgMarkup) return ''
+    return DOMPurify.sanitize(result.svgMarkup, SANITIZER_CONFIG)
+  }, [result?.svgMarkup])
+
+  const svgAspectRatio = useMemo(() => extractSvgAspectRatio(sanitizedSvgMarkup), [sanitizedSvgMarkup])
+
+  const iframeMarkup = useMemo(() => {
+    if (!sanitizedSvgMarkup) return ''
+    return `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8" /><style>
+      :root { color-scheme: light dark; }
+      html, body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: transparent;
+      }
+      body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      svg {
+        width: 100%;
+        height: auto;
+        max-width: 100%;
+        max-height: 100%;
+      }
+    </style></head><body>${sanitizedSvgMarkup}</body></html>`
+  }, [sanitizedSvgMarkup])
 
   useEffect(() => {
     setHistory(readSvgHistory())
@@ -65,6 +170,7 @@ export default function SvgPlaygroundPage({ experience }) {
   }, [copied])
 
   const apiBaseUrl = experience?.svgApiBaseUrl || experience?.defaultBaseUrl || 'https://groq-endpoint.louispaulet13.workers.dev'
+  const routeSegment = useDeluxeRoute ? 'svg_deluxe' : 'svg'
 
   async function handleSubmit(event) {
     event.preventDefault()
@@ -78,7 +184,9 @@ export default function SvgPlaygroundPage({ experience }) {
     setError('')
 
     try {
-      const requestUrl = new URL(`${apiBaseUrl.replace(/\/$/, '')}/svg/${encodeURIComponent(trimmedPrompt)}`)
+      const requestUrl = new URL(
+        `${apiBaseUrl.replace(/\/$/, '')}/${routeSegment}/${encodeURIComponent(trimmedPrompt)}`,
+      )
       const response = await fetch(requestUrl.toString())
       if (!response.ok) {
         let message = `Generation failed with status ${response.status}`
@@ -112,6 +220,7 @@ export default function SvgPlaygroundPage({ experience }) {
         dataUrl,
         svgMarkup,
         raw: payload,
+        route: routeSegment,
       }
 
       setResult(nextResult)
@@ -122,6 +231,7 @@ export default function SvgPlaygroundPage({ experience }) {
         dataUrl,
         svgMarkup,
         timestamp: createdAt,
+        route: routeSegment,
       }
 
       const existingWithoutDuplicate = history.filter(
@@ -140,11 +250,13 @@ export default function SvgPlaygroundPage({ experience }) {
   function handleSelectHistory(entry) {
     if (!entry) return
     setPrompt(entry.prompt || '')
+    setUseDeluxeRoute(entry.route === 'svg_deluxe')
     setResult({
       prompt: entry.prompt,
       dataUrl: computeDataUrl(entry),
       svgMarkup: entry.svgMarkup || '',
       raw: null,
+      route: entry.route || 'svg',
     })
   }
 
@@ -184,8 +296,28 @@ export default function SvgPlaygroundPage({ experience }) {
               placeholder="Describe what the SVG should contain..."
             />
             <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-              Requests are sent to <code className="rounded bg-slate-100 px-1 py-0.5 text-[0.7rem] text-slate-700 dark:bg-slate-800 dark:text-slate-200">{`${apiBaseUrl}/svg/<prompt>`}</code>. We encode the prompt so spaces and punctuation are preserved.
+              Requests are sent to{' '}
+              <code className="rounded bg-slate-100 px-1 py-0.5 text-[0.7rem] text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                {`${apiBaseUrl}/${routeSegment}/<prompt>`}
+              </code>
+              . We encode the prompt so spaces and punctuation are preserved.
             </p>
+            <label
+              htmlFor="svglab-deluxe"
+              className="mt-3 flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 bg-slate-50/70 px-3 py-3 text-sm text-slate-600 shadow-sm transition hover:border-brand-300 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-300"
+            >
+              <input
+                id="svglab-deluxe"
+                type="checkbox"
+                checked={useDeluxeRoute}
+                onChange={(event) => setUseDeluxeRoute(event.target.checked)}
+                className="mt-1 h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500 dark:border-slate-600 dark:bg-slate-900"
+              />
+              <span>
+                Use the <code className="rounded bg-slate-200 px-1 py-0.5 text-[0.7rem] text-slate-700 dark:bg-slate-900 dark:text-slate-200">/svg_deluxe</code> route for{' '}
+                oss-120B generations with an 8,192-token canvas suitable for animated SVGs.
+              </span>
+            </label>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
@@ -237,8 +369,31 @@ export default function SvgPlaygroundPage({ experience }) {
                       </button>
                     ) : null}
                   </div>
-                  <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-slate-100 dark:border-slate-700 dark:bg-slate-800">
-                    <img src={result.dataUrl} alt={result.prompt} className="h-full w-full object-contain" loading="lazy" />
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Served via {result.route === 'svg_deluxe' ? 'oss-120B' : 'Llama 3 70B'} on the{' '}
+                    <code className="rounded bg-slate-100 px-1 py-0.5 text-[0.65rem] text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                      /{result.route || 'svg'}
+                    </code>{' '}
+                    endpoint.
+                  </p>
+                  <div
+                    className="relative w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-100 dark:border-slate-700 dark:bg-slate-800"
+                    style={{ aspectRatio: svgAspectRatio || 1 }}
+                  >
+                    {sanitizedSvgMarkup ? (
+                      <iframe
+                        key={result.svgMarkup}
+                        title={result.prompt}
+                        srcDoc={iframeMarkup}
+                        sandbox=""
+                        className="h-full w-full bg-white/40 dark:bg-slate-900/40"
+                        scrolling="no"
+                        loading="lazy"
+                        style={{ border: 'none' }}
+                      />
+                    ) : (
+                      <img src={result.dataUrl} alt={result.prompt} className="h-full w-full object-contain" loading="lazy" />
+                    )}
                   </div>
                   {result.raw ? (
                     <details className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs text-slate-600 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-300">
