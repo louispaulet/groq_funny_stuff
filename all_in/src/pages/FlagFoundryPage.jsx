@@ -10,6 +10,8 @@ const buildDataUrl = (payload) => {
   return svgMarkup ? `data:image/svg+xml;utf8,${encodeURIComponent(svgMarkup)}` : ''
 }
 
+const POPULATION_FORMATTER = new Intl.NumberFormat('en-US')
+
 const CONTINENTS = [
   {
     id: 'europe',
@@ -17,51 +19,51 @@ const CONTINENTS = [
     description:
       'Auto-queues every European flag so you can watch the continent populate without lifting a finger.',
     countries: [
-      { name: 'Albania', code: 'AL' },
-      { name: 'Andorra', code: 'AD' },
-      { name: 'Austria', code: 'AT' },
-      { name: 'Belarus', code: 'BY' },
-      { name: 'Belgium', code: 'BE' },
-      { name: 'Bosnia and Herzegovina', code: 'BA' },
-      { name: 'Bulgaria', code: 'BG' },
-      { name: 'Croatia', code: 'HR' },
-      { name: 'Cyprus', code: 'CY' },
-      { name: 'Czechia', code: 'CZ' },
-      { name: 'Denmark', code: 'DK' },
-      { name: 'Estonia', code: 'EE' },
-      { name: 'Finland', code: 'FI' },
-      { name: 'France', code: 'FR' },
-      { name: 'Germany', code: 'DE' },
-      { name: 'Greece', code: 'GR' },
-      { name: 'Hungary', code: 'HU' },
-      { name: 'Iceland', code: 'IS' },
-      { name: 'Ireland', code: 'IE' },
-      { name: 'Italy', code: 'IT' },
-      { name: 'Latvia', code: 'LV' },
-      { name: 'Liechtenstein', code: 'LI' },
-      { name: 'Lithuania', code: 'LT' },
-      { name: 'Luxembourg', code: 'LU' },
-      { name: 'Malta', code: 'MT' },
-      { name: 'Moldova', code: 'MD' },
-      { name: 'Monaco', code: 'MC' },
-      { name: 'Montenegro', code: 'ME' },
-      { name: 'Netherlands', code: 'NL' },
-      { name: 'North Macedonia', code: 'MK' },
-      { name: 'Norway', code: 'NO' },
-      { name: 'Poland', code: 'PL' },
-      { name: 'Portugal', code: 'PT' },
-      { name: 'Romania', code: 'RO' },
-      { name: 'Russia', code: 'RU' },
-      { name: 'San Marino', code: 'SM' },
-      { name: 'Serbia', code: 'RS' },
-      { name: 'Slovakia', code: 'SK' },
-      { name: 'Slovenia', code: 'SI' },
-      { name: 'Spain', code: 'ES' },
-      { name: 'Sweden', code: 'SE' },
-      { name: 'Switzerland', code: 'CH' },
-      { name: 'Ukraine', code: 'UA' },
-      { name: 'United Kingdom', code: 'GB' },
-      { name: 'Vatican City', code: 'VA' },
+      { name: 'Russia', code: 'RU', population: 143997393 },
+      { name: 'Germany', code: 'DE', population: 84075075 },
+      { name: 'United Kingdom', code: 'GB', population: 69551332 },
+      { name: 'France', code: 'FR', population: 66650804 },
+      { name: 'Italy', code: 'IT', population: 59146260 },
+      { name: 'Spain', code: 'ES', population: 47889958 },
+      { name: 'Ukraine', code: 'UA', population: 38980376 },
+      { name: 'Poland', code: 'PL', population: 38140910 },
+      { name: 'Romania', code: 'RO', population: 18908650 },
+      { name: 'Netherlands', code: 'NL', population: 18346819 },
+      { name: 'Belgium', code: 'BE', population: 11779946 },
+      { name: 'Sweden', code: 'SE', population: 11055959 },
+      { name: 'Czechia', code: 'CZ', population: 10678744 },
+      { name: 'Portugal', code: 'PT', population: 10519018 },
+      { name: 'Greece', code: 'GR', population: 10423054 },
+      { name: 'Hungary', code: 'HU', population: 9668149 },
+      { name: 'Belarus', code: 'BY', population: 9443211 },
+      { name: 'Austria', code: 'AT', population: 9131761 },
+      { name: 'Switzerland', code: 'CH', population: 8767849 },
+      { name: 'Serbia', code: 'RS', population: 6911019 },
+      { name: 'Bulgaria', code: 'BG', population: 6446596 },
+      { name: 'Denmark', code: 'DK', population: 5866324 },
+      { name: 'Norway', code: 'NO', population: 5735040 },
+      { name: 'Finland', code: 'FI', population: 5528859 },
+      { name: 'Slovakia', code: 'SK', population: 5458000 },
+      { name: 'Ireland', code: 'IE', population: 5274000 },
+      { name: 'Croatia', code: 'HR', population: 3856431 },
+      { name: 'Bosnia and Herzegovina', code: 'BA', population: 3500295 },
+      { name: 'Albania', code: 'AL', population: 2891085 },
+      { name: 'Moldova', code: 'MD', population: 2681536 },
+      { name: 'Lithuania', code: 'LT', population: 2599928 },
+      { name: 'Slovenia', code: 'SI', population: 2146844 },
+      { name: 'North Macedonia', code: 'MK', population: 2064183 },
+      { name: 'Latvia', code: 'LV', population: 1849843 },
+      { name: 'Estonia', code: 'EE', population: 1357728 },
+      { name: 'Cyprus', code: 'CY', population: 1313959 },
+      { name: 'Luxembourg', code: 'LU', population: 669132 },
+      { name: 'Montenegro', code: 'ME', population: 630219 },
+      { name: 'Malta', code: 'MT', population: 574300 },
+      { name: 'Iceland', code: 'IS', population: 381552 },
+      { name: 'Andorra', code: 'AD', population: 77287 },
+      { name: 'Monaco', code: 'MC', population: 39244 },
+      { name: 'Liechtenstein', code: 'LI', population: 39010 },
+      { name: 'San Marino', code: 'SM', population: 32700 },
+      { name: 'Vatican City', code: 'VA', population: 801 },
     ],
   },
   {
@@ -272,12 +274,21 @@ const buildInitialGenerationState = () =>
 
 function FlagCard({ entry }) {
   const { country, dataUrl, error, prompt, status } = entry
+  const populationLabel =
+    typeof country.population === 'number' && Number.isFinite(country.population)
+      ? `2025 est. population: ${POPULATION_FORMATTER.format(country.population)}`
+      : null
   return (
     <article className="space-y-3 rounded-2xl border border-slate-200 bg-white/80 p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900/60">
-      <header className="space-y-2 text-center">
-        <div className="inline-flex items-center gap-2 text-lg font-semibold text-slate-800 dark:text-slate-100">
-          <ReactCountryFlag countryCode={country.code} svg title={`${country.name} reference flag`} className="text-2xl" />
-          <span>{country.name}</span>
+      <header className="space-y-3 text-center">
+        <div className="space-y-1">
+          <div className="inline-flex items-center gap-2 text-lg font-semibold text-slate-800 dark:text-slate-100">
+            <ReactCountryFlag countryCode={country.code} svg title={`${country.name} reference flag`} className="text-2xl" />
+            <span>{country.name}</span>
+          </div>
+          {populationLabel ? (
+            <p className="text-xs font-medium text-slate-500 dark:text-slate-400">{populationLabel}</p>
+          ) : null}
         </div>
         <p className="text-xs text-slate-500 dark:text-slate-400">Unicode reference flag for quick color checks.</p>
       </header>
