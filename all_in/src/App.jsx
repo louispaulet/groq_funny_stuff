@@ -13,6 +13,7 @@ import ProfilePage from './pages/ProfilePage'
 import ObjectMakerNav from './components/objectmaker/ObjectMakerNav'
 import ObjectMakerBuilder from './pages/ObjectMakerBuilder'
 import ObjectMakerZoo from './pages/ObjectMakerZoo'
+import BankHolidayPlannerPage from './pages/BankHolidayPlannerPage'
 import NewsAnalyzerPage from './pages/NewsAnalyzerPage'
 import SixDegreesPage from './pages/SixDegreesPage'
 import ImageGeneratorPage from './pages/ImageGeneratorPage'
@@ -30,6 +31,7 @@ export default function App() {
         <AppShell>
           <Routes>
             <Route path="/" element={<HomePage />} />
+            <Route path="/bank-holiday-planner" element={<BankHolidayPlannerPage />} />
             {experiences.map((experience) =>
               experience.id === 'allergyfinder' ? (
                 <Fragment key={experience.id}>
