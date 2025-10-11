@@ -451,8 +451,30 @@ export default function FlagFoundryPage({ experience }) {
           <div className="space-y-2">
             <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100">Global Flag Foundry</h2>
             <p className="text-sm text-slate-600 dark:text-slate-300">
-              Every continent is organized below. Europe auto-starts, while the others wait for your signal so you can pace API
-              usage and savor the gallery fills.
+              🚩 Flag Foundry is pitched like a FAANG lab demo: a crisp visualization of how an LLM navigates vexillological
+              structure inside a dense{' '}
+              <a
+                href="https://en.wikipedia.org/wiki/Latent_space"
+                className="underline decoration-dotted underline-offset-2"
+                target="_blank"
+                rel="noreferrer"
+              >
+                latent space
+              </a>{' '}
+              with just enough flair to feel like a keynote teaser.
+            </p>
+            <p className="text-sm text-slate-600 dark:text-slate-300">
+              🧠 This page is about understanding what an LLM knows about a flag in a few tokens. The model is{' '}
+              <a
+                href="https://en.wikipedia.org/wiki/LLaMA_(language_model)"
+                className="underline decoration-dotted underline-offset-2"
+                target="_blank"
+                rel="noreferrer"
+              >
+                LLaMA&nbsp;3&nbsp;70B
+              </a>
+              , operating under a 1024-token constraint — the simpler the flag, the easier it is to honor that boundary without
+              smearing the hypothesis space.
             </p>
           </div>
           <div className="space-y-2">
