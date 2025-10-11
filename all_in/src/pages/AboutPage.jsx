@@ -70,14 +70,24 @@ export default function AboutPage() {
             the worker can augment requests with product lookups before returning Groq responses. 💬
           </li>
           <li>
-            <span className="font-semibold text-slate-800 dark:text-slate-200">GET /flavor-finder/&lt;food&gt;</span> — helper route
-            that fetches product entries directly, useful for debugging the worker&apos;s ingredient sourcing without spinning
-            up the UI. 🔎
+            <span className="font-semibold text-slate-800 dark:text-slate-200">GET /flavor-finder/&lt;foodOrBarcode&gt;</span> —
+            helper route that fetches allergy metadata on demand, perfect for debugging the worker&apos;s ingredient sourcing
+            without loading the full UI. 🔎
           </li>
           <li>
             <span className="font-semibold text-slate-800 dark:text-slate-200">GET /news/&lt;category&gt;</span> — curated news feed
             powering the News Analyzer experience. The worker aggregates trusted sources per category and returns normalized
             JSON so the UI can render headlines instantly. 🗞️
+          </li>
+          <li>
+            <span className="font-semibold text-slate-800 dark:text-slate-200">GET /svg/&lt;prompt&gt; and /svg_deluxe/&lt;prompt&gt;</span>
+            — SVG rendering routes used by the Prompt Lab and Flag Foundry. <code>/svg</code> streams Llama&nbsp;3 inline markup,
+            while <code>/svg_deluxe</code> taps oss-120B for high-token animated canvases. 🧵
+          </li>
+          <li>
+            <span className="font-semibold text-slate-800 dark:text-slate-200">GET /flux/&lt;prompt&gt;</span> — image generator
+            backing Pizza Maker, Car Maker, and the Flux playground. The worker orchestrates Groq&apos;s Flux models and normalizes
+            the resulting gallery payloads. 🖼️
           </li>
           <li>
             <span className="font-semibold text-slate-800 dark:text-slate-200">POST /obj/&lt;type&gt; (and /object*/ variants)</span> —
