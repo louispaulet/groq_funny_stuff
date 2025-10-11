@@ -200,7 +200,7 @@ export default function UserProfile() {
         <div className="absolute bottom-[-10rem] left-[-8rem] h-64 w-64 rounded-full bg-emerald-300/20 blur-3xl" aria-hidden="true" />
         <div className="relative space-y-6">
           <div>
-            <span className="inline-flex items-center rounded-full bg-white/20 px-3 py-1 text-xs font-semibold uppercase tracking-wide">
+            <span className="inline-flex items-center rounded-full bg-emerald-950/40 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-100">
               Profile
             </span>
             <h2 className="mt-4 text-3xl font-semibold sm:text-4xl">User Preferences &amp; Activity</h2>
@@ -210,25 +210,25 @@ export default function UserProfile() {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-4">
-            <div className="rounded-3xl border border-white/30 bg-white/20 px-6 py-4 text-lg font-semibold text-white shadow-lg backdrop-blur">
+            <div className="rounded-3xl border border-white/10 bg-emerald-950/50 px-6 py-4 text-lg font-semibold text-emerald-100 shadow-lg backdrop-blur">
               {profileName || 'No profile name stored'}
             </div>
             <button
               type="button"
               onClick={handleRegenerateProfile}
-              className="inline-flex items-center rounded-full bg-white/20 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/30"
+              className="inline-flex items-center rounded-full bg-emerald-950/40 px-4 py-2 text-sm font-medium text-emerald-100 transition hover:bg-emerald-900/70"
             >
               Generate New Alias 🎲
             </button>
             <button
               type="button"
               onClick={handleFlushProfile}
-              className="inline-flex items-center rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-500/90"
+              className="inline-flex items-center rounded-full border border-white/20 bg-emerald-950/30 px-4 py-2 text-sm font-semibold text-emerald-100 transition hover:bg-red-500/80 hover:text-white"
             >
               Remove Profile Cookie 🗑️
             </button>
           </div>
-          <p className="rounded-3xl border border-white/20 bg-white/10 px-4 py-3 text-xs text-white/90 shadow-inner">
+          <p className="rounded-3xl border border-white/10 bg-emerald-950/40 px-4 py-3 text-xs text-emerald-100 shadow-inner">
             Important: Removing the profile cookie deletes the saved alias immediately. The next time you open this page a new
             randomly generated name will appear.
           </p>
