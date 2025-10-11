@@ -13,6 +13,9 @@ export default function ObjectMakerNav() {
       <NavLink to="/objectmaker" className={navClasses} end>
         Builder
       </NavLink>
+      <NavLink to="/objectmaker/bhp" className={navClasses}>
+        BHP Planner
+      </NavLink>
       <NavLink to="/objectmaker/zoo" className={navClasses}>
         Zoo
       </NavLink>

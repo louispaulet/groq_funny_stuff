@@ -47,6 +47,12 @@ const detailedCopyById = {
         demonstrate how reliable JSON scaffolding unlocks downstream tooling: the sharper the schema, the more dependable the
         generated objects. Image generation integrations are planned, but today is about perfecting the structured prompt. 🗂️
       </p>
+      <p>
+        New in the Object Maker wing: the <strong>BHP — Bank Holiday Planner</strong>. Feed it your available paid leave days and
+        a country’s bank holidays and it calls the <code className="rounded bg-slate-900/80 px-1 py-0.5 text-[0.7rem] text-white">/obj</code>
+        route with a vacation-optimization schema. The assistant returns PTO blocks that maximize uninterrupted time off while
+        comparing the haul against a random leave-day strategy. ✈️
+      </p>
     </>
   ),
   stlviewer: (
