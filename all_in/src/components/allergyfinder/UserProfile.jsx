@@ -196,7 +196,7 @@ export default function UserProfile() {
   return (
     <div className="space-y-12">
       <section className="relative overflow-hidden rounded-4xl border border-brand-400/40 bg-gradient-to-br from-brand-500 via-emerald-500 to-brand-600 p-8 text-white shadow-2xl">
-        <div className="absolute right-[-12rem] top-[-6rem] h-56 w-56 rounded-full bg-white/10 blur-3xl" aria-hidden="true" />
+        <div className="absolute right-[-12rem] top-[-6rem] h-56 w-56 rounded-full bg-emerald-200/30 blur-3xl" aria-hidden="true" />
         <div className="absolute bottom-[-10rem] left-[-8rem] h-64 w-64 rounded-full bg-emerald-300/20 blur-3xl" aria-hidden="true" />
         <div className="relative space-y-6">
           <div>
