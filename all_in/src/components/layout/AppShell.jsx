@@ -59,7 +59,7 @@ export default function AppShell({ children }) {
   return (
     <div className="min-h-screen flex flex-col">
       <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:border-slate-800 dark:bg-slate-900/70">
-        <div className="flex w-full items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
+        <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
           <NavLink to="/" className="flex items-center gap-3">
             <div className="grid h-10 w-10 place-items-center rounded-xl bg-brand-600 text-white text-lg font-semibold">
               llI
@@ -105,11 +105,13 @@ export default function AppShell({ children }) {
           </div>
         </div>
       </header>
-      <main className="w-full flex-1 px-4 py-8 sm:px-6 lg:px-8">
-        {children}
+      <main className="flex-1">
+        <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+          {children}
+        </div>
       </main>
       <footer className="mt-auto border-t border-slate-200 bg-white/80 py-6 text-sm text-slate-600 backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:border-slate-800 dark:bg-slate-900/70 dark:text-slate-300">
-        <div className="flex w-full flex-col gap-2 px-4 text-center sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8 sm:text-left">
+        <div className="mx-auto flex w-full max-w-6xl flex-col gap-2 px-4 text-center sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8 sm:text-left">
           <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 sm:justify-start">
             <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 sm:justify-start">
               <span className="font-semibold text-slate-700 dark:text-slate-200">Groq AllIn Studio</span>
