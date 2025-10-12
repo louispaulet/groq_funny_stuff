@@ -71,4 +71,22 @@ export const cursedMarketInventory = [
     image: '/secondhand_food_market/butter_without_packaging.png',
     curse: 'Melts faster when you start asking questions.',
   },
+  {
+    id: 'forgotten-office-coffee',
+    title: 'Forgotten Office Coffee',
+    description:
+      'Corporate relic in a branded mug, brewed last week and abandoned during the big move.',
+    price: '€1.10',
+    image: '/secondhand_food_market/forgotten_coffee.png',
+    curse: 'Tastes like burnout and three rescheduled meetings.',
+  },
+  {
+    id: 'microwaved-yesterday-fries',
+    title: 'Reheated Fries Offer',
+    description:
+      'Yesterday\'s fast food fries revived by microwave - soggy, lukewarm, and surprisingly affordable.',
+    price: '€0.80',
+    image: '/secondhand_food_market/reheated_fries.png',
+    curse: 'Forever haunted by the crunch they once had.',
+  },
 ]
