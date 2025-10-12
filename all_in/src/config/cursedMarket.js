@@ -5,7 +5,7 @@ export const cursedMarketInventory = [
     description:
       'Classic street food experience enhanced by authentic grime and possible tetanus. Hand flavor included.',
     price: '€2.50',
-    image: '/second-hand-food-market/dirty-hands-hot-dog.png',
+    image: '/secondhand_food_market/hot_dog_dirty_hands.png',
     curse: 'Seasoned with axle grease memories and unverified relish.',
   },
   {
@@ -14,7 +14,7 @@ export const cursedMarketInventory = [
     description:
       'Artisanal bottled bath water. Collected fresh after a long, reflective soak. Slightly soapy undertones.',
     price: '€9.99',
-    image: '/second-hand-food-market/bath-water-vial.png',
+    image: '/secondhand_food_market/bath_water_vial.png',
     curse: 'Infused with existential dread and three stray eyelashes.',
   },
   {
@@ -23,7 +23,7 @@ export const cursedMarketInventory = [
     description:
       'Half-finished caramel latte featuring a bold lipstick accent. A kiss of mystery and backwash.',
     price: '€4.00',
-    image: '/second-hand-food-market/lipstick-starbucks-drink.png',
+    image: '/secondhand_food_market/didnt_use_the_straw.png',
     curse: 'Guaranteed to share secrets you never wanted to overhear.',
   },
   {
@@ -32,7 +32,7 @@ export const cursedMarketInventory = [
     description:
       'A minimalist sushi experience. Eight perfect rice ovals, all the fish gone to a better place.',
     price: '€5.50',
-    image: '/second-hand-food-market/sushi-minus-fish.png',
+    image: '/secondhand_food_market/oops_i_ate_all_the_fish.png',
     curse: 'Haunted by the ghosts of sashimi past.',
   },
   {
@@ -41,7 +41,7 @@ export const cursedMarketInventory = [
     description:
       'Freshly stepped-on pepperoni pizza. Notes of human warmth and crushed dignity.',
     price: '€6.66',
-    image: '/second-hand-food-market/foot-stomped-pizza.png',
+    image: '/secondhand_food_market/pizza_stomp.png',
     curse: 'Pairs well with toe jam and despair.',
   },
   {
@@ -50,7 +50,7 @@ export const cursedMarketInventory = [
     description:
       'Perfectly intact except for one large bite. Comes with existential regret and saliva residue.',
     price: '€3.20',
-    image: '/second-hand-food-market/single-bite-burger.png',
+    image: '/secondhand_food_market/single_bite_burger.png',
     curse: 'Whispers “you should have been faster” with every chew.',
   },
   {
@@ -59,7 +59,7 @@ export const cursedMarketInventory = [
     description:
       'Generous seven-slice offering, ideal for those who love paying full price for less.',
     price: '€7.00',
-    image: '/second-hand-food-market/pizza-missing-slice.png',
+    image: '/secondhand_food_market/pizza_missing_slice.png',
     curse: 'Forever incomplete; every slice tastes like absence.',
   },
   {
@@ -68,7 +68,7 @@ export const cursedMarketInventory = [
     description:
       'Naked butter bar, hand-temperature. Comes with a faint scent of palm sweat and trust issues.',
     price: '€1.80',
-    image: '/second-hand-food-market/butter-without-packaging.png',
+    image: '/secondhand_food_market/butter_without_packaging.png',
     curse: 'Melts faster when you start asking questions.',
   },
 ]
