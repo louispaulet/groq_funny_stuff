@@ -3,6 +3,9 @@ import { SparklesIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outli
 import { cursedMarketInventory } from '../config/cursedMarket'
 
 export default function SecondHandFoodMarketPage() {
+  const foodItems = cursedMarketInventory.filter((item) => item.category !== 'spells-and-potions')
+  const spellAndPotionItems = cursedMarketInventory.filter((item) => item.category === 'spells-and-potions')
+
   return (
     <div className="space-y-12">
       <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-500 via-rose-500 to-brand-600 px-8 py-14 text-white shadow-xl">
@@ -61,7 +64,7 @@ export default function SecondHandFoodMarketPage() {
           </p>
         </header>
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {cursedMarketInventory.map((item) => (
+          {foodItems.map((item) => (
             <article
               key={item.id}
               className="group relative flex flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white/95 shadow-sm transition hover:border-brand-400/60 hover:shadow-xl dark:border-slate-800 dark:bg-slate-900/95"
@@ -97,6 +100,54 @@ export default function SecondHandFoodMarketPage() {
           ))}
         </div>
       </section>
+
+      {spellAndPotionItems.length > 0 && (
+        <section className="space-y-8">
+          <header className="space-y-3">
+            <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Spells & Potions Annex 🔮</h2>
+            <p className="text-sm text-slate-600 dark:text-slate-400">
+              For patrons seeking something more arcane than reheated leftovers, we stashed the enchanted liquids and curious
+              brews down here. Ingredients may include moonlight, discarded wishes, and probably soap.
+            </p>
+          </header>
+          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+            {spellAndPotionItems.map((item) => (
+              <article
+                key={item.id}
+                className="group relative flex flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white/95 shadow-sm transition hover:border-brand-400/60 hover:shadow-xl dark:border-slate-800 dark:bg-slate-900/95"
+              >
+                <div className="relative aspect-square w-full overflow-hidden bg-slate-900/80">
+                  <img
+                    src={item.image}
+                    alt={item.title}
+                    className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-900/80 to-transparent p-4 text-xs uppercase tracking-[0.3em] text-white/75">
+                    {item.curse}
+                  </div>
+                </div>
+                <div className="flex flex-1 flex-col space-y-4 p-6">
+                  <div className="space-y-2">
+                    <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">{item.title}</h3>
+                    <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-300">{item.description}</p>
+                  </div>
+                  <div className="mt-auto flex items-center justify-between pt-2">
+                    <span className="text-sm font-semibold text-brand-600 dark:text-brand-400">{item.price}</span>
+                    <button
+                      type="button"
+                      className="inline-flex items-center gap-2 rounded-full border border-brand-500/40 bg-brand-500/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-brand-700 transition hover:border-brand-500 hover:bg-brand-500/20 dark:text-brand-300"
+                    >
+                      Buy Now
+                      <span aria-hidden>→</span>
+                    </button>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white/80 p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900/80">
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)] lg:items-center">
