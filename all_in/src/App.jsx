@@ -23,6 +23,7 @@ import PizzaMakerPage from './pages/PizzaMakerPage'
 import CarMakerPage from './pages/CarMakerPage'
 import SvgPlaygroundPage from './pages/SvgPlaygroundPage'
 import FlagFoundryPage from './pages/FlagFoundryPage'
+import SecondHandFoodMarketPage from './pages/SecondHandFoodMarketPage'
 
 export default function App() {
   return (
@@ -32,6 +33,7 @@ export default function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/bank-holiday-planner" element={<BankHolidayPlannerPage />} />
+            <Route path="/second-hand-food-market" element={<SecondHandFoodMarketPage />} />
             {experiences.map((experience) =>
               experience.id === 'allergyfinder' ? (
                 <Fragment key={experience.id}>

@@ -265,6 +265,63 @@ export default function HomePage() {
         <div className="absolute -right-24 -top-24 h-56 w-56 rounded-full bg-white/10 blur-3xl" aria-hidden />
       </section>
 
+      <section className="relative overflow-hidden rounded-[2.75rem] border border-slate-200 bg-white/90 px-6 py-8 shadow-sm transition hover:shadow-xl dark:border-slate-800 dark:bg-slate-900/80 sm:px-8 sm:py-10">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(99,102,241,0.08),_transparent_60%)] dark:bg-[radial-gradient(circle_at_top,_rgba(99,102,241,0.18),_transparent_65%)]" aria-hidden />
+        <div className="relative z-10 grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] lg:items-center">
+          <div className="space-y-4">
+            <p className="inline-flex items-center gap-2 rounded-full bg-brand-500/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.35em] text-brand-600 dark:text-brand-300">
+              🧤 Pop-up · Satirical
+            </p>
+            <h2 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">Second-Hand Food Market</h2>
+            <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+              Browse a cursed catalogue of pre-loved cuisine featuring seven-eighths of a pizza, artisanal bath water, and other
+              hygienically questionable delights. The storefront leans into cozy flea-market vibes while staying inside the AllIn shell.
+            </p>
+            <div className="flex flex-wrap items-center gap-3">
+              <Link
+                to="/second-hand-food-market"
+                className="inline-flex items-center gap-2 rounded-full bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow transition hover:bg-brand-500"
+              >
+                Visit the market
+                <span aria-hidden>→</span>
+              </Link>
+              <span className="inline-flex items-center gap-2 rounded-full border border-dashed border-brand-500/40 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-brand-600 dark:text-brand-300">
+                Curses included
+              </span>
+            </div>
+          </div>
+          <div className="relative hidden justify-center lg:flex">
+            <div className="relative w-full max-w-sm overflow-hidden rounded-3xl border border-slate-200 bg-slate-50/80 p-6 text-left shadow-sm dark:border-slate-700 dark:bg-slate-900/80">
+              <div className="absolute -top-8 right-4 h-16 w-16 rounded-full bg-brand-500/20 blur-2xl" aria-hidden />
+              <p className="text-xs uppercase tracking-[0.4em] text-slate-400 dark:text-slate-500">Sample listings</p>
+              <ul className="mt-4 space-y-3 text-sm text-slate-600 dark:text-slate-300">
+                <li className="flex items-start gap-2">
+                  <span aria-hidden>🍕</span>
+                  <span>
+                    <span className="font-semibold">Foot-Stomped Pizza</span>
+                    <span className="block text-xs text-slate-500 dark:text-slate-400">Pairs best with a tetanus shot.</span>
+                  </span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span aria-hidden>🥤</span>
+                  <span>
+                    <span className="font-semibold">Lipstick Latte (Half)</span>
+                    <span className="block text-xs text-slate-500 dark:text-slate-400">Now with bonus secrets.</span>
+                  </span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span aria-hidden>🧴</span>
+                  <span>
+                    <span className="font-semibold">Bath Water Vial</span>
+                    <span className="block text-xs text-slate-500 dark:text-slate-400">Serve chilled. Question why later.</span>
+                  </span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section className="relative mx-auto max-w-6xl overflow-hidden rounded-[2.75rem] bg-gradient-to-br from-emerald-500 via-cyan-500 to-sky-500 px-6 py-8 text-white shadow-xl sm:px-8 sm:py-10">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.25),_transparent_55%)]" aria-hidden />
         <div className="relative z-10 grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] lg:items-center">
