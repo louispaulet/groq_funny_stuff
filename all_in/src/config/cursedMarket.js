@@ -7,6 +7,7 @@ export const cursedMarketInventory = [
     price: '€2.50',
     image: '/secondhand_food_market/hot_dog_dirty_hands.png',
     curse: 'Seasoned with axle grease memories and unverified relish.',
+    category: 'food',
   },
   {
     id: 'bath-water-vial',
@@ -16,6 +17,7 @@ export const cursedMarketInventory = [
     price: '€9.99',
     image: '/secondhand_food_market/bath_water_vial.png',
     curse: 'Infused with existential dread and three stray eyelashes.',
+    category: 'spells-and-potions',
   },
   {
     id: 'lipstick-starbucks-drink',
@@ -25,6 +27,7 @@ export const cursedMarketInventory = [
     price: '€4.00',
     image: '/secondhand_food_market/didnt_use_the_straw.png',
     curse: 'Guaranteed to share secrets you never wanted to overhear.',
+    category: 'food',
   },
   {
     id: 'sushi-minus-fish',
@@ -34,6 +37,7 @@ export const cursedMarketInventory = [
     price: '€5.50',
     image: '/secondhand_food_market/oops_i_ate_all_the_fish.png',
     curse: 'Haunted by the ghosts of sashimi past.',
+    category: 'food',
   },
   {
     id: 'foot-stomped-pizza',
@@ -43,6 +47,7 @@ export const cursedMarketInventory = [
     price: '€6.66',
     image: '/secondhand_food_market/pizza_stomp.png',
     curse: 'Pairs well with toe jam and despair.',
+    category: 'food',
   },
   {
     id: 'single-bite-burger',
@@ -52,6 +57,7 @@ export const cursedMarketInventory = [
     price: '€3.20',
     image: '/secondhand_food_market/single_bite_burger.png',
     curse: 'Whispers “you should have been faster” with every chew.',
+    category: 'food',
   },
   {
     id: 'pizza-missing-slice',
@@ -61,6 +67,7 @@ export const cursedMarketInventory = [
     price: '€7.00',
     image: '/secondhand_food_market/pizza_missing_slice.png',
     curse: 'Forever incomplete; every slice tastes like absence.',
+    category: 'food',
   },
   {
     id: 'butter-without-packaging',
@@ -70,6 +77,7 @@ export const cursedMarketInventory = [
     price: '€1.80',
     image: '/secondhand_food_market/butter_without_packaging.png',
     curse: 'Melts faster when you start asking questions.',
+    category: 'food',
   },
   {
     id: 'forgotten-office-coffee',
@@ -79,6 +87,7 @@ export const cursedMarketInventory = [
     price: '€1.10',
     image: '/secondhand_food_market/forgotten_coffee.png',
     curse: 'Tastes like burnout and three rescheduled meetings.',
+    category: 'food',
   },
   {
     id: 'microwaved-yesterday-fries',
@@ -88,5 +97,6 @@ export const cursedMarketInventory = [
     price: '€0.80',
     image: '/secondhand_food_market/reheated_fries.png',
     curse: 'Forever haunted by the crunch they once had.',
+    category: 'food',
   },
 ]
