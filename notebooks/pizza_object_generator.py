@@ -1,14 +1,13 @@
-# %% [markdown]
-"""\
-# Pizza Object Generator Notebook (Python Script)
+"""Pizza Object Generator Notebook (Python Script).
 
-This script is authored as a `.py` notebook compatible with Jupytext/Colab-style
-imports. It generates imaginative pizza concepts with the Groq API and renders
-corresponding images using Together AI's FLUX image model. Outputs are written
-as JSON descriptors alongside PNG image files for each pizza.
+This module is authored as a plain Python script so that Google Colab can import
+it via *File → Upload notebook…* or by running ``%run pizza_object_generator.py``
+after uploading it to the session. It generates imaginative pizza concepts with
+the Groq API and renders corresponding images using Together AI's FLUX image
+model. Outputs are written as JSON descriptors alongside PNG image files for
+each pizza.
 """
 
-# %%
 from __future__ import annotations
 
 import base64
@@ -21,14 +20,10 @@ from pathlib import Path
 from typing import Iterable, List, Optional
 
 # External dependencies. These imports will succeed in Google Colab after
-# `pip install groq together`.
+# ``pip install groq together``.
 from groq import Groq  # type: ignore
 from together import Together  # type: ignore
 
-# %% [markdown]
-"""## Configuration helpers"""
-
-# %%
 DEFAULT_TEXT_MODEL = "openai/gpt-oss-120b"
 DEFAULT_IMAGE_MODEL = "black-forest-labs/FLUX.1-schnell-Free"
 IMAGE_REQUESTS_PER_MINUTE = 6
@@ -50,11 +45,6 @@ class PizzaConcept:
             data["image_path"] = str(self.image_path)
         return data
 
-
-# %% [markdown]
-"""## API client factories"""
-
-# %%
 def build_groq_client(api_key: Optional[str] = None) -> Groq:
     """Instantiate a Groq text client using the provided or environment API key."""
 
@@ -76,11 +66,6 @@ def build_together_client(api_key: Optional[str] = None) -> Together:
         )
     return Together(api_key=key)
 
-
-# %% [markdown]
-"""## Groq prompt construction"""
-
-# %%
 def pizza_prompt(num_pizzas: int) -> str:
     """Create a structured prompt instructing the Groq model to return JSON."""
 
@@ -107,11 +92,6 @@ def pizza_prompt(num_pizzas: int) -> str:
         """
     ).strip()
 
-
-# %% [markdown]
-"""## Pizza generation via Groq"""
-
-# %%
 def fetch_pizza_concepts(client: Groq, count: int) -> List[PizzaConcept]:
     """Fetch a list of pizza concepts from the Groq API."""
 
@@ -143,11 +123,6 @@ def fetch_pizza_concepts(client: Groq, count: int) -> List[PizzaConcept]:
         )
     return pizzas
 
-
-# %% [markdown]
-"""## Together image generation"""
-
-# %%
 def ensure_output_dirs(base_dir: Path) -> tuple[Path, Path]:
     """Create the output directories for JSON metadata and image assets."""
 
@@ -202,11 +177,6 @@ def generate_images(
             fp.write(image_bytes)
         concept.image_path = image_path
 
-
-# %% [markdown]
-"""## Persistence helpers"""
-
-# %%
 def persist_pizzas(pizzas: Iterable[PizzaConcept], json_dir: Path) -> None:
     """Write each pizza to its own JSON file."""
 
@@ -216,11 +186,6 @@ def persist_pizzas(pizzas: Iterable[PizzaConcept], json_dir: Path) -> None:
         with json_path.open("w", encoding="utf-8") as fp:
             json.dump(concept.to_serializable(), fp, indent=2, ensure_ascii=False)
 
-
-# %% [markdown]
-"""## High-level orchestration"""
-
-# %%
 def generate_pizza_batch(
     output_root: Path,
     count: int = 10,
@@ -240,11 +205,6 @@ def generate_pizza_batch(
 
     return pizzas
 
-
-# %% [markdown]
-"""## Display helpers for interactive sessions"""
-
-# %%
 def display_pizzas(pizzas: Iterable[PizzaConcept]) -> None:
     """Render pizzas in a notebook-friendly layout using IPython display."""
 
@@ -260,11 +220,6 @@ def display_pizzas(pizzas: Iterable[PizzaConcept]) -> None:
             "image": Image(filename=str(concept.image_path)) if concept.image_path else None,
         })
 
-
-# %% [markdown]
-"""## Script entry point"""
-
-# %%
 def main() -> None:
     base_output = Path.cwd() / "pizza_outputs"
     pizzas = generate_pizza_batch(base_output)
