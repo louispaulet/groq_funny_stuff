@@ -20,6 +20,16 @@ export const cursedMarketInventory = [
     category: 'spells-and-potions',
   },
   {
+    id: 'influencer-tears',
+    title: 'Influencer Tears',
+    description:
+      'A concentrated vial of algorithm-approved despair, perfect for potions requiring boosted engagement or dramatic flair.',
+    price: '€14.40',
+    image: '/secondhand_food_market/influencer_tears.png',
+    curse: 'May summon parasocial hauntings and the faint echo of sponsored apologies.',
+    category: 'spells-and-potions',
+  },
+  {
     id: 'lipstick-starbucks-drink',
     title: 'Lipstick Starbucks Drink',
     description:
