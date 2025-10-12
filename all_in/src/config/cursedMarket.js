@@ -30,6 +30,16 @@ export const cursedMarketInventory = [
     category: 'spells-and-potions',
   },
   {
+    id: 'liquid-serenity-potion',
+    title: 'Liquid Serenity Potion',
+    description:
+      'A luminous tonic that jolts your ambition while smoothing out every frayed nerve, ideal for nights requiring sharp focus and soft edges.',
+    price: '€11.11',
+    image: '/secondhand_food_market/liquid_serenity_potion.png',
+    curse: 'Grants tranquil alertness until the witching hour, then insists on karaoke with unexpected confidence.',
+    category: 'spells-and-potions',
+  },
+  {
     id: 'lipstick-starbucks-drink',
     title: 'Lipstick Starbucks Drink',
     description:
