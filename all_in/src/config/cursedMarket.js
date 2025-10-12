@@ -20,6 +20,26 @@ export const cursedMarketInventory = [
     category: 'spells-and-potions',
   },
   {
+    id: 'influencer-tears',
+    title: 'Influencer Tears',
+    description:
+      'A concentrated vial of algorithm-approved despair, perfect for potions requiring boosted engagement or dramatic flair.',
+    price: '€14.40',
+    image: '/secondhand_food_market/influencer_tears.png',
+    curse: 'May summon parasocial hauntings and the faint echo of sponsored apologies.',
+    category: 'spells-and-potions',
+  },
+  {
+    id: 'liquid-serenity-potion',
+    title: 'Liquid Serenity Potion',
+    description:
+      'A luminous tonic that jolts your ambition while smoothing out every frayed nerve, ideal for nights requiring sharp focus and soft edges.',
+    price: '€11.11',
+    image: '/secondhand_food_market/liquid_serenity_potion.png',
+    curse: 'Grants tranquil alertness until the witching hour, then insists on karaoke with unexpected confidence.',
+    category: 'spells-and-potions',
+  },
+  {
     id: 'lipstick-starbucks-drink',
     title: 'Lipstick Starbucks Drink',
     description:
