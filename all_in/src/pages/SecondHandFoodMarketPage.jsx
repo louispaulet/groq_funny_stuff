@@ -66,7 +66,7 @@ export default function SecondHandFoodMarketPage() {
               key={item.id}
               className="group relative flex flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white/95 shadow-sm transition hover:border-brand-400/60 hover:shadow-xl dark:border-slate-800 dark:bg-slate-900/95"
             >
-              <div className="relative h-56 overflow-hidden bg-slate-900/80">
+              <div className="relative aspect-square w-full overflow-hidden bg-slate-900/80">
                 <img
                   src={item.image}
                   alt={item.title}
