@@ -13,6 +13,8 @@ const BALL_ACCELERATION = 4
 const COLLISION_COOLDOWN = 0.12
 const THEME_OBJECT_TYPE = 'pong_theme'
 const THEME_MODEL_ID = 'meta-llama/llama-4-maverick-17b-128e-instruct'
+const MIN_THEME_INTERVAL_MS = 15000
+const RATE_LIMIT_COOLDOWN_MS = 45000
 
 const THEME_STRUCTURE = {
   type: 'object',
@@ -180,49 +182,109 @@ function useThemeManager() {
   const fetchingRef = useRef(false)
   const themeRef = useRef(DEFAULT_THEME)
   const pendingReasonRef = useRef('initial')
+  const lastRequestRef = useRef(0)
+  const rateLimitedUntilRef = useRef(0)
+  const cooldownTimeoutRef = useRef(null)
+  const latestScoresRef = useRef({ left: 0, right: 0 })
 
   useEffect(() => {
     themeRef.current = theme
   }, [theme])
 
-  const requestTheme = useCallback(async ({ reason, scores }) => {
+  useEffect(
+    () => () => {
+      if (cooldownTimeoutRef.current) {
+        clearTimeout(cooldownTimeoutRef.current)
+        cooldownTimeoutRef.current = null
+      }
+    },
+    [],
+  )
+
+  const requestTheme = useCallback(({ reason, scores }) => {
+    latestScoresRef.current = scores
+
+    const scheduleRetry = (delayMs, retryReason) => {
+      if (typeof window === 'undefined') return
+      const safeDelay = Math.max(0, Number.isFinite(delayMs) ? delayMs : 0)
+      if (cooldownTimeoutRef.current) {
+        clearTimeout(cooldownTimeoutRef.current)
+        cooldownTimeoutRef.current = null
+      }
+      cooldownTimeoutRef.current = window.setTimeout(() => {
+        cooldownTimeoutRef.current = null
+        requestTheme({ reason: retryReason, scores: latestScoresRef.current })
+      }, safeDelay)
+    }
+
     if (fetchingRef.current) {
       pendingReasonRef.current = reason
-      return
+      return { status: 'queued' }
+    }
+
+    const now = Date.now()
+    if (rateLimitedUntilRef.current && now < rateLimitedUntilRef.current) {
+      setError('Rate limit hit. Cooling down before the next theme.')
+      scheduleRetry(rateLimitedUntilRef.current - now, reason)
+      return { status: 'rate-limited' }
+    }
+
+    const sinceLast = now - lastRequestRef.current
+    if (sinceLast < MIN_THEME_INTERVAL_MS) {
+      scheduleRetry(MIN_THEME_INTERVAL_MS - sinceLast, reason)
+      return { status: 'delayed' }
+    }
+
+    if (cooldownTimeoutRef.current) {
+      clearTimeout(cooldownTimeoutRef.current)
+      cooldownTimeoutRef.current = null
     }
 
     fetchingRef.current = true
     pendingReasonRef.current = 'initial'
     setLoading(true)
     setError('')
+    lastRequestRef.current = now
 
-    try {
-      const prompt = buildThemePrompt({ reason, scores, previousStyle: themeRef.current?.styleName })
-      const { payload } = await createRemoteObject({
-        structure: THEME_STRUCTURE,
-        objectType: THEME_OBJECT_TYPE,
-        prompt,
-        strict: true,
-        model: THEME_MODEL_ID,
-      })
-      const normalized = normalizeThemePayload(payload)
-      setTheme(normalized)
-      setHistory((prev) => [
-        { theme: normalized, reason, timestamp: Date.now(), prompt },
-        ...prev,
-      ].slice(0, 8))
-    } catch (err) {
-      console.error('Theme request failed', err)
-      setError(err?.message || 'Theme request failed')
-    } finally {
-      setLoading(false)
-      fetchingRef.current = false
-      if (pendingReasonRef.current !== 'initial') {
-        const nextReason = pendingReasonRef.current
-        pendingReasonRef.current = 'initial'
-        requestTheme({ reason: nextReason, scores })
+    const run = async () => {
+      try {
+        const prompt = buildThemePrompt({ reason, scores, previousStyle: themeRef.current?.styleName })
+        const { payload } = await createRemoteObject({
+          structure: THEME_STRUCTURE,
+          objectType: THEME_OBJECT_TYPE,
+          prompt,
+          strict: true,
+          model: THEME_MODEL_ID,
+        })
+        const normalized = normalizeThemePayload(payload)
+        setTheme(normalized)
+        setHistory((prev) => [
+          { theme: normalized, reason, timestamp: Date.now(), prompt },
+          ...prev,
+        ].slice(0, 8))
+        rateLimitedUntilRef.current = 0
+      } catch (err) {
+        console.error('Theme request failed', err)
+        if (err?.message?.includes('HTTP 429')) {
+          setError('Rate limit hit. Cooling down before the next theme.')
+          rateLimitedUntilRef.current = Date.now() + RATE_LIMIT_COOLDOWN_MS
+          scheduleRetry(RATE_LIMIT_COOLDOWN_MS, reason)
+        } else {
+          setError(err?.message || 'Theme request failed')
+        }
+      } finally {
+        setLoading(false)
+        fetchingRef.current = false
+        if (pendingReasonRef.current !== 'initial') {
+          const nextReason = pendingReasonRef.current
+          pendingReasonRef.current = 'initial'
+          requestTheme({ reason: nextReason, scores: latestScoresRef.current })
+        }
       }
     }
+
+    run()
+    return { status: 'started' }
   }, [])
 
   return {
@@ -272,7 +334,6 @@ export default function PongShowdownPage() {
   const triggerTheme = useCallback(
     (reason) => {
       const reasonCopy = reason
-      requestTheme({ reason: reasonCopy, scores: scoresRef.current })
       const descriptions = {
         'left-paddle': 'Left paddle deflects the rally—palette remix unlocked.',
         'right-paddle': 'Right paddle counters in style—new colors inbound.',
@@ -280,7 +341,17 @@ export default function PongShowdownPage() {
         'score-right': 'Right side scores and the court reinvents itself.',
         initial: 'Opening serve ignites the palette generator.',
       }
-      setStatusMessage(descriptions[reasonCopy] || 'New theme charging up…')
+      const outcome = requestTheme({ reason: reasonCopy, scores: scoresRef.current })
+      const defaultMessage = descriptions[reasonCopy] || 'New theme charging up…'
+      const message =
+        outcome?.status === 'rate-limited'
+          ? 'Rate limit reached. Cooling down before new colors.'
+          : outcome?.status === 'delayed'
+            ? 'Cooling down the palette generator…'
+            : outcome?.status === 'queued'
+              ? 'Palette update queued…'
+              : defaultMessage
+      setStatusMessage(message)
     },
     [requestTheme],
   )
