@@ -83,7 +83,8 @@ export default function AppShell({ children }) {
                   experience.id !== 'svglab' &&
                   experience.id !== 'flagfoundry' &&
                   experience.id !== 'pizzamaker' &&
-                  experience.id !== 'carmaker',
+                  experience.id !== 'carmaker' &&
+                  experience.id !== 'pongshowdown',
               )
               .map((experience) => (
               <NavLink
