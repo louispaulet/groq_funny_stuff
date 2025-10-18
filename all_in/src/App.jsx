@@ -25,6 +25,7 @@ import CarMakerPage from './pages/CarMakerPage'
 import SvgPlaygroundPage from './pages/SvgPlaygroundPage'
 import FlagFoundryPage from './pages/FlagFoundryPage'
 import SecondHandFoodMarketPage from './pages/SecondHandFoodMarketPage'
+import PongShowdownPage from './pages/PongShowdownPage'
 import ScrollToTop from './components/ScrollToTop'
 
 export default function App() {
@@ -147,6 +148,12 @@ export default function App() {
                   key={experience.id}
                   path={experience.path}
                   element={<SixDegreesPage />}
+                />
+              ) : experience.id === 'pongshowdown' ? (
+                <Route
+                  key={experience.id}
+                  path={experience.path}
+                  element={<PongShowdownPage />}
                 />
               ) : (
                 <Route

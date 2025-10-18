@@ -269,6 +269,33 @@ export const experiences = [
     defaultBaseUrl: FALLBACK_BASE_URL,
   },
   {
+    id: 'pongshowdown',
+    path: '/pong-showdown',
+    name: 'Pong Showdown',
+    headline: 'Arcade rallies with Groq-styled palettes.',
+    description:
+      'Watch an autonomous Pong match where every paddle hit or score triggers a Groq /obj request for a brand-new colorway.',
+    badge: 'Arcade',
+    heroGradient: 'from-emerald-500 to-sky-500',
+    panelAccent: 'bg-emerald-100 text-emerald-900 dark:bg-emerald-500/20 dark:text-emerald-200',
+    navAccent: {
+      gradient: 'from-emerald-500 to-sky-500',
+      hover:
+        'hover:bg-emerald-500/10 hover:text-emerald-600 hover:border-emerald-400/60 dark:hover:bg-emerald-500/20 dark:hover:text-emerald-200 dark:hover:border-emerald-400/60',
+      focus: 'focus-visible:ring-emerald-500/40',
+    },
+    defaultModel: 'meta-llama/llama-4-maverick-17b-128e-instruct',
+    modelOptions: [
+      'meta-llama/llama-4-maverick-17b-128e-instruct',
+      'meta-llama/llama-4-scout-17b-16e-instruct',
+    ],
+    allowBaseUrlOverride: false,
+    enableStlViewer: false,
+    enableBarcodeScanner: false,
+    logLabel: 'PongShowdown',
+    defaultBaseUrl: FALLBACK_BASE_URL,
+  },
+  {
     id: 'newsanalyzer',
     path: '/newsanalyzer',
     name: 'News Analyzer',
