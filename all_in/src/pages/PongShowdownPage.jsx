@@ -8,8 +8,8 @@ const PADDLE_HEIGHT = 96
 const PADDLE_MARGIN = 32
 const BALL_RADIUS = 10
 const PADDLE_SPEED = 300
-const BALL_SPEED = 280
-const BALL_ACCELERATION = 18
+const BALL_SPEED = 140
+const BALL_ACCELERATION = 9
 const COLLISION_COOLDOWN = 0.12
 const THEME_OBJECT_TYPE = 'pong_theme'
 const THEME_MODEL_ID = 'meta-llama/llama-4-maverick-17b-128e-instruct'
@@ -22,8 +22,6 @@ const THEME_STRUCTURE = {
     stylePrompt: { type: 'string' },
     colors: {
       type: 'array',
-      minItems: 4,
-      maxItems: 6,
       items: {
         type: 'object',
         additionalProperties: false,
@@ -101,7 +99,7 @@ function normalizeThemePayload(payload) {
   const styleName = typeof payload?.styleName === 'string' ? payload.styleName.trim() : ''
   const stylePrompt = typeof payload?.stylePrompt === 'string' ? payload.stylePrompt.trim() : ''
   const colors = Array.isArray(payload?.colors) ? payload.colors : []
-  const normalizedColors = colors
+  let normalizedColors = colors
     .map((color) => {
       const role = typeof color?.role === 'string' ? color.role : ''
       const hex = sanitizeHex(color?.hex)
@@ -112,7 +110,11 @@ function normalizeThemePayload(payload) {
     })
     .filter(Boolean)
 
-  if (!normalizedColors.length) {
+  if (normalizedColors.length > 6) {
+    normalizedColors = normalizedColors.slice(0, 6)
+  }
+
+  if (normalizedColors.length < 4) {
     return DEFAULT_THEME
   }
 
