@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import GameOfLifeShowcase from '../components/home/GameOfLifeShowcase'
 import { experiences } from '../config/experiences'
 
 const detailedCopyById = {
@@ -264,6 +265,8 @@ export default function HomePage() {
         </div>
         <div className="absolute -right-24 -top-24 h-56 w-56 rounded-full bg-white/10 blur-3xl" aria-hidden />
       </section>
+
+      <GameOfLifeShowcase />
 
       <section className="relative overflow-hidden rounded-[2.75rem] border border-slate-200 bg-white/90 px-6 py-8 shadow-sm transition hover:shadow-xl dark:border-slate-800 dark:bg-slate-900/80 sm:px-8 sm:py-10">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(99,102,241,0.08),_transparent_60%)] dark:bg-[radial-gradient(circle_at_top,_rgba(99,102,241,0.18),_transparent_65%)]" aria-hidden />
