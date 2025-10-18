@@ -266,6 +266,69 @@ export default function HomePage() {
         <div className="absolute -right-24 -top-24 h-56 w-56 rounded-full bg-white/10 blur-3xl" aria-hidden />
       </section>
 
+      <section className="relative overflow-hidden rounded-[2.75rem] border border-slate-200 bg-white/85 px-6 py-8 text-slate-900 shadow-sm transition hover:shadow-xl dark:border-slate-800 dark:bg-slate-900/75 dark:text-slate-100 sm:px-8 sm:py-10">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(14,165,233,0.08),_transparent_65%)] dark:bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.18),_transparent_68%)]" aria-hidden />
+        <div className="relative z-10 grid gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:items-center">
+          <div className="space-y-4">
+            <p className="inline-flex items-center gap-2 rounded-full bg-sky-500/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.35em] text-sky-600 dark:text-sky-300">
+              🧬 Cellular Automata · Spotlight
+            </p>
+            <h2 className="text-2xl font-semibold sm:text-3xl">Conway&apos;s Game of Life returns with a full lab</h2>
+            <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+              Conway&apos;s Game of Life is a zero-player cellular automaton where each generation is determined by the previous one. A simple four-rule system lets patterns emerge, stabilize, or explode into chaos—no human intervention required. Learn more about the origin story on{' '}
+              <a
+                href="https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life"
+                target="_blank"
+                rel="noreferrer"
+                className="font-semibold text-sky-600 underline-offset-2 transition hover:underline dark:text-sky-300"
+              >
+                Wikipedia
+              </a>
+              .
+            </p>
+            <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+              The new Game of Life Lab expands the ambient showcase into an interactive playground. Pick a glider gun or oscillator, resize the toroidal grid, and dial the clock from slow motion to hyper-speed while the automaton evolves in real time.
+            </p>
+            <ul className="grid gap-2 text-sm text-slate-600 dark:text-slate-300">
+              <li className="flex items-start gap-2">
+                <span aria-hidden>🎛️</span>
+                <span>Choose a starter configuration and recenter it instantly across any matrix size.</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span aria-hidden>🎚️</span>
+                <span>Modulate simulation speed to track delicate oscillators or sprint through hundreds of generations.</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span aria-hidden>🛰️</span>
+                <span>Observe live stats for active cells and toroidal wrapping to understand how spaceships traverse the field.</span>
+              </li>
+            </ul>
+            <div className="flex flex-wrap items-center gap-3 pt-1">
+              <Link
+                to="/game-of-life-lab"
+                className="inline-flex items-center gap-2 rounded-full bg-sky-500 px-5 py-2 text-sm font-semibold text-white shadow transition hover:bg-sky-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900"
+              >
+                Explore the Game of Life Lab
+                <span aria-hidden>→</span>
+              </Link>
+              <span className="inline-flex items-center gap-2 rounded-full border border-sky-400/50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-sky-600 dark:text-sky-300">
+                New this drop
+              </span>
+            </div>
+          </div>
+          <div className="relative hidden overflow-hidden rounded-3xl border border-slate-200 bg-slate-50/90 p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900/60 lg:block">
+            <div className="absolute -top-8 right-4 h-20 w-20 rounded-full bg-sky-500/20 blur-3xl" aria-hidden />
+            <div className="space-y-4 text-sm text-slate-600 dark:text-slate-300">
+              <p className="font-semibold text-slate-900 dark:text-slate-100">Lab highlights</p>
+              <p>• Toroidal wrap keeps patterns looping forever—no edge deaths.</p>
+              <p>• Pause the automaton, advance step-by-step, or reset to experiment quickly.</p>
+              <p>• Clean presets showcase glider guns, pulsars, and spaceship formations.</p>
+              <p className="text-xs uppercase tracking-[0.35em] text-slate-400 dark:text-slate-500">Ready to tinker? Hit the lab below.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <GameOfLifeShowcase />
 
       <section className="relative overflow-hidden rounded-[2.75rem] border border-slate-200 bg-white/90 px-6 py-8 shadow-sm transition hover:shadow-xl dark:border-slate-800 dark:bg-slate-900/80 sm:px-8 sm:py-10">
