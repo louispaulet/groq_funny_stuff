@@ -287,6 +287,15 @@ export default function HomePage() {
                           <span aria-hidden>↗</span>
                         </Link>
                       ))}
+                    {category.id === 'play' ? (
+                      <Link
+                        to="/game-of-life-lab"
+                        className="inline-flex items-center gap-1 rounded-full bg-white/90 px-3 py-1.5 text-xs font-semibold text-slate-900 transition hover:bg-white"
+                      >
+                        <span>Game of Life Lab</span>
+                        <span aria-hidden>↗</span>
+                      </Link>
+                    ) : null}
                   </div>
                 </div>
               </div>
