@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import GameOfLifeShowcase from '../components/home/GameOfLifeShowcase'
 import { experiences } from '../config/experiences'
 
 const detailedCopyById = {
@@ -216,6 +217,36 @@ const experienceCategories = uncategorizedExperienceIds.length
     ]
   : baseExperienceCategories
 
+const gameOfLifeLabDetails = (
+  <>
+    <p>
+      Conway&apos;s Game of Life is a zero-player cellular automaton where each generation springs from the last. A
+      four-rule system lets gliders, pulsars, and guns emerge from simple seeds—no human steering. Brush up on the
+      origin story on{' '}
+      <a
+        href="https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life"
+        target="_blank"
+        rel="noreferrer"
+        className="font-semibold text-sky-600 underline-offset-2 transition hover:underline dark:text-sky-300"
+      >
+        Wikipedia
+      </a>
+      .
+    </p>
+    <p>
+      The Game of Life Lab lets you dial in the matrix size, swap curated presets, and modulate the simulation clock from
+      slow motion to warp speed. Centered seeds wrap around a toroidal grid so spaceships never fall off the edge.
+    </p>
+    <ul className="ml-4 list-disc space-y-2 text-slate-600 dark:text-slate-300">
+      <li>Pause, resume, or step one generation at a time for frame-by-frame analysis.</li>
+      <li>Track active-cell stats in real time to see how density shifts across the surface.</li>
+      <li>Experiment with oscillators, glider guns, and looped spaceships in one quick workspace.</li>
+    </ul>
+  </>
+)
+
+const gameOfLifeLabTags = ['cellular-automaton', 'toroidal-grid', 'live-controls']
+
 export default function HomePage() {
 
   return (
@@ -256,6 +287,15 @@ export default function HomePage() {
                           <span aria-hidden>↗</span>
                         </Link>
                       ))}
+                    {category.id === 'play' ? (
+                      <Link
+                        to="/game-of-life-lab"
+                        className="inline-flex items-center gap-1 rounded-full bg-white/90 px-3 py-1.5 text-xs font-semibold text-slate-900 transition hover:bg-white"
+                      >
+                        <span>Game of Life Lab</span>
+                        <span aria-hidden>↗</span>
+                      </Link>
+                    ) : null}
                   </div>
                 </div>
               </div>
@@ -264,6 +304,8 @@ export default function HomePage() {
         </div>
         <div className="absolute -right-24 -top-24 h-56 w-56 rounded-full bg-white/10 blur-3xl" aria-hidden />
       </section>
+
+      <GameOfLifeShowcase />
 
       <section className="relative overflow-hidden rounded-[2.75rem] border border-slate-200 bg-white/90 px-6 py-8 shadow-sm transition hover:shadow-xl dark:border-slate-800 dark:bg-slate-900/80 sm:px-8 sm:py-10">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(99,102,241,0.08),_transparent_60%)] dark:bg-[radial-gradient(circle_at_top,_rgba(99,102,241,0.18),_transparent_65%)]" aria-hidden />
@@ -445,6 +487,52 @@ export default function HomePage() {
               </article>
             )
           })}
+          <article className="group relative overflow-hidden rounded-3xl border border-slate-200 bg-white/90 p-8 shadow-sm transition hover:shadow-xl dark:border-slate-800 dark:bg-slate-900">
+            <div
+              className="pointer-events-none absolute inset-0 opacity-0 transition-opacity group-hover:opacity-100"
+              aria-hidden
+            >
+              <div className="absolute -top-20 right-0 h-40 w-40 rounded-full bg-sky-500/10 blur-3xl" />
+              <div className="absolute -bottom-24 left-6 h-36 w-36 rounded-full bg-cyan-400/10 blur-3xl" />
+            </div>
+            <div className="relative space-y-5">
+              <div className="flex flex-wrap items-center gap-4">
+                <div className="flex flex-col gap-2">
+                  <div className="h-1 w-16 rounded-full bg-gradient-to-r from-sky-500 to-cyan-400" aria-hidden />
+                  <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Game of Life Lab</h3>
+                </div>
+                <span className="inline-flex items-center rounded-full bg-sky-100 px-3 py-1 text-xs font-semibold text-sky-800 dark:bg-sky-500/20 dark:text-sky-200">
+                  Lab
+                </span>
+                <Link
+                  to="/game-of-life-lab"
+                  className="ml-auto inline-flex items-center gap-2 rounded-full border border-slate-300 px-3 py-1 text-sm font-medium text-slate-700 transition hover:border-sky-500 hover:bg-sky-50 hover:text-sky-600 dark:border-slate-700 dark:text-slate-200 dark:hover:border-sky-400/60 dark:hover:bg-sky-500/10"
+                >
+                  Enter workspace
+                  <span aria-hidden>→</span>
+                </Link>
+              </div>
+              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Explore Conway&apos;s classic automaton with live controls and toroidal wrap.</p>
+              <div className="space-y-3 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                {gameOfLifeLabDetails}
+              </div>
+              {gameOfLifeLabTags.length > 0 && (
+                <div className="flex flex-wrap gap-2 pt-2">
+                  {gameOfLifeLabTags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="inline-flex items-center rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:border-slate-700 dark:text-slate-300"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
+              <div className="text-xs uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                Toroidal wrap • Live controls • Preset seeds
+              </div>
+            </div>
+          </article>
         </div>
       </section>
     </div>

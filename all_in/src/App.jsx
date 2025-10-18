@@ -18,6 +18,7 @@ import NewsAnalyzerPage from './pages/NewsAnalyzerPage'
 import SixDegreesPage from './pages/SixDegreesPage'
 import ImageGeneratorPage from './pages/ImageGeneratorPage'
 import ImageGalleryPage from './pages/ImageGalleryPage'
+import GameOfLifeLabPage from './pages/GameOfLifeLabPage'
 import ImageGeneratorNav from './components/imagegen/ImageGeneratorNav'
 import PizzaMakerPage from './pages/PizzaMakerPage'
 import CarMakerPage from './pages/CarMakerPage'
@@ -36,6 +37,7 @@ export default function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/bank-holiday-planner" element={<BankHolidayPlannerPage />} />
             <Route path="/second-hand-food-market" element={<SecondHandFoodMarketPage />} />
+            <Route path="/game-of-life-lab" element={<GameOfLifeLabPage />} />
             {experiences.map((experience) =>
               experience.id === 'allergyfinder' ? (
                 <Fragment key={experience.id}>
