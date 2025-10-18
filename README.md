@@ -57,6 +57,116 @@ Unified workspace with shared layout, navigation, and chat components. Experienc
 ## Extras
 - `demos/` — static HTML experiments for Groq streaming APIs.
 
+## 20 Ridiculously Enthusiastic HELLO WORLDS
+Because sometimes you need to reassure every runtime in the room that you're friendly, caffeinated, and fully initialized.
+
+1. **Python (friendly neighborhood snake-charmer)**
+   ```python
+   print("HELLO WORLD 🐍 (don't worry, I'm more Monty than venom)")
+   ```
+2. **JavaScript (browser tab that refuses to sleep)**
+   ```js
+   console.log("HELLO WORLD 🌐 — yes, I'm running in 17 tabs at once!");
+   ```
+3. **TypeScript (JavaScript after three spreadsheets)**
+   ```ts
+   const greeting: string = "HELLO WORLD 📋 (typed, iced, and refactored)";
+   console.log(greeting);
+   ```
+4. **Go (compiled power walker)**
+   ```go
+   package main
+
+   import "fmt"
+
+   func main() {
+       fmt.Println("HELLO WORLD 🏃‍♂️ — keep up or get goroutined")
+   }
+   ```
+5. **Rust (safety goggles required)**
+   ```rust
+   fn main() {
+       println!("HELLO WORLD 🦀 — zero fear, zero undefined behavior");
+   }
+   ```
+6. **Java (coffee-fueled enterprise)**
+   ```java
+   public class Hello {
+       public static void main(String[] args) {
+           System.out.println("HELLO WORLD ☕ — proudly JVM-ing since forever");
+       }
+   }
+   ```
+7. **C# (sharper than your IDE theme)**
+   ```csharp
+   Console.WriteLine("HELLO WORLD ♯ — tuned for maximum resonance");
+   ```
+8. **C (vintage command-line charmer)**
+   ```c
+   #include <stdio.h>
+
+   int main(void) {
+       printf("HELLO WORLD 🧵 — mind the manual memory knitting!\n");
+       return 0;
+   }
+   ```
+9. **C++ (template metaprogramming fan club president)**
+   ```cpp
+   #include <iostream>
+
+   int main() {
+       std::cout << "HELLO WORLD 🤖 — overloaded with enthusiasm" << std::endl;
+   }
+   ```
+10. **Swift (polished enough to mirror your face)**
+    ```swift
+    print("HELLO WORLD 🦅 — swooping in with protocol extensions")
+    ```
+11. **Kotlin (Android's witty confidant)**
+    ```kotlin
+    fun main() {
+        println("HELLO WORLD 🤳 — coroutines and vibes only")
+    }
+    ```
+12. **Ruby (poetic runtime, sparkly output)**
+    ```ruby
+    puts "HELLO WORLD 💎 — blocks, do blocks dream of lambdas?"
+    ```
+13. **PHP (web server time traveler)**
+    ```php
+    <?php echo "HELLO WORLD 🧠 — still shipping memes since PHP 3"; ?>
+    ```
+14. **Bash (shell script that woke up spicy)**
+    ```bash
+    echo "HELLO WORLD 🔔 — ringing across /bin like it's 1995"
+    ```
+15. **Perl (regex gremlin extraordinaire)**
+    ```perl
+    print "HELLO WORLD 🧙 — one-liner magic and unreadable runes";
+    ```
+16. **Haskell (purely functional tea ceremony)**
+    ```haskell
+    main = putStrLn "HELLO WORLD 🧘 — monads are just comfy burritos"
+    ```
+17. **Elixir (distributed choir conductor)**
+    ```elixir
+    IO.puts("HELLO WORLD 🎶 — let the processes harmonize")
+    ```
+18. **R (statistically significant greeting)**
+    ```r
+    cat("HELLO WORLD 📊 — 95% confident you'll smile\n")
+    ```
+19. **Julia (numerical sprinter with flair)**
+    ```julia
+    println("HELLO WORLD 🏎️ — vectorized and victory-lapped")
+    ```
+20. **Dart (cross-platform courier pigeon)**
+    ```dart
+    void main() {
+      print('HELLO WORLD 🕊️ — Fluttering into your notifications');
+    }
+    ```
+
 ## Testing Notes
 - Groq AllIn Studio: `npm run lint` and `npm run test` (inside `all_in/`) or `make test` from the repo root.
 
