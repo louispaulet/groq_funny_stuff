@@ -44,24 +44,24 @@ export default function GameOfLifeShowcase() {
   const activePreset = GAME_OF_LIFE_PRESETS[activePresetIndex]
 
   return (
-    <section className="relative overflow-hidden rounded-[2.75rem] border border-slate-200 bg-slate-900/95 px-6 py-8 text-white shadow-xl transition hover:shadow-2xl dark:border-slate-700 sm:px-10 sm:py-12">
+    <section className="relative overflow-hidden rounded-[2.5rem] border border-slate-200 bg-slate-900/95 px-6 py-7 text-white shadow-xl transition hover:shadow-2xl dark:border-slate-700 sm:px-10 sm:py-10">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.35),_transparent_55%)]" aria-hidden />
-      <div className="relative z-10 space-y-8">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-          <div className="space-y-3">
+      <div className="relative z-10 space-y-6">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+          <div className="space-y-2">
             <p className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.35em] text-sky-200">
               🧬 Ambient Simulation
             </p>
             <h2 className="text-2xl font-semibold sm:text-3xl">Life Loop Observatory</h2>
             <p className="max-w-2xl text-sm text-slate-200">
-              Watch a Conway&apos;s Game of Life preset evolve inside a neon matrix. When you&apos;re ready to run your own experiments with custom grid sizes, turbo or slow-motion timers, and curated seeds, step into the new Game of Life Lab.
+              Watch a Conway&apos;s Game of Life preset evolve on a toroidal grid. Ready for custom dimensions or speed ramps? Hop into the Game of Life Lab for hands-on controls.
             </p>
           </div>
-          <div className="flex flex-col gap-3 self-start sm:flex-row sm:items-center">
+          <div className="flex flex-col gap-2 self-start sm:flex-row sm:items-center">
             <button
               type="button"
               onClick={handleShufflePreset}
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-white/15 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-white/25"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-white/12 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-white shadow-sm transition hover:bg-white/20"
             >
               Reset &amp; Shuffle Pattern
               <span aria-hidden>↻</span>
@@ -76,9 +76,9 @@ export default function GameOfLifeShowcase() {
           </div>
         </div>
 
-        <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-gradient-to-br from-slate-900 via-slate-900/80 to-slate-800 p-6 shadow-lg">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(14,116,144,0.35),_transparent_70%)]" aria-hidden />
-          <div className="relative z-10 flex flex-col items-center gap-4">
+        <div className="relative overflow-hidden rounded-[2.25rem] border border-white/10 bg-gradient-to-br from-slate-900 via-slate-900/80 to-slate-800 p-5 shadow-lg">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(14,116,144,0.3),_transparent_70%)]" aria-hidden />
+          <div className="relative z-10 flex flex-col items-center gap-3">
             <div
               className="grid gap-[3px] rounded-2xl border border-white/5 bg-slate-900/80 p-4 shadow-inner"
               style={{
@@ -103,7 +103,7 @@ export default function GameOfLifeShowcase() {
                 Preset · {activePreset.name}
               </span>
               <span className="rounded-full border border-white/10 px-3 py-1 font-semibold">
-                Generation {generation.toLocaleString()}
+                Gen {generation.toLocaleString()}
               </span>
             </div>
             <p className="max-w-2xl text-center text-xs text-slate-300/80">
