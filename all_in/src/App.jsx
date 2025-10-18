@@ -24,11 +24,13 @@ import CarMakerPage from './pages/CarMakerPage'
 import SvgPlaygroundPage from './pages/SvgPlaygroundPage'
 import FlagFoundryPage from './pages/FlagFoundryPage'
 import SecondHandFoodMarketPage from './pages/SecondHandFoodMarketPage'
+import ScrollToTop from './components/ScrollToTop'
 
 export default function App() {
   return (
     <ThemeProvider>
       <HashRouter>
+        <ScrollToTop />
         <AppShell>
           <Routes>
             <Route path="/" element={<HomePage />} />
