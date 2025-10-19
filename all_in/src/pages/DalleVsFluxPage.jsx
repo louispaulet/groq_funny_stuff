@@ -420,7 +420,10 @@ export default function DalleVsFluxPage() {
     if (!url) return
     setDownloadingUrl(url)
     try {
-      const response = await fetch(url)
+      const response = await fetch(url, {
+        mode: 'cors',
+        cache: 'no-store',
+      })
       if (!response.ok) {
         throw new Error(`Failed to download image (status ${response.status})`)
       }
