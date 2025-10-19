@@ -79,12 +79,18 @@ function parseComparisonCsv(text) {
   const promptIndex = header.indexOf('prompt')
   const fluxIndex = header.indexOf('file_flux_url')
   const dalleIndex = header.indexOf('file_dalle_url')
+  const categoryIndex = header.indexOf('category')
 
   if (promptIndex === -1 || fluxIndex === -1 || dalleIndex === -1) {
     throw new Error('CSV header missing required columns')
   }
 
-  const requiredIndex = Math.max(promptIndex, fluxIndex, dalleIndex)
+  const requiredIndices = [promptIndex, fluxIndex, dalleIndex]
+  if (categoryIndex !== -1) {
+    requiredIndices.push(categoryIndex)
+  }
+
+  const requiredIndex = Math.max(...requiredIndices)
 
   return rows
     .slice(1)
@@ -93,6 +99,8 @@ function parseComparisonCsv(text) {
       prompt: row[promptIndex]?.trim() || '',
       fluxUrl: row[fluxIndex]?.trim() || '',
       dalleUrl: row[dalleIndex]?.trim() || '',
+      category:
+        categoryIndex === -1 ? 'Uncategorized' : row[categoryIndex]?.trim() || 'Uncategorized',
     }))
     .filter((entry) => entry.prompt && entry.fluxUrl && entry.dalleUrl)
 }
@@ -133,6 +141,7 @@ export default function DalleVsFluxPage() {
   const [comparisons, setComparisons] = useState([])
   const [status, setStatus] = useState('loading')
   const [errorMessage, setErrorMessage] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState('all')
 
   useEffect(() => {
     let cancelled = false
@@ -174,10 +183,43 @@ export default function DalleVsFluxPage() {
     }
   }, [])
 
-  const { page, totalPages, pageItems, goToNext, goToPrevious } = usePagination(
-    comparisons,
+  const categories = useMemo(() => {
+    const unique = new Set()
+    comparisons.forEach(({ category }) => {
+      const normalized = (category || '').trim()
+      if (normalized) {
+        unique.add(normalized)
+      }
+    })
+    return Array.from(unique).sort((a, b) => a.localeCompare(b))
+  }, [comparisons])
+
+  useEffect(() => {
+    if (selectedCategory !== 'all' && !categories.includes(selectedCategory)) {
+      setSelectedCategory('all')
+    }
+  }, [categories, selectedCategory])
+
+  const filteredComparisons = useMemo(() => {
+    if (selectedCategory === 'all') {
+      return comparisons
+    }
+    return comparisons.filter(({ category }) => category === selectedCategory)
+  }, [comparisons, selectedCategory])
+
+  const { page, totalPages, pageItems, goToPage, goToNext, goToPrevious } = usePagination(
+    filteredComparisons,
     ITEMS_PER_PAGE,
   )
+
+  const handleCategoryChange = (event) => {
+    const nextCategory = event.target.value
+    setSelectedCategory(nextCategory)
+    goToPage(1)
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  }
 
   const handleNext = () => {
     goToNext()
@@ -186,9 +228,11 @@ export default function DalleVsFluxPage() {
     }
   }
 
+  const totalFiltered = filteredComparisons.length
   const isLoading = status === 'loading'
   const isError = status === 'error'
-  const hasComparisons = comparisons.length > 0
+  const hasAnyComparisons = comparisons.length > 0
+  const hasFilteredComparisons = totalFiltered > 0
 
   return (
     <div className="space-y-12">
@@ -223,15 +267,39 @@ export default function DalleVsFluxPage() {
       </section>
 
       <section className="space-y-6">
-        <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div className="space-y-1">
             <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Prompt gallery</h2>
             <p className="text-sm text-slate-600 dark:text-slate-400">
               Each prompt renders Flux Schnell (left) beside DALL·E 3 (right). Click an image to open the original export.
             </p>
           </div>
-          <div className="inline-flex items-center gap-3 rounded-full border border-slate-200 bg-white/90 px-4 py-2 text-sm font-medium text-slate-600 shadow-sm dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-200">
-            Page {page} of {totalPages}
+          <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:gap-4">
+            <div className="flex items-center gap-2 rounded-full border border-slate-200 bg-white/90 px-3 py-2 text-sm text-slate-600 shadow-sm dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-200">
+              <span className="text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
+                Category
+              </span>
+              <select
+                aria-label="Filter by category"
+                value={selectedCategory}
+                onChange={handleCategoryChange}
+                className="min-w-[12rem] rounded-full border border-transparent bg-white/80 px-3 py-1 text-sm font-medium text-slate-700 transition focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/40 dark:bg-slate-900/60 dark:text-slate-100 dark:focus:border-brand-400"
+              >
+                <option value="all">All categories</option>
+                {categories.map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="inline-flex items-center gap-3 rounded-full border border-slate-200 bg-white/90 px-4 py-2 text-sm font-medium text-slate-600 shadow-sm dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-200">
+              <span>
+                Page {page} of {totalPages}
+              </span>
+              <span aria-hidden>•</span>
+              <span>{totalFiltered} prompts</span>
+            </div>
           </div>
         </header>
 
@@ -249,18 +317,25 @@ export default function DalleVsFluxPage() {
             </article>
           )}
 
-          {!isLoading && !isError && !hasComparisons && (
+          {!isLoading && !isError && !hasAnyComparisons && (
             <article className="space-y-3 rounded-3xl border border-slate-200 bg-white/90 p-6 text-sm text-slate-600 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
               No comparisons are available yet. Check back soon.
             </article>
           )}
 
-          {pageItems.map(({ prompt, fluxUrl, dalleUrl }, index) => (
+          {!isLoading && !isError && hasAnyComparisons && !hasFilteredComparisons && (
+            <article className="space-y-3 rounded-3xl border border-amber-200 bg-amber-50 p-6 text-sm text-amber-700 shadow-sm dark:border-amber-600/60 dark:bg-amber-900/30 dark:text-amber-200">
+              <p className="font-semibold">No prompts match this category.</p>
+              <p>Try selecting a different category to continue exploring the comparison set.</p>
+            </article>
+          )}
+
+          {pageItems.map(({ prompt, fluxUrl, dalleUrl, category }, index) => (
             <article
               key={`${prompt}-${fluxUrl}`}
               className="space-y-6 rounded-3xl border border-slate-200 bg-white/90 p-6 shadow-sm transition hover:shadow-lg dark:border-slate-800 dark:bg-slate-900"
             >
-              <header className="space-y-2">
+              <header className="space-y-3">
                 <div className="flex items-center gap-3 text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                   <span>
                     Prompt {index + 1 + (page - 1) * ITEMS_PER_PAGE}
@@ -268,6 +343,9 @@ export default function DalleVsFluxPage() {
                   <span aria-hidden>•</span>
                   <span>{prompt.length} characters</span>
                 </div>
+                <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-100 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-wide text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                  {category}
+                </span>
                 <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-200">{prompt}</p>
               </header>
               <div className="grid gap-6 lg:grid-cols-2">
@@ -310,7 +388,7 @@ export default function DalleVsFluxPage() {
           <button
             type="button"
             onClick={goToPrevious}
-            disabled={page === 1 || isLoading || !hasComparisons}
+            disabled={page === 1 || isLoading || !hasFilteredComparisons}
             className="inline-flex items-center gap-2 rounded-full border border-slate-300 px-4 py-2 font-medium text-slate-600 transition enabled:hover:border-brand-500 enabled:hover:bg-brand-500/10 enabled:hover:text-brand-600 disabled:opacity-50 dark:border-slate-700 dark:text-slate-200 dark:enabled:hover:border-brand-400/60 dark:enabled:hover:bg-brand-500/10"
           >
             ← Previous
@@ -318,7 +396,7 @@ export default function DalleVsFluxPage() {
           <button
             type="button"
             onClick={handleNext}
-            disabled={page === totalPages || isLoading || !hasComparisons}
+            disabled={page === totalPages || isLoading || !hasFilteredComparisons}
             className="inline-flex items-center gap-2 rounded-full border border-slate-300 px-4 py-2 font-medium text-slate-600 transition enabled:hover:border-brand-500 enabled:hover:bg-brand-500/10 enabled:hover:text-brand-600 disabled:opacity-50 dark:border-slate-700 dark:text-slate-200 dark:enabled:hover:border-brand-400/60 dark:enabled:hover:bg-brand-500/10"
           >
             Next →
