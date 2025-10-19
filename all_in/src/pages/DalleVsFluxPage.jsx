@@ -179,6 +179,13 @@ export default function DalleVsFluxPage() {
     ITEMS_PER_PAGE,
   )
 
+  const handleNext = () => {
+    goToNext()
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  }
+
   const isLoading = status === 'loading'
   const isError = status === 'error'
   const hasComparisons = comparisons.length > 0
@@ -310,7 +317,7 @@ export default function DalleVsFluxPage() {
           </button>
           <button
             type="button"
-            onClick={goToNext}
+            onClick={handleNext}
             disabled={page === totalPages || isLoading || !hasComparisons}
             className="inline-flex items-center gap-2 rounded-full border border-slate-300 px-4 py-2 font-medium text-slate-600 transition enabled:hover:border-brand-500 enabled:hover:bg-brand-500/10 enabled:hover:text-brand-600 disabled:opacity-50 dark:border-slate-700 dark:text-slate-200 dark:enabled:hover:border-brand-400/60 dark:enabled:hover:bg-brand-500/10"
           >
