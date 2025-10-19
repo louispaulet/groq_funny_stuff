@@ -5,6 +5,32 @@ const ITEMS_PER_PAGE = 10
 const BASE_URL = import.meta.env.BASE_URL || '/'
 const CSV_URL = `${BASE_URL.endsWith('/') ? BASE_URL : `${BASE_URL}/`}data/dalle-flux-comparison.csv`
 
+function sanitizeFilenameSegment(value) {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+/, '')
+    .replace(/-+$/, '')
+}
+
+function buildDownloadFilename(url, prompt, label) {
+  let extension = 'png'
+  try {
+    const path = new URL(url).pathname
+    const lastDot = path.lastIndexOf('.')
+    if (lastDot !== -1 && lastDot < path.length - 1) {
+      extension = path.slice(lastDot + 1)
+    }
+  } catch {
+    // Ignore URL parsing failures and use the default extension
+  }
+
+  const baseName = sanitizeFilenameSegment(prompt).slice(0, 48) || 'artwork'
+  const labelSegment = sanitizeFilenameSegment(label)
+  const prefix = labelSegment ? `${labelSegment}-` : ''
+  return `${prefix}${baseName}.${extension}`
+}
+
 function parseCsv(text) {
   const rows = []
   let currentField = ''
@@ -142,6 +168,7 @@ export default function DalleVsFluxPage() {
   const [status, setStatus] = useState('loading')
   const [errorMessage, setErrorMessage] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
+  const [downloadingUrl, setDownloadingUrl] = useState('')
 
   useEffect(() => {
     let cancelled = false
@@ -191,7 +218,7 @@ export default function DalleVsFluxPage() {
         unique.add(normalized)
       }
     })
-    return Array.from(unique).sort((a, b) => a.localeCompare(b))
+    return Array.from(unique)
   }, [comparisons])
 
   useEffect(() => {
@@ -225,6 +252,34 @@ export default function DalleVsFluxPage() {
     goToNext()
     if (typeof window !== 'undefined') {
       window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  }
+
+  const handleDownload = async (url, prompt, sourceLabel) => {
+    if (!url) return
+    setDownloadingUrl(url)
+    try {
+      const response = await fetch(url, {
+        mode: 'cors',
+        cache: 'no-store',
+      })
+      if (!response.ok) {
+        throw new Error(`Failed to download image (status ${response.status})`)
+      }
+
+      const blob = await response.blob()
+      const objectUrl = URL.createObjectURL(blob)
+      const anchor = document.createElement('a')
+      anchor.href = objectUrl
+      anchor.download = buildDownloadFilename(url, prompt, sourceLabel)
+      document.body.appendChild(anchor)
+      anchor.click()
+      anchor.remove()
+      URL.revokeObjectURL(objectUrl)
+    } catch (error) {
+      console.error('Failed to download image', error)
+    } finally {
+      setDownloadingUrl('')
     }
   }
 
@@ -361,7 +416,18 @@ export default function DalleVsFluxPage() {
                     </a>
                   </div>
                   <figcaption className="text-xs uppercase tracking-wide text-emerald-600 dark:text-emerald-300">
-                    Flux Schnell — GroqCloud (free endpoint)
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <span className="font-semibold">Flux Schnell — GroqCloud (free endpoint)</span>
+                      <button
+                        type="button"
+                        onClick={() => handleDownload(fluxUrl, prompt, 'Flux Schnell')}
+                        disabled={downloadingUrl === fluxUrl}
+                        className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-3 py-1 text-[0.65rem] font-semibold tracking-wide text-slate-600 transition hover:border-brand-500 hover:bg-brand-500/10 hover:text-brand-600 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:text-slate-200 dark:hover:border-brand-400/60 dark:hover:bg-brand-500/10"
+                        aria-label="Download Flux Schnell image"
+                      >
+                        {downloadingUrl === fluxUrl ? 'Downloading…' : 'Download'}
+                      </button>
+                    </div>
                   </figcaption>
                 </figure>
                 <figure className="space-y-3">
@@ -376,7 +442,18 @@ export default function DalleVsFluxPage() {
                     </a>
                   </div>
                   <figcaption className="text-xs uppercase tracking-wide text-indigo-600 dark:text-indigo-300">
-                    DALL·E 3 — OpenAI (paid usage)
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <span className="font-semibold">DALL·E 3 — OpenAI (paid usage)</span>
+                      <button
+                        type="button"
+                        onClick={() => handleDownload(dalleUrl, prompt, 'DALLE-3')}
+                        disabled={downloadingUrl === dalleUrl}
+                        className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-3 py-1 text-[0.65rem] font-semibold tracking-wide text-slate-600 transition hover:border-brand-500 hover:bg-brand-500/10 hover:text-brand-600 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:text-slate-200 dark:hover:border-brand-400/60 dark:hover:bg-brand-500/10"
+                        aria-label="Download DALL·E 3 image"
+                      >
+                        {downloadingUrl === dalleUrl ? 'Downloading…' : 'Download'}
+                      </button>
+                    </div>
                   </figcaption>
                 </figure>
               </div>
