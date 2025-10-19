@@ -270,7 +270,7 @@ export default function DalleVsFluxPage() {
         <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div className="space-y-1">
             <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Prompt gallery</h2>
-            <p className="text-sm text-slate-600 dark:text-slate-400">
+            <p className="max-w-xl text-sm text-slate-600 dark:text-slate-400">
               Each prompt renders Flux Schnell (left) beside DALL·E 3 (right). Click an image to open the original export.
             </p>
           </div>
@@ -293,12 +293,12 @@ export default function DalleVsFluxPage() {
                 ))}
               </select>
             </div>
-            <div className="inline-flex items-center gap-3 rounded-full border border-slate-200 bg-white/90 px-4 py-2 text-sm font-medium text-slate-600 shadow-sm dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-200">
-              <span>
+            <div className="inline-flex flex-nowrap items-center gap-2 rounded-full border border-slate-200 bg-white/90 px-4 py-2 text-sm font-medium text-slate-600 shadow-sm dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-200">
+              <span className="whitespace-nowrap">
                 Page {page} of {totalPages}
               </span>
               <span aria-hidden>•</span>
-              <span>{totalFiltered} prompts</span>
+              <span className="whitespace-nowrap">{totalFiltered} prompts</span>
             </div>
           </div>
         </header>
