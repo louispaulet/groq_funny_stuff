@@ -1,8 +1,101 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { dalleFluxComparisons } from '../data/dalleFluxComparisonData'
 
 const ITEMS_PER_PAGE = 10
+const BASE_URL = import.meta.env.BASE_URL || '/'
+const CSV_URL = `${BASE_URL.endsWith('/') ? BASE_URL : `${BASE_URL}/`}data/dalle-flux-comparison.csv`
+
+function parseCsv(text) {
+  const rows = []
+  let currentField = ''
+  let currentRow = []
+  let inQuotes = false
+
+  for (let i = 0; i < text.length; i += 1) {
+    const char = text[i]
+
+    if (inQuotes) {
+      if (char === '"') {
+        const peek = text[i + 1]
+        if (peek === '"') {
+          currentField += '"'
+          i += 1
+        } else {
+          inQuotes = false
+        }
+      } else {
+        currentField += char
+      }
+      continue
+    }
+
+    if (char === '"') {
+      inQuotes = true
+      continue
+    }
+
+    if (char === ',') {
+      currentRow.push(currentField)
+      currentField = ''
+      continue
+    }
+
+    if (char === '\r') {
+      continue
+    }
+
+    if (char === '\n') {
+      currentRow.push(currentField)
+      if (currentRow.some((value) => value !== '')) {
+        rows.push(currentRow)
+      }
+      currentRow = []
+      currentField = ''
+      continue
+    }
+
+    currentField += char
+  }
+
+  if (inQuotes) {
+    throw new Error('CSV parse error: unmatched quote')
+  }
+
+  currentRow.push(currentField)
+  if (currentRow.some((value) => value !== '')) {
+    rows.push(currentRow)
+  }
+
+  return rows
+}
+
+function parseComparisonCsv(text) {
+  const rows = parseCsv(text)
+  if (!rows.length) {
+    return []
+  }
+
+  const header = rows[0].map((value) => value.trim().toLowerCase())
+  const promptIndex = header.indexOf('prompt')
+  const fluxIndex = header.indexOf('file_flux_url')
+  const dalleIndex = header.indexOf('file_dalle_url')
+
+  if (promptIndex === -1 || fluxIndex === -1 || dalleIndex === -1) {
+    throw new Error('CSV header missing required columns')
+  }
+
+  const requiredIndex = Math.max(promptIndex, fluxIndex, dalleIndex)
+
+  return rows
+    .slice(1)
+    .filter((row) => row.length > requiredIndex)
+    .map((row) => ({
+      prompt: row[promptIndex]?.trim() || '',
+      fluxUrl: row[fluxIndex]?.trim() || '',
+      dalleUrl: row[dalleIndex]?.trim() || '',
+    }))
+    .filter((entry) => entry.prompt && entry.fluxUrl && entry.dalleUrl)
+}
 
 function usePagination(items, itemsPerPage) {
   const [page, setPage] = useState(1)
@@ -37,10 +130,58 @@ function usePagination(items, itemsPerPage) {
 }
 
 export default function DalleVsFluxPage() {
+  const [comparisons, setComparisons] = useState([])
+  const [status, setStatus] = useState('loading')
+  const [errorMessage, setErrorMessage] = useState('')
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function loadCsv() {
+      setStatus('loading')
+      setErrorMessage('')
+
+      try {
+        const response = await fetch(CSV_URL, {
+          headers: {
+            Accept: 'text/csv',
+          },
+        })
+
+        if (!response.ok) {
+          throw new Error(`Failed to load CSV (status ${response.status})`)
+        }
+
+        const text = await response.text()
+        const parsed = parseComparisonCsv(text)
+
+        if (!cancelled) {
+          setComparisons(parsed)
+          setStatus('ready')
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setStatus('error')
+          setErrorMessage(error instanceof Error ? error.message : 'Unknown error')
+        }
+      }
+    }
+
+    loadCsv()
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
   const { page, totalPages, pageItems, goToNext, goToPrevious } = usePagination(
-    dalleFluxComparisons,
+    comparisons,
     ITEMS_PER_PAGE,
   )
+
+  const isLoading = status === 'loading'
+  const isError = status === 'error'
+  const hasComparisons = comparisons.length > 0
 
   return (
     <div className="space-y-12">
@@ -88,6 +229,25 @@ export default function DalleVsFluxPage() {
         </header>
 
         <div className="space-y-8">
+          {isLoading && (
+            <article className="space-y-4 rounded-3xl border border-slate-200 bg-white/90 p-6 text-sm text-slate-600 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
+              Loading comparison dataset…
+            </article>
+          )}
+
+          {isError && !isLoading && (
+            <article className="space-y-3 rounded-3xl border border-rose-200/80 bg-rose-50/80 p-6 text-sm text-rose-700 shadow-sm dark:border-rose-700/60 dark:bg-rose-900/30 dark:text-rose-200">
+              <p className="font-semibold">We couldn’t load the CSV file.</p>
+              <p>{errorMessage}</p>
+            </article>
+          )}
+
+          {!isLoading && !isError && !hasComparisons && (
+            <article className="space-y-3 rounded-3xl border border-slate-200 bg-white/90 p-6 text-sm text-slate-600 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
+              No comparisons are available yet. Check back soon.
+            </article>
+          )}
+
           {pageItems.map(({ prompt, fluxUrl, dalleUrl }, index) => (
             <article
               key={`${prompt}-${fluxUrl}`}
@@ -143,7 +303,7 @@ export default function DalleVsFluxPage() {
           <button
             type="button"
             onClick={goToPrevious}
-            disabled={page === 1}
+            disabled={page === 1 || isLoading || !hasComparisons}
             className="inline-flex items-center gap-2 rounded-full border border-slate-300 px-4 py-2 font-medium text-slate-600 transition enabled:hover:border-brand-500 enabled:hover:bg-brand-500/10 enabled:hover:text-brand-600 disabled:opacity-50 dark:border-slate-700 dark:text-slate-200 dark:enabled:hover:border-brand-400/60 dark:enabled:hover:bg-brand-500/10"
           >
             ← Previous
@@ -151,7 +311,7 @@ export default function DalleVsFluxPage() {
           <button
             type="button"
             onClick={goToNext}
-            disabled={page === totalPages}
+            disabled={page === totalPages || isLoading || !hasComparisons}
             className="inline-flex items-center gap-2 rounded-full border border-slate-300 px-4 py-2 font-medium text-slate-600 transition enabled:hover:border-brand-500 enabled:hover:bg-brand-500/10 enabled:hover:text-brand-600 disabled:opacity-50 dark:border-slate-700 dark:text-slate-200 dark:enabled:hover:border-brand-400/60 dark:enabled:hover:bg-brand-500/10"
           >
             Next →
