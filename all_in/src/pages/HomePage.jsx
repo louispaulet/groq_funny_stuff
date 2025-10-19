@@ -315,6 +315,18 @@ export default function HomePage() {
               </div>
             ))}
           </div>
+          <div className="flex flex-wrap items-center gap-3 pt-4">
+            <Link
+              to="/dalle-vs-flux"
+              className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-brand-600 shadow transition hover:bg-brand-50"
+            >
+              View the DALL·E 3 vs Flux comparison
+              <span aria-hidden>→</span>
+            </Link>
+            <span className="inline-flex items-center gap-2 rounded-full border border-dashed border-white/40 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white/80">
+              New spotlight
+            </span>
+          </div>
         </div>
         <div className="absolute -right-24 -top-24 h-56 w-56 rounded-full bg-white/10 blur-3xl" aria-hidden />
       </section>
@@ -501,6 +513,59 @@ export default function HomePage() {
               </article>
             )
           })}
+          <article className="group relative overflow-hidden rounded-3xl border border-slate-200 bg-white/90 p-8 shadow-sm transition hover:shadow-xl dark:border-slate-800 dark:bg-slate-900">
+            <div
+              className="pointer-events-none absolute inset-0 opacity-0 transition-opacity group-hover:opacity-100"
+              aria-hidden
+            >
+              <div className="absolute -top-20 right-0 h-40 w-40 rounded-full bg-fuchsia-500/10 blur-3xl" />
+              <div className="absolute -bottom-24 left-6 h-36 w-36 rounded-full bg-amber-400/10 blur-3xl" />
+            </div>
+            <div className="relative space-y-5">
+              <div className="flex flex-wrap items-center gap-4">
+                <div className="flex flex-col gap-2">
+                  <div className="h-1 w-16 rounded-full bg-gradient-to-r from-fuchsia-500 via-amber-400 to-rose-500" aria-hidden />
+                  <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Flux vs DALL·E Comparison Lab</h3>
+                </div>
+                <span className="inline-flex items-center rounded-full bg-fuchsia-100 px-3 py-1 text-xs font-semibold text-fuchsia-800 dark:bg-fuchsia-500/20 dark:text-fuchsia-200">
+                  Research drop
+                </span>
+                <Link
+                  to="/dalle-vs-flux"
+                  className="ml-auto inline-flex items-center gap-2 rounded-full border border-slate-300 px-3 py-1 text-sm font-medium text-slate-700 transition hover:border-fuchsia-500 hover:bg-fuchsia-50 hover:text-fuchsia-600 dark:border-slate-700 dark:text-slate-200 dark:hover:border-fuchsia-400/60 dark:hover:bg-fuchsia-500/10"
+                >
+                  Open comparison
+                  <span aria-hidden>→</span>
+                </Link>
+              </div>
+              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+                See how Groq-hosted Flux Schnell stacks up against OpenAI’s latest DALL·E 3 release across shared prompts, styles, and budgets.
+              </p>
+              <div className="space-y-3 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                <p>
+                  We logged 186 matched prompts and streamed both renders via public endpoints. Flux Schnell ran on GroqCloud for free,
+                  while the DALL·E 3 set consumed $30 of credits — a practical look at cost-per-image trade-offs.
+                </p>
+                <p>
+                  The gallery batches ten comparisons per page for quick scanning, and every tile links to the original export so you can inspect details, brushwork, and color handling up close.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2 pt-2">
+                <span className="inline-flex items-center rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:border-slate-700 dark:text-slate-300">
+                  image-benchmark
+                </span>
+                <span className="inline-flex items-center rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:border-slate-700 dark:text-slate-300">
+                  pagination-ready
+                </span>
+                <span className="inline-flex items-center rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:border-slate-700 dark:text-slate-300">
+                  cost-transparency
+                </span>
+              </div>
+              <div className="text-xs uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                Flux Schnell (GroqCloud) • DALL·E 3 (OpenAI) • 186 prompts tracked
+              </div>
+            </div>
+          </article>
           <article className="group relative overflow-hidden rounded-3xl border border-slate-200 bg-white/90 p-8 shadow-sm transition hover:shadow-xl dark:border-slate-800 dark:bg-slate-900">
             <div
               className="pointer-events-none absolute inset-0 opacity-0 transition-opacity group-hover:opacity-100"

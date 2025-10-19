@@ -26,6 +26,7 @@ import SvgPlaygroundPage from './pages/SvgPlaygroundPage'
 import FlagFoundryPage from './pages/FlagFoundryPage'
 import SecondHandFoodMarketPage from './pages/SecondHandFoodMarketPage'
 import PongShowdownPage from './pages/PongShowdownPage'
+import DalleVsFluxPage from './pages/DalleVsFluxPage'
 import ScrollToTop from './components/ScrollToTop'
 
 export default function App() {
@@ -39,6 +40,7 @@ export default function App() {
             <Route path="/bank-holiday-planner" element={<BankHolidayPlannerPage />} />
             <Route path="/second-hand-food-market" element={<SecondHandFoodMarketPage />} />
             <Route path="/game-of-life-lab" element={<GameOfLifeLabPage />} />
+            <Route path="/dalle-vs-flux" element={<DalleVsFluxPage />} />
             {experiences.map((experience) =>
               experience.id === 'allergyfinder' ? (
                 <Fragment key={experience.id}>
