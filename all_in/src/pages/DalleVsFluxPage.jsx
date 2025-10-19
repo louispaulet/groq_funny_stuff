@@ -5,148 +5,6 @@ const ITEMS_PER_PAGE = 10
 const BASE_URL = import.meta.env.BASE_URL || '/'
 const CSV_URL = `${BASE_URL.endsWith('/') ? BASE_URL : `${BASE_URL}/`}data/dalle-flux-comparison.csv`
 
-const BALANCED_CATEGORY_ORDER = [
-  'Fashion & Lifestyle',
-  'Sculpture & Installations',
-  'Tech & Futurism',
-  'Myth & Legend',
-  'Portraits & People',
-  'Interiors & Still Life',
-  'Architecture & Structures',
-  'Nature & Wildlife',
-  'Abstract & Experimental',
-]
-
-const KEYWORD_PATTERNS = {
-  fashion:
-    /\b(fashion|runway|couture|wardrobe|outfit|garment|dress|haute|catwalk|model|styling|makeup|hairstyle|beauty shoot|street style|costume|attire|ensemble)\b/i,
-  sculpture:
-    /\b(sculpture|statue|installation|bust|carving|marble|bronze|stone|ceramic|clay|relief|woodcarving|figurine|3d print|kinetic|monument|bas-relief)\b/i,
-  tech:
-    /\b(futuristic|future|sci[- ]?fi|science fiction|cyberpunk|steampunk|robot|android|mecha|mech|drone|spaceship|spacecraft|ai|quantum|hologram|interface|augmented reality|technology|tech|neon|synthwave|data|circuit|nanotech|metaverse|virtual reality|digital|cybernetic|matrix|simulation|space station|galaxy|nebula|astronaut|starship|cosmic|interstellar|celestial|satellite|planetary|spacesuit)\b/i,
-  myth:
-    /\b(fantasy|myth|mythic|mythical|legend|heroic|hero|epic|dragon|wizard|witch|spell|magic|magical|sorcerer|fairy|fairytale|fable|goddess|god|deity|spirit|creature|monster|beast|oracle|prophecy|enchanted|griffin|phoenix|mermaid|centaur|angel|demon|vampire|werewolf|ghost|haunted|supernatural|pantheon|mythology|ancient gods|divine)\b/i,
-  portrait:
-    /\b(portrait|character|figure|person|people|woman|man|girl|boy|child|family|crowd|dancer|musician|performer|warrior|soldier|pilot|chef|artisan|monk|sailor|athlete|actor|actress|self-portrait|queen|king|emperor|empress|pharaoh|leader|teacher|students|worker|workers|villagers|priest|priestess|philosopher|scientist|inventor|artist|painter|composer|writer|author|poet|scholar|couple|group portrait)\b/i,
-  stillLife:
-    /\b(still life|tabletop|table setting|arrangement|vase|bouquet|flowers|floral|botanical|fruit|vegetable|produce|dessert|cake|pastry|bread|cheese|wine|coffee|tea|banquet|feast|culinary|cuisine|kitchen counter|spread|charcuterie|harvest|cornucopia|tea ceremony|coffee service)\b/i,
-  interior:
-    /\b(interior|living room|kitchen|dining|bedroom|studio|workspace|office|library|atelier|workshop|apartment|loft|cafe|restaurant|bar|lounge|salon|foyer|hallway|gallery|museum hall|auditorium|theater interior|furniture|sofa|armchair|chandelier|ceiling|atrium|lobby|hall|ballroom|banquet hall)\b/i,
-  architecture:
-    /\b(city|cityscape|urban|street|avenue|plaza|square|architecture|architectural|building|skyscraper|tower|bridge|temple|castle|palace|cathedral|church|mosque|pagoda|pyramid|ruins|monastery|fortress|citadel|harbor|harbour|port|market|bazaar|stadium|colosseum|theater|arena|museum|observatory|resort|hotel|village|town|metropolis|megacity|neighborhood|district|train|subway|tram|transport hub|railway|industrial|factory)\b/i,
-  nature:
-    /\b(landscape|mountain|mountains|forest|woodland|woods|grove|jungle|rainforest|desert|canyon|valley|meadow|river|waterfall|ocean|sea|island|coast|shore|beach|cliff|glacier|volcano|aurora|savanna|reef|garden|park|field|prairie|storm|weather|sunset|sunrise|skies|clouds|moon|stars|constellation|planet|celestial|skyline|horizon|countryside|pastoral|flora|fauna|wildlife|animals|animal|bird|birds|butterfly|insect|fox|wolf|bear|lion|tiger|elephant|horse|deer|stag|otter|seal|penguin|whale|dolphin|fish|coral|reef)\b/i,
-  abstract:
-    /\b(abstract|geometric|geometry|pattern|kaleidoscope|psychedelic|glitch|surreal|dream|dreamscape|experimental|avant-garde|conceptual|expressionist|cubist|minimalist|minimalism|maximalist|color field|gestural|nonlinear|dada|bauhaus|constructivist|suprematist|op art|fractal|algorithmic|generative|data art|concept art|visionary|symbolic|symbolism|ornate|filigree|baroque|rococo|ornament|mandala|intricate|tapestry|mosaic|stained glass|patterned|arabesque|opulent|decorative)\b/i,
-}
-
-function createCategoryPreferences(prompt, originalCategory) {
-  const text = prompt.toLowerCase()
-  const original = (originalCategory || '').toLowerCase()
-  const preferences = []
-
-  const add = (label) => {
-    if (!preferences.includes(label)) {
-      preferences.push(label)
-    }
-  }
-
-  if (KEYWORD_PATTERNS.fashion.test(text) || original.includes('fashion') || original.includes('textile')) {
-    add('Fashion & Lifestyle')
-  }
-
-  if (KEYWORD_PATTERNS.sculpture.test(text) || original.includes('sculpture')) {
-    add('Sculpture & Installations')
-  }
-
-  if (KEYWORD_PATTERNS.tech.test(text) || original.includes('digital art')) {
-    add('Tech & Futurism')
-  }
-
-  if (KEYWORD_PATTERNS.myth.test(text)) {
-    add('Myth & Legend')
-  }
-
-  if (KEYWORD_PATTERNS.portrait.test(text) || original.includes('portrait')) {
-    add('Portraits & People')
-  }
-
-  if (KEYWORD_PATTERNS.stillLife.test(text)) {
-    add('Interiors & Still Life')
-  }
-
-  if (KEYWORD_PATTERNS.interior.test(text) || original.includes('interior')) {
-    add('Interiors & Still Life')
-  }
-
-  if (KEYWORD_PATTERNS.architecture.test(text) || original.includes('architecture') || original.includes('building')) {
-    add('Architecture & Structures')
-  }
-
-  if (KEYWORD_PATTERNS.nature.test(text) || original.includes('landscape') || original.includes('seascape')) {
-    add('Nature & Wildlife')
-  }
-
-  if (
-    KEYWORD_PATTERNS.abstract.test(text) ||
-    original.includes('mixed media') ||
-    original.includes('illustration') ||
-    original.includes('painting')
-  ) {
-    add('Abstract & Experimental')
-  }
-
-  BALANCED_CATEGORY_ORDER.forEach(add)
-
-  return preferences
-}
-
-function rebalanceComparisons(entries) {
-  if (!entries.length) return []
-
-  const indexedEntries = entries.map((entry, index) => ({ ...entry, originalIndex: index }))
-  const sortedEntries = [...indexedEntries].sort((a, b) => {
-    const categoryCompare = (a.category || '').localeCompare(b.category || '')
-    if (categoryCompare !== 0) {
-      return categoryCompare
-    }
-    return a.prompt.localeCompare(b.prompt)
-  })
-
-  const limit = Math.ceil(sortedEntries.length / BALANCED_CATEGORY_ORDER.length)
-  const counts = new Map(BALANCED_CATEGORY_ORDER.map((label) => [label, 0]))
-
-  const assigned = sortedEntries.map((entry) => {
-    const preferences = createCategoryPreferences(entry.prompt, entry.category)
-    let assigned = preferences.find((label) => (counts.get(label) || 0) < limit)
-
-    if (!assigned) {
-      assigned = [...counts.entries()].sort((a, b) => {
-        if (a[1] !== b[1]) {
-          return a[1] - b[1]
-        }
-        return BALANCED_CATEGORY_ORDER.indexOf(a[0]) - BALANCED_CATEGORY_ORDER.indexOf(b[0])
-      })[0][0]
-    }
-
-    counts.set(assigned, (counts.get(assigned) || 0) + 1)
-
-    return {
-      ...entry,
-      originalCategory: entry.category || 'Uncategorized',
-      category: assigned,
-    }
-  })
-
-  return assigned
-    .sort((a, b) => a.originalIndex - b.originalIndex)
-    .map((entry) => {
-      const next = { ...entry }
-      delete next.originalIndex
-      return next
-    })
-}
-
 function sanitizeFilenameSegment(value) {
   return value
     .toLowerCase()
@@ -171,15 +29,6 @@ function buildDownloadFilename(url, prompt, label) {
   const labelSegment = sanitizeFilenameSegment(label)
   const prefix = labelSegment ? `${labelSegment}-` : ''
   return `${prefix}${baseName}.${extension}`
-}
-
-function shuffleArray(values) {
-  const next = [...values]
-  for (let index = next.length - 1; index > 0; index -= 1) {
-    const swapIndex = Math.floor(Math.random() * (index + 1))
-    ;[next[index], next[swapIndex]] = [next[swapIndex], next[index]]
-  }
-  return next
 }
 
 function parseCsv(text) {
@@ -319,7 +168,6 @@ export default function DalleVsFluxPage() {
   const [status, setStatus] = useState('loading')
   const [errorMessage, setErrorMessage] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
-  const [shuffledCategories, setShuffledCategories] = useState([])
   const [downloadingUrl, setDownloadingUrl] = useState('')
 
   useEffect(() => {
@@ -342,10 +190,9 @@ export default function DalleVsFluxPage() {
 
         const text = await response.text()
         const parsed = parseComparisonCsv(text)
-        const balanced = rebalanceComparisons(parsed)
 
         if (!cancelled) {
-          setComparisons(balanced)
+          setComparisons(parsed)
           setStatus('ready')
         }
       } catch (error) {
@@ -373,14 +220,6 @@ export default function DalleVsFluxPage() {
     })
     return Array.from(unique)
   }, [comparisons])
-
-  useEffect(() => {
-    if (categories.length === 0) {
-      setShuffledCategories([])
-      return
-    }
-    setShuffledCategories(shuffleArray(categories))
-  }, [categories])
 
   useEffect(() => {
     if (selectedCategory !== 'all' && !categories.includes(selectedCategory)) {
@@ -502,7 +341,7 @@ export default function DalleVsFluxPage() {
                 className="min-w-[12rem] rounded-full border border-transparent bg-white/80 px-3 py-1 text-sm font-medium text-slate-700 transition focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/40 dark:bg-slate-900/60 dark:text-slate-100 dark:focus:border-brand-400"
               >
                 <option value="all">All categories</option>
-                {shuffledCategories.map((category) => (
+                {categories.map((category) => (
                   <option key={category} value={category}>
                     {category}
                   </option>
