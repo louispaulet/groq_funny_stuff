@@ -207,6 +207,24 @@ export const experiences = [
     svgApiBaseUrl: (getEnvValue('VITE_SVG_API_BASE_URL') || FALLBACK_BASE_URL).replace(/\/$/, ''),
   },
   {
+    id: 'mermaidstudio',
+    path: '/mermaid-studio',
+    name: 'Mermaid Display',
+    headline: 'Draft Mermaid syntax and render diagrams in an instant workspace.',
+    description:
+      'Type Mermaid definitions, press render, and archive every previous diagram in a cookie-backed gallery for quick reference.',
+    badge: 'Diagram',
+    heroGradient: 'from-cyan-500 to-emerald-500',
+    panelAccent: 'bg-cyan-100 text-cyan-900 dark:bg-cyan-500/20 dark:text-cyan-200',
+    navAccent: {
+      gradient: 'from-cyan-500 to-emerald-500',
+      hover:
+        'hover:bg-cyan-500/10 hover:text-emerald-600 hover:border-cyan-400/60 dark:hover:bg-cyan-500/20 dark:hover:text-emerald-200 dark:hover:border-cyan-400/60',
+      focus: 'focus-visible:ring-cyan-500/40',
+    },
+    logLabel: 'MermaidDisplay',
+  },
+  {
     id: 'pizzamaker',
     path: '/pizza-maker',
     name: 'Pizza Maker',
