@@ -526,6 +526,7 @@ export default function HomePage() {
           {experiences.map((experience) => {
             const detailedCopy = detailedCopyById[experience.id] ?? <p>{experience.description}</p>
             const tags = tagsById[experience.id] ?? []
+            const modelOptions = Array.isArray(experience.modelOptions) ? experience.modelOptions : []
 
             return (
               <article
@@ -572,9 +573,11 @@ export default function HomePage() {
                       ))}
                     </div>
                   )}
-                  <div className="text-xs uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                    {experience.modelOptions.join(' • ')}
-                  </div>
+                  {modelOptions.length > 0 && (
+                    <div className="text-xs uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                      {modelOptions.join(' • ')}
+                    </div>
+                  )}
                 </div>
               </article>
             )
