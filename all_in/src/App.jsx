@@ -27,6 +27,7 @@ import FlagFoundryPage from './pages/FlagFoundryPage'
 import SecondHandFoodMarketPage from './pages/SecondHandFoodMarketPage'
 import PongShowdownPage from './pages/PongShowdownPage'
 import DalleVsFluxPage from './pages/DalleVsFluxPage'
+import MermaidStudioPage from './pages/MermaidStudioPage'
 import ScrollToTop from './components/ScrollToTop'
 
 export default function App() {
@@ -106,6 +107,16 @@ export default function App() {
                   element={(
                     <ExperiencePage experience={experience}>
                       <SvgPlaygroundPage experience={experience} />
+                    </ExperiencePage>
+                  )}
+                />
+              ) : experience.id === 'mermaidstudio' ? (
+                <Route
+                  key={experience.id}
+                  path={experience.path}
+                  element={(
+                    <ExperiencePage experience={experience}>
+                      <MermaidStudioPage experience={experience} />
                     </ExperiencePage>
                   )}
                 />

@@ -92,6 +92,19 @@ const detailedCopyById = {
       </p>
     </>
   ),
+  mermaidstudio: (
+    <>
+      <p>
+        🧭 Mermaid Display is a diagramming console for rapid flowcharting. Drop in Mermaid syntax, tap render, and watch the
+        canvas refresh instantly—perfect for sequencing pipelines, swim lanes, or onboarding walkthroughs without leaving the
+        browser.
+      </p>
+      <p>
+        Every time you iterate on the prompt, the previous diagram slides into a cookie-backed gallery with a live SVG preview.
+        Build a playlist of saved flows, reload them with one click, and keep experimenting with zero setup. 🗂️
+      </p>
+    </>
+  ),
   flagfoundry: (
     <>
       <p>
@@ -168,6 +181,7 @@ const tagsById = {
   stlviewer: ['chat-based', '3d-workflow', 'viewer-embedded'],
   pokedex: ['chat-based', 'fandom', 'api-powered'],
   svglab: ['text-to-svg', 'gallery-backed', 'promptable'],
+  mermaidstudio: ['diagramming', 'mermaid', 'cookie-gallery'],
   flagfoundry: ['image-based', 'svg-automation', 'slow-drip'],
   pizzamaker: ['image-based', 'guided-prompts', 'culinary'],
   carmaker: ['image-based', 'cinematic', 'automotive'],
@@ -196,6 +210,12 @@ const baseExperienceCategories = [
     title: 'SVG Studios',
     description: 'Vector-first workspaces for programmatic art and evolving flags.',
     experienceIds: ['svglab', 'flagfoundry'],
+  },
+  {
+    id: 'diagramming',
+    title: 'Diagram Studios',
+    description: 'Prompt Mermaid to map flows and keep every render close by.',
+    experienceIds: ['mermaidstudio'],
   },
   {
     id: 'visuals',
@@ -331,6 +351,52 @@ export default function HomePage() {
         <div className="absolute -right-24 -top-24 h-56 w-56 rounded-full bg-white/10 blur-3xl" aria-hidden />
       </section>
 
+      <section className="relative overflow-hidden rounded-[2.75rem] border border-cyan-200 bg-white/90 px-6 py-8 shadow-sm transition hover:shadow-xl dark:border-cyan-800 dark:bg-slate-900/80 sm:px-8 sm:py-10">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(6,182,212,0.18),_transparent_60%)] dark:bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.22),_transparent_65%)]" aria-hidden />
+        <div className="relative z-10 grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] lg:items-center">
+          <div className="space-y-4">
+            <p className="inline-flex items-center gap-2 rounded-full bg-cyan-500/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.35em] text-cyan-600 dark:text-cyan-300">
+              🧭 New · Diagramming
+            </p>
+            <h2 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">Mermaid Display</h2>
+            <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+              Compose Mermaid syntax, press render, and watch the canvas update without leaving the AllIn shell. Perfect for flowcharts, customer journeys, and system diagrams that need to evolve in seconds.
+            </p>
+            <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+              Each iteration sweeps the previous diagram into a cookie-backed gallery, complete with live SVG thumbnails so you can revisit every branch of your idea.
+            </p>
+            <div className="flex flex-wrap items-center gap-3">
+              <Link
+                to="/mermaid-studio"
+                className="inline-flex items-center gap-2 rounded-full bg-cyan-600 px-4 py-2 text-sm font-semibold text-white shadow transition hover:bg-cyan-500"
+              >
+                Open Mermaid Display
+                <span aria-hidden>→</span>
+              </Link>
+              <span className="inline-flex items-center gap-2 rounded-full border border-dashed border-cyan-500/40 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-cyan-600 dark:text-cyan-300">
+                Cookie-backed gallery
+              </span>
+            </div>
+          </div>
+          <div className="relative hidden justify-center lg:flex">
+            <div className="relative w-full max-w-sm overflow-hidden rounded-3xl border border-cyan-200 bg-white/90 p-6 text-left shadow-sm dark:border-cyan-700 dark:bg-slate-900/80">
+              <div className="absolute -top-6 right-6 h-20 w-20 rounded-full bg-cyan-500/20 blur-3xl" aria-hidden />
+              <p className="text-xs uppercase tracking-[0.4em] text-cyan-500 dark:text-cyan-300">Sample prompt</p>
+              <pre className="mt-3 rounded-2xl bg-slate-900/90 p-4 text-[0.7rem] leading-relaxed text-cyan-100">
+                {`graph TD
+  Idea[Sketch prompt]
+  Idea --> Review{Happy with it?}
+  Review -- Yes --> Render[Render diagram]
+  Review -- No --> Iterate[Adjust prompt]`}
+              </pre>
+              <p className="mt-4 text-xs text-slate-500 dark:text-slate-400">
+                Rendering saves the previous diagram to the gallery so you can compare every iteration.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <GameOfLifeShowcase />
 
       <section className="relative overflow-hidden rounded-[2.75rem] border border-slate-200 bg-white/90 px-6 py-8 shadow-sm transition hover:shadow-xl dark:border-slate-800 dark:bg-slate-900/80 sm:px-8 sm:py-10">
@@ -460,6 +526,7 @@ export default function HomePage() {
           {experiences.map((experience) => {
             const detailedCopy = detailedCopyById[experience.id] ?? <p>{experience.description}</p>
             const tags = tagsById[experience.id] ?? []
+            const modelOptions = Array.isArray(experience.modelOptions) ? experience.modelOptions : []
 
             return (
               <article
@@ -506,9 +573,11 @@ export default function HomePage() {
                       ))}
                     </div>
                   )}
-                  <div className="text-xs uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                    {experience.modelOptions.join(' • ')}
-                  </div>
+                  {modelOptions.length > 0 && (
+                    <div className="text-xs uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                      {modelOptions.join(' • ')}
+                    </div>
+                  )}
                 </div>
               </article>
             )
