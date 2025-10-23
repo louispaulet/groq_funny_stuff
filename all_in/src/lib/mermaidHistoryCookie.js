@@ -16,6 +16,9 @@ function sanitiseEntry(entry) {
 
   const prompt = typeof entry.prompt === 'string' ? entry.prompt.trim() : ''
   const svgMarkup = normaliseSvgMarkup(entry.svgMarkup)
+  const mermaidSource = typeof entry.mermaidSource === 'string' ? entry.mermaidSource.trim() : ''
+  const title = typeof entry.title === 'string' ? entry.title.trim() : ''
+  const notes = typeof entry.notes === 'string' ? entry.notes.trim() : ''
 
   if (!svgMarkup) return null
 
@@ -26,6 +29,9 @@ function sanitiseEntry(entry) {
   return {
     prompt,
     svgMarkup,
+    mermaidSource,
+    title,
+    notes,
     timestamp,
   }
 }
@@ -69,7 +75,15 @@ export function appendMermaidHistoryEntry(entry) {
   }
 
   const existing = readMermaidHistory()
-  const next = [sanitised, ...existing.filter((item) => item.svgMarkup !== sanitised.svgMarkup || item.prompt !== sanitised.prompt)]
+  const next = [
+    sanitised,
+    ...existing.filter(
+      (item) =>
+        item.svgMarkup !== sanitised.svgMarkup ||
+        item.prompt !== sanitised.prompt ||
+        item.mermaidSource !== sanitised.mermaidSource,
+    ),
+  ]
     .slice(0, MERMAID_HISTORY_LIMIT)
 
   writeMermaidHistory(next)

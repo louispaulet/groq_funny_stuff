@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import DOMPurify from 'dompurify'
 import mermaid from 'mermaid'
-import { ArrowPathIcon, PlayIcon, TrashIcon } from '@heroicons/react/24/outline'
+import { ArrowPathIcon, ClipboardDocumentIcon, PlayIcon, TrashIcon } from '@heroicons/react/24/outline'
+import { createRemoteObject } from '../lib/objectApi'
+import { normalizeBaseUrl } from '../lib/objectMakerUtils'
 import {
   appendMermaidHistoryEntry,
   clearMermaidHistory,
@@ -13,6 +15,37 @@ const SANITIZER_CONFIG = {
   USE_PROFILES: { svg: true, svgFilters: true },
 }
 
+const MERMAID_RESPONSE_STRUCTURE = {
+  type: 'object',
+  additionalProperties: false,
+  properties: {
+    title: {
+      type: 'string',
+      description: 'Short label for the generated diagram.',
+    },
+    mermaid: {
+      type: 'string',
+      description: 'Valid Mermaid definition (no code fences).',
+    },
+    notes: {
+      type: 'string',
+      description: 'Optional summary or assumptions about the diagram.',
+    },
+  },
+  required: ['mermaid'],
+}
+
+const MERMAID_OBJECT_TYPE = 'mermaid_blueprint'
+
+const MERMAID_SYSTEM_PROMPT = [
+  'You are a diagram director who produces Mermaid.js diagrams from natural language briefs.',
+  'Return a JSON object that follows the provided schema.',
+  'The "mermaid" field must contain a valid Mermaid definition that renders in Mermaid v10 without modifications. Do not include code fences or commentary.',
+  'Choose the most appropriate diagram style (flowchart, sequence, class, timeline, mindmap, etc.) for the request and use concise, descriptive labels.',
+  'Keep identifiers syntax-safe and prefer multi-line layouts when relationships need clarity.',
+  'Capture any assumptions or guidance for the user in the optional "notes" field (keep it under 100 words).',
+].join(' ')
+
 function buildPreviewMarkup(svgMarkup) {
   if (typeof window === 'undefined') return ''
   if (typeof svgMarkup !== 'string') return ''
@@ -21,8 +54,21 @@ function buildPreviewMarkup(svgMarkup) {
   return DOMPurify.sanitize(trimmed, SANITIZER_CONFIG)
 }
 
+function buildObjectPrompt(userPrompt) {
+  return [
+    'Create a Mermaid.js diagram that satisfies the following request.',
+    'Respond with a JSON object matching the provided schema.',
+    'Use newline characters to format the diagram for readability.',
+    '',
+    'User brief:',
+    userPrompt,
+  ].join('\n')
+}
+
 function GalleryItem({ entry, onSelect }) {
   const sanitizedMarkup = useMemo(() => buildPreviewMarkup(entry.svgMarkup), [entry.svgMarkup])
+  const title = entry.title || 'Saved Mermaid diagram'
+  const brief = entry.prompt
 
   return (
     <button
@@ -42,12 +88,11 @@ function GalleryItem({ entry, onSelect }) {
           </div>
         )}
       </div>
-      <div>
-        <p className="line-clamp-2 text-sm font-medium text-slate-700 dark:text-slate-200">
-          {entry.prompt || 'Saved Mermaid prompt'}
-        </p>
+      <div className="space-y-1">
+        <p className="line-clamp-1 text-sm font-semibold text-slate-700 dark:text-slate-200">{title}</p>
+        {brief ? <p className="line-clamp-2 text-xs text-slate-500 dark:text-slate-400">“{brief}”</p> : null}
         {entry.timestamp ? (
-          <p className="text-xs text-slate-500 dark:text-slate-400">
+          <p className="text-xs text-slate-400 dark:text-slate-500">
             {new Date(entry.timestamp).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}
           </p>
         ) : null}
@@ -56,14 +101,18 @@ function GalleryItem({ entry, onSelect }) {
   )
 }
 
-export default function MermaidStudioPage() {
-  const [prompt, setPrompt] = useState('graph TD\n  Start([Prompt received]) --> Validate{Valid Mermaid?}\n  Validate -- Yes --> Render[Render diagram]\n  Validate -- No --> Fix[Revise syntax]\n  Render --> Gallery[Store previous render]')
+export default function MermaidStudioPage({ experience }) {
+  const [prompt, setPrompt] = useState('Show the interactions of The Office characters.')
   const [diagram, setDiagram] = useState(null)
   const [history, setHistory] = useState([])
   const [status, setStatus] = useState(null)
   const [rendering, setRendering] = useState(false)
+  const [copied, setCopied] = useState(false)
 
   const renderCounter = useRef(0)
+
+  const normalizedBaseUrl = normalizeBaseUrl(experience?.defaultBaseUrl)
+  const model = experience?.defaultModel || experience?.modelOptions?.[0] || ''
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -74,13 +123,22 @@ export default function MermaidStudioPage() {
     setHistory(readMermaidHistory())
   }, [])
 
+  useEffect(() => {
+    if (!copied) return
+    const timer = setTimeout(() => setCopied(false), 1500)
+    return () => clearTimeout(timer)
+  }, [copied])
+
   const sanitizedDiagram = useMemo(() => buildPreviewMarkup(diagram?.svgMarkup || ''), [diagram?.svgMarkup])
+  const mermaidSource = diagram?.mermaidSource || ''
+  const diagramTitle = diagram?.title || ''
+  const diagramNotes = diagram?.notes || ''
 
   async function handleSubmit(event) {
     event.preventDefault()
     const trimmedPrompt = prompt.trim()
     if (!trimmedPrompt) {
-      setStatus({ type: 'error', message: 'Enter a Mermaid definition to render.' })
+      setStatus({ type: 'error', message: 'Describe the diagram you want before calling /obj.' })
       return
     }
 
@@ -91,51 +149,124 @@ export default function MermaidStudioPage() {
 
     const previousDiagram = diagram
     const promptChanged = previousDiagram && previousDiagram.prompt !== trimmedPrompt
-
     if (promptChanged) {
       setDiagram(null)
     }
 
     setRendering(true)
-    setStatus(null)
+    setCopied(false)
+    setStatus({ type: 'info', message: 'Drafting Mermaid markup via /obj…' })
+
+    let mermaidText = ''
+    let title = ''
+    let notes = ''
 
     try {
+      const { payload } = await createRemoteObject({
+        baseUrl: normalizedBaseUrl || undefined,
+        structure: MERMAID_RESPONSE_STRUCTURE,
+        objectType: MERMAID_OBJECT_TYPE,
+        prompt: buildObjectPrompt(trimmedPrompt),
+        system: MERMAID_SYSTEM_PROMPT,
+        strict: true,
+        model: model || undefined,
+      })
+
+      mermaidText = typeof payload?.mermaid === 'string' ? payload.mermaid.trim() : ''
+      title = typeof payload?.title === 'string' ? payload.title.trim() : ''
+      notes = typeof payload?.notes === 'string' ? payload.notes.trim() : ''
+
+      if (!mermaidText) {
+        throw new Error('Mermaid diagram missing from /obj response.')
+      }
+
       renderCounter.current += 1
       const renderId = `mermaid-diagram-${renderCounter.current}`
-      const { svg } = await mermaid.render(renderId, trimmedPrompt)
+      const { svg } = await mermaid.render(renderId, mermaidText)
 
-      if (promptChanged) {
+      if (promptChanged && previousDiagram) {
         const nextHistory = appendMermaidHistoryEntry(previousDiagram)
         setHistory(nextHistory)
       }
 
-      setDiagram({ prompt: trimmedPrompt, svgMarkup: svg })
-      setStatus({ type: 'success', message: 'Diagram rendered. Tweak the prompt to explore variants.' })
+      setDiagram({
+        prompt: trimmedPrompt,
+        mermaidSource: mermaidText,
+        svgMarkup: svg,
+        title,
+        notes,
+      })
+      setStatus({
+        type: 'success',
+        message: 'Mermaid diagram generated via /obj. Copy the source or iterate with another brief.',
+      })
     } catch (error) {
-      const message =
+      const baseMessage =
         error && typeof error.message === 'string'
-          ? `Mermaid render failed: ${error.message}`
-          : 'Mermaid render failed. Please check your syntax.'
-      setStatus({ type: 'error', message })
-      if (promptChanged && previousDiagram) {
-        setDiagram(previousDiagram)
+          ? error.message
+          : 'Mermaid generation failed. Please try a different description.'
+      if (mermaidText) {
+        setDiagram({
+          prompt: trimmedPrompt,
+          mermaidSource: mermaidText,
+          svgMarkup: '',
+          title,
+          notes,
+        })
+        setStatus({
+          type: 'error',
+          message: `Mermaid render failed: ${baseMessage}. Copy the generated source below or adjust your prompt.`,
+        })
+      } else {
+        if (promptChanged && previousDiagram) {
+          setDiagram(previousDiagram)
+        }
+        setStatus({ type: 'error', message: baseMessage })
       }
     } finally {
       setRendering(false)
     }
   }
 
+  function handleCopySource() {
+    if (!mermaidSource) return
+    if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+      navigator.clipboard
+        .writeText(mermaidSource)
+        .then(() => setCopied(true))
+        .catch(() => {
+          setStatus({
+            type: 'error',
+            message: 'Copy failed. Select the Mermaid source manually instead.',
+          })
+        })
+    } else {
+      setStatus({
+        type: 'error',
+        message: 'Clipboard API unavailable. Select the Mermaid source manually instead.',
+      })
+    }
+  }
+
   function handleClearCurrent() {
     setDiagram(null)
     setPrompt('')
-    setStatus({ type: 'info', message: 'Cleared the current prompt and diagram. Your gallery remains intact.' })
+    setStatus({ type: 'info', message: 'Cleared the current brief and diagram. Your gallery remains intact.' })
+    setCopied(false)
   }
 
   function handleSelectHistory(entry) {
     if (!entry) return
     setPrompt(entry.prompt || '')
-    setDiagram({ prompt: entry.prompt || '', svgMarkup: entry.svgMarkup })
-    setStatus({ type: 'info', message: 'Loaded a saved Mermaid render. Adjust and submit to remix it.' })
+    setDiagram({
+      prompt: entry.prompt || '',
+      svgMarkup: entry.svgMarkup,
+      mermaidSource: entry.mermaidSource || '',
+      title: entry.title || '',
+      notes: entry.notes || '',
+    })
+    setStatus({ type: 'info', message: 'Loaded a saved Mermaid render. Submit to regenerate it via /obj.' })
+    setCopied(false)
   }
 
   function handleClearHistory() {
@@ -144,25 +275,29 @@ export default function MermaidStudioPage() {
     setStatus({ type: 'info', message: 'Cleared the Mermaid gallery cookie for this browser.' })
   }
 
+  const promptPlaceholder =
+    experience?.promptPlaceholder || 'Example: Show the interactions of The Office characters.'
+
   return (
     <div className="space-y-8">
       <section className="rounded-3xl border border-slate-200 bg-white/90 p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/70 sm:p-8">
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div className="space-y-2">
             <label htmlFor="mermaid-prompt" className="text-sm font-semibold text-slate-700 dark:text-slate-200">
-              Prompt Mermaid to sketch a flow
+              Describe the diagram you need
             </label>
-            <input
+            <textarea
               id="mermaid-prompt"
-              type="text"
               value={prompt}
               onChange={(event) => setPrompt(event.target.value)}
-              placeholder="Example: graph TD; Start --> Decision{Go this way?}; Decision -->|Yes| PathA; Decision -->|No| PathB"
+              placeholder={promptPlaceholder}
+              rows={4}
               className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
               disabled={rendering}
             />
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Press Enter or hit render to update the diagram. Submitting a new prompt moves the previous render into the gallery.
+              We send your brief to the <code className="rounded bg-slate-900/80 px-1 py-0.5 text-[0.7rem] text-white">/obj</code>{' '}
+              helper so the LLM returns a ready-to-render Mermaid definition.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
@@ -172,7 +307,7 @@ export default function MermaidStudioPage() {
               disabled={rendering}
             >
               {rendering ? <ArrowPathIcon className="h-4 w-4 animate-spin" /> : <PlayIcon className="h-4 w-4" />}
-              <span>{rendering ? 'Rendering…' : 'Render diagram'}</span>
+              <span>{rendering ? 'Drafting…' : 'Generate diagram'}</span>
             </button>
             <button
               type="button"
@@ -182,6 +317,11 @@ export default function MermaidStudioPage() {
               <TrashIcon className="h-4 w-4" />
               <span>Clear</span>
             </button>
+            {model ? (
+              <span className="text-xs text-slate-500 dark:text-slate-400">
+                Powered by <span className="font-medium text-slate-700 dark:text-slate-200">{model}</span> via /obj
+              </span>
+            ) : null}
           </div>
         </form>
         {status ? (
@@ -199,11 +339,48 @@ export default function MermaidStudioPage() {
         ) : null}
       </section>
 
+      {mermaidSource ? (
+        <section className="space-y-3 rounded-3xl border border-slate-200 bg-white/90 p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/70 sm:p-8">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100">Generated Mermaid source</h2>
+              {diagramTitle ? (
+                <p className="text-sm text-slate-500 dark:text-slate-400">{diagramTitle}</p>
+              ) : null}
+            </div>
+            <button
+              type="button"
+              onClick={handleCopySource}
+              className="inline-flex items-center gap-2 rounded-full border border-slate-300 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-slate-600 transition hover:border-brand-400 hover:text-brand-600 dark:border-slate-700 dark:text-slate-200 dark:hover:border-brand-300 dark:hover:text-brand-200"
+            >
+              <ClipboardDocumentIcon className="h-4 w-4" />
+              <span>{copied ? 'Copied!' : 'Copy source'}</span>
+            </button>
+          </div>
+          <textarea
+            value={mermaidSource}
+            readOnly
+            spellCheck={false}
+            className="h-48 w-full rounded-2xl border border-slate-300 bg-slate-950/5 px-4 py-3 text-xs font-mono text-slate-700 shadow-inner transition dark:border-slate-700 dark:bg-slate-950/60 dark:text-slate-100"
+          />
+          {diagramNotes ? (
+            <p className="text-sm text-slate-500 dark:text-slate-400">{diagramNotes}</p>
+          ) : null}
+        </section>
+      ) : null}
+
       <section className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100">Live Mermaid canvas</h2>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="space-y-1">
+            <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100">Live Mermaid canvas</h2>
+            {diagramTitle ? (
+              <p className="text-sm text-slate-600 dark:text-slate-300">{diagramTitle}</p>
+            ) : null}
+          </div>
           {diagram?.prompt ? (
-            <span className="text-xs uppercase tracking-wide text-slate-400 dark:text-slate-500">{diagram.prompt}</span>
+            <span className="max-w-xs text-right text-xs uppercase tracking-wide text-slate-400 dark:text-slate-500">
+              {diagram.prompt}
+            </span>
           ) : null}
         </div>
         <div className="relative min-h-[16rem] overflow-hidden rounded-3xl border border-slate-200 bg-white/90 p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900/70">
@@ -225,7 +402,7 @@ export default function MermaidStudioPage() {
           ) : (
             !rendering && (
               <div className="flex h-full items-center justify-center text-sm text-slate-400 dark:text-slate-500">
-                No diagram rendered yet. Add a prompt above to see Mermaid in action.
+                No diagram rendered yet. Describe a scene above to see Mermaid in action.
               </div>
             )
           )}
@@ -256,7 +433,7 @@ export default function MermaidStudioPage() {
           </div>
         ) : (
           <div className="rounded-3xl border border-dashed border-slate-300 bg-slate-50/70 p-6 text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-300">
-            Render a diagram to start building your Mermaid gallery. Every submission tucks the previous render here for safekeeping.
+            Generate a diagram to start building your Mermaid gallery. Every submission tucks the previous render here for safekeeping.
           </div>
         )}
       </section>

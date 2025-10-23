@@ -223,6 +223,10 @@ export const experiences = [
       focus: 'focus-visible:ring-cyan-500/40',
     },
     logLabel: 'MermaidDisplay',
+    defaultModel: 'openai/gpt-oss-20b',
+    modelOptions: ['openai/gpt-oss-20b', 'openai/gpt-oss-120b'],
+    defaultBaseUrl: (getEnvValue('VITE_MERMAID_OBJ_BASE_URL') || FALLBACK_BASE_URL).replace(/\/$/, ''),
+    allowBaseUrlOverride: false,
   },
   {
     id: 'pizzamaker',
