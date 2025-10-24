@@ -53,6 +53,9 @@ export default function MermaidStudioPage({ experience }) {
         edgeLabelTextColor: '#1f2937',
       },
     })
+    mermaid.parseError = (err) => {
+      console.error('Mermaid parseError callback', err)
+    }
   }, [])
 
   useEffect(() => {
@@ -121,6 +124,20 @@ export default function MermaidStudioPage({ experience }) {
         throw new Error('Mermaid diagram missing from /obj response.')
       }
 
+      try {
+        await mermaid.parse(mermaidText)
+      } catch (parseError) {
+        console.error('Mermaid syntax error', parseError)
+        const firstLine =
+          typeof parseError?.message === 'string'
+            ? parseError.message.split('\n').find((line) => line.trim())
+            : ''
+        const friendlyMessage = firstLine
+          ? `Mermaid syntax error: ${firstLine.trim()}`
+          : 'Mermaid syntax error. Review the generated source.'
+        throw new Error(friendlyMessage)
+      }
+
       renderCounter.current += 1
       const renderId = `mermaid-diagram-${renderCounter.current}`
       const { svg } = await mermaid.render(renderId, mermaidText)
@@ -157,7 +174,9 @@ export default function MermaidStudioPage({ experience }) {
         })
         setStatus({
           type: 'error',
-          message: `Mermaid render failed: ${baseMessage}. Copy the generated source below or adjust your prompt.`,
+          message: `${baseMessage.startsWith('Mermaid syntax error') ? baseMessage : `Mermaid render failed: ${baseMessage}`}${
+            baseMessage.endsWith('.') ? '' : '.'
+          } Copy the generated source below or adjust your prompt.`,
         })
       } else {
         if (promptChanged && previousDiagram) {
