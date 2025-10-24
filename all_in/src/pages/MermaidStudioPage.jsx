@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import mermaid from 'mermaid'
 
 import MermaidCanvas from '../components/mermaid/MermaidCanvas'
 import MermaidGallery from '../components/mermaid/MermaidGallery'
@@ -17,6 +16,19 @@ import {
   decorateMermaidSvg,
 } from '../lib/mermaidStudio'
 
+let mermaidLoaderPromise = null
+
+async function loadMermaidModule() {
+  if (typeof window === 'undefined') {
+    throw new Error('Mermaid cannot load in a non-browser environment.')
+  }
+  if (!mermaidLoaderPromise) {
+    mermaidLoaderPromise = import('mermaid')
+  }
+  const module = await mermaidLoaderPromise
+  return module.default || module
+}
+
 export default function MermaidStudioPage({ experience }) {
   const [prompt, setPrompt] = useState('Show the interactions of The Office characters.')
   const [diagram, setDiagram] = useState(null)
@@ -26,35 +38,68 @@ export default function MermaidStudioPage({ experience }) {
   const [copied, setCopied] = useState(false)
 
   const renderCounter = useRef(0)
+  const mermaidApiRef = useRef(null)
 
   const normalizedBaseUrl = normalizeBaseUrl(experience?.defaultBaseUrl)
   const model = experience?.defaultModel || experience?.modelOptions?.[0] || ''
 
   useEffect(() => {
-    if (typeof window === 'undefined') return
-    mermaid.initialize({
-      startOnLoad: false,
-      securityLevel: 'loose',
-      theme: 'neutral',
-      flowchart: { useMaxWidth: false, htmlLabels: false, curve: 'basis' },
-      themeVariables: {
-        fontFamily: 'Inter, system-ui, sans-serif',
-        fontSize: '15px',
-        textColor: '#1f2937',
-        primaryTextColor: '#1f2937',
-        secondaryTextColor: '#1f2937',
-        nodeTextColor: '#1f2937',
-        labelTextColor: '#1f2937',
-        primaryColor: '#f8fafc',
-        secondaryColor: '#e2e8f0',
-        tertiaryColor: '#cbd5f5',
-        lineColor: '#64748b',
-        edgeLabelBackground: '#e2e8f0',
-        edgeLabelTextColor: '#1f2937',
+    if (typeof window === 'undefined') return undefined
+
+    let cancelled = false
+
+    setStatus((current) =>
+      current ?? {
+        type: 'info',
+        message: 'Loading the Mermaid renderer…',
       },
-    })
-    mermaid.parseError = (err) => {
-      console.error('Mermaid parseError callback', err)
+    )
+
+    loadMermaidModule()
+      .then((mermaidApi) => {
+        if (cancelled) return
+        mermaidApi.initialize({
+          startOnLoad: false,
+          securityLevel: 'loose',
+          theme: 'neutral',
+          flowchart: { useMaxWidth: false, htmlLabels: false, curve: 'basis' },
+          themeVariables: {
+            fontFamily: 'Inter, system-ui, sans-serif',
+            fontSize: '15px',
+            textColor: '#1f2937',
+            primaryTextColor: '#1f2937',
+            secondaryTextColor: '#1f2937',
+            nodeTextColor: '#1f2937',
+            labelTextColor: '#1f2937',
+            primaryColor: '#f8fafc',
+            secondaryColor: '#e2e8f0',
+            tertiaryColor: '#cbd5f5',
+            lineColor: '#64748b',
+            edgeLabelBackground: '#e2e8f0',
+            edgeLabelTextColor: '#1f2937',
+          },
+        })
+        mermaidApi.parseError = (err) => {
+          console.error('Mermaid parseError callback', err)
+        }
+        mermaidApiRef.current = mermaidApi
+        setStatus((current) =>
+          current?.type === 'info' && current.message.startsWith('Loading the Mermaid renderer')
+            ? null
+            : current,
+        )
+      })
+      .catch((error) => {
+        if (cancelled) return
+        console.error('Failed to load Mermaid', error)
+        setStatus({
+          type: 'error',
+          message: 'Mermaid failed to load. Refresh and try again.',
+        })
+      })
+
+    return () => {
+      cancelled = true
     }
   }, [])
 
@@ -97,6 +142,12 @@ export default function MermaidStudioPage({ experience }) {
       setDiagram(null)
     }
 
+    const mermaidApi = mermaidApiRef.current
+    if (!mermaidApi) {
+      setStatus({ type: 'info', message: 'Mermaid is still loading. Please wait a moment and try again.' })
+      return
+    }
+
     setRendering(true)
     setCopied(false)
     setStatus({ type: 'info', message: 'Drafting Mermaid markup via /obj…' })
@@ -125,7 +176,7 @@ export default function MermaidStudioPage({ experience }) {
       }
 
       try {
-        await mermaid.parse(mermaidText)
+        await mermaidApi.parse(mermaidText)
       } catch (parseError) {
         console.error('Mermaid syntax error', parseError)
         const firstLine =
@@ -140,7 +191,7 @@ export default function MermaidStudioPage({ experience }) {
 
       renderCounter.current += 1
       const renderId = `mermaid-diagram-${renderCounter.current}`
-      const { svg } = await mermaid.render(renderId, mermaidText)
+      const { svg } = await mermaidApi.render(renderId, mermaidText)
       const decoratedSvg = decorateMermaidSvg(svg)
 
       if (promptChanged && previousDiagram) {

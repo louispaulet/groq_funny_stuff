@@ -76,6 +76,9 @@ export default defineConfig({
             if (id.includes('/react/') || id.includes('react-dom')) return 'react'
             if (id.includes('marked') || id.includes('dompurify') || id.includes('highlight.js')) return 'markdown'
             if (id.includes('@heroicons')) return 'icons'
+            if (id.includes('node_modules/mermaid')) return 'mermaid'
+            if (id.includes('node_modules/katex')) return 'katex'
+            if (id.includes('node_modules/@zxing')) return 'zxing'
             if (id.includes('three') || id.includes('@react-three')) return 'stl'
           }
           return undefined

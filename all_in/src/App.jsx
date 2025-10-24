@@ -1,4 +1,4 @@
-import { Fragment } from 'react'
+import { Fragment, Suspense, lazy } from 'react'
 import { HashRouter, Navigate, Route, Routes } from 'react-router-dom'
 import AppShell from './components/layout/AppShell'
 import HomePage from './pages/HomePage'
@@ -27,7 +27,8 @@ import FlagFoundryPage from './pages/FlagFoundryPage'
 import SecondHandFoodMarketPage from './pages/SecondHandFoodMarketPage'
 import PongShowdownPage from './pages/PongShowdownPage'
 import DalleVsFluxPage from './pages/DalleVsFluxPage'
-import MermaidStudioPage from './pages/MermaidStudioPage'
+
+const MermaidStudioPage = lazy(() => import('./pages/MermaidStudioPage'))
 import ScrollToTop from './components/ScrollToTop'
 
 export default function App() {
@@ -116,7 +117,15 @@ export default function App() {
                   path={experience.path}
                   element={(
                     <ExperiencePage experience={experience}>
-                      <MermaidStudioPage experience={experience} />
+                      <Suspense
+                        fallback={(
+                          <div className="p-6 text-center text-slate-600 dark:text-slate-200">
+                            Loading Mermaid Studio…
+                          </div>
+                        )}
+                      >
+                        <MermaidStudioPage experience={experience} />
+                      </Suspense>
                     </ExperiencePage>
                   )}
                 />

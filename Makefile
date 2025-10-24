@@ -1,13 +1,16 @@
 ALLIN_DIR := all_in
 ALLIN_PORT := 5175
 
-.PHONY: install run test deploy clean
+.PHONY: install run test build deploy clean
 
 install:
 	cd $(ALLIN_DIR) && npm install
 
 run:
 	cd $(ALLIN_DIR) && npm run dev -- --host --port $(ALLIN_PORT) --strictPort
+
+build:
+	cd $(ALLIN_DIR) && npm run build
 
 test:
 	cd $(ALLIN_DIR) && npm run lint
