@@ -2,6 +2,7 @@ import {
   clearChunkedCookie,
   deleteCookie,
   getDocument,
+  flushCookieStorage,
   readChunkedCookie,
   readCookieValue,
   writeChunkedCookie,
@@ -251,6 +252,7 @@ export function flushAllCookies() {
     if (!name) return
     doc.cookie = `${name}=; path=/; max-age=0`
   })
+  flushCookieStorage()
 }
 
 export {
