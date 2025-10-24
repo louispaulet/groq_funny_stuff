@@ -1,4 +1,4 @@
-import { ArrowPathIcon, PlayIcon, TrashIcon } from '@heroicons/react/24/outline'
+import { ArrowPathIcon, PlayIcon, TrashIcon, XMarkIcon } from '@heroicons/react/24/outline'
 
 function statusClasses(type) {
   if (type === 'error') {
@@ -19,6 +19,7 @@ export default function MermaidPromptForm({
   onPromptChange,
   onSubmit,
   onClear,
+  onDismissStatus,
 }) {
   return (
     <section className="rounded-3xl border border-slate-200 bg-white/90 p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/70 sm:p-8">
@@ -67,7 +68,19 @@ export default function MermaidPromptForm({
       </form>
       {status ? (
         <div className={`mt-4 rounded-2xl border px-4 py-3 text-sm font-medium transition ${statusClasses(status.type)}`}>
-          {status.message}
+          <div className="flex items-start justify-between gap-4">
+            <p className="whitespace-pre-wrap text-left text-sm font-medium">{status.message}</p>
+            {onDismissStatus ? (
+              <button
+                type="button"
+                onClick={onDismissStatus}
+                className="inline-flex h-7 w-7 flex-none items-center justify-center rounded-full border border-slate-300 text-slate-500 transition hover:border-slate-400 hover:text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-500/40 dark:border-slate-600 dark:text-slate-300 dark:hover:border-slate-500 dark:hover:text-slate-100"
+                aria-label="Dismiss status"
+              >
+                <XMarkIcon className="h-4 w-4" />
+              </button>
+            ) : null}
+          </div>
         </div>
       ) : null}
     </section>

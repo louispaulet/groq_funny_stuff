@@ -70,6 +70,11 @@ export default function MermaidStudioPage({ experience }) {
   const diagramTitle = diagram?.title || ''
   const diagramNotes = diagram?.notes || ''
 
+  const handlePromptChange = (nextPrompt) => {
+    setPrompt(nextPrompt)
+    setStatus((current) => (current?.type === 'error' ? null : current))
+  }
+
   async function handleSubmit(event) {
     event.preventDefault()
     const trimmedPrompt = prompt.trim()
@@ -212,6 +217,10 @@ export default function MermaidStudioPage({ experience }) {
     setStatus({ type: 'info', message: 'Cleared the Mermaid gallery cookie for this browser.' })
   }
 
+  function handleDismissStatus() {
+    setStatus(null)
+  }
+
   const promptPlaceholder =
     experience?.promptPlaceholder || 'Example: Show the interactions of The Office characters.'
 
@@ -223,9 +232,10 @@ export default function MermaidStudioPage({ experience }) {
         rendering={rendering}
         model={model}
         status={status}
-        onPromptChange={setPrompt}
+        onPromptChange={handlePromptChange}
         onSubmit={handleSubmit}
         onClear={handleClearCurrent}
+        onDismissStatus={handleDismissStatus}
       />
       <MermaidSourcePanel
         mermaidSource={mermaidSource}
