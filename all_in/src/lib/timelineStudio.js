@@ -8,7 +8,6 @@ export const TIMELINE_RESPONSE_STRUCTURE = {
     summary: { type: 'string' },
     events: {
       type: 'array',
-      minItems: 4,
       items: {
         type: 'object',
         additionalProperties: false,
