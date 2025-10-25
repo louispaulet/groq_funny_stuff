@@ -77,7 +77,7 @@ export const TIMELINE_PRESET_SCENARIOS = [
   },
   {
     id: 'michelin-star-menu',
-    label: 'Michelin star menu',
+    label: '⭐ Michelin star menu',
     prompt:
       'Design a Michelin starred 7 course meal menu, give me a detailed descriptions of each of the 7 courses. The timeline is during the course of a 3h meal on a single day, at an optimal pace for maximal enjoyment.',
   },
