@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import GameOfLifeShowcase from '../components/home/GameOfLifeShowcase'
+import TimelineShowcase from '../components/home/TimelineShowcase'
 import { experiences } from '../config/experiences'
 
 const detailedCopyById = {
@@ -343,6 +344,13 @@ export default function HomePage() {
               View the DALL·E 3 vs Flux comparison
               <span aria-hidden>→</span>
             </Link>
+            <a
+              href="#timeline-lab"
+              className="inline-flex items-center gap-2 rounded-full border border-white/40 px-4 py-2 text-sm font-semibold text-white/90 transition hover:border-white/70 hover:bg-white/10"
+            >
+              Browse the Timeline Atelier
+              <span aria-hidden>↓</span>
+            </a>
             <span className="inline-flex items-center gap-2 rounded-full border border-dashed border-white/40 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white/80">
               New spotlight
             </span>
@@ -396,6 +404,8 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      <TimelineShowcase />
 
       <GameOfLifeShowcase />
 
