@@ -111,6 +111,7 @@ function EmotionEmojiCard({ entry }) {
 export default function EmotionEmojiFoundry({ svgApiBaseUrl }) {
   const [entries, setEntries] = useState(() => EMOTIONS.map(createEmotionEntry))
   const [generationState, setGenerationState] = useState({ running: false, completed: false })
+  const [countdownSeconds, setCountdownSeconds] = useState(0)
 
   const apiBaseUrl = useMemo(() => {
     const base = (svgApiBaseUrl || DEFAULT_BASE_URL || '').replace(/\/$/, '')
@@ -118,6 +119,7 @@ export default function EmotionEmojiFoundry({ svgApiBaseUrl }) {
   }, [svgApiBaseUrl])
 
   const timeoutsRef = useRef()
+  const countdownIntervalRef = useRef()
   const cancelledRef = useRef(false)
   const generationStateRef = useRef(generationState)
 
@@ -128,6 +130,38 @@ export default function EmotionEmojiFoundry({ svgApiBaseUrl }) {
       return nextState
     })
   }, [])
+
+  const clearCountdown = useCallback(() => {
+    if (countdownIntervalRef.current) {
+      clearInterval(countdownIntervalRef.current)
+      countdownIntervalRef.current = undefined
+    }
+    setCountdownSeconds(0)
+  }, [])
+
+  const beginCountdown = useCallback(
+    (durationMs) => {
+      const totalSeconds = Math.ceil(durationMs / 1000)
+      if (totalSeconds <= 0) {
+        clearCountdown()
+        return
+      }
+
+      clearCountdown()
+      const startedAt = Date.now()
+      setCountdownSeconds(totalSeconds)
+
+      countdownIntervalRef.current = setInterval(() => {
+        const elapsedSeconds = Math.floor((Date.now() - startedAt) / 1000)
+        const remaining = Math.max(totalSeconds - elapsedSeconds, 0)
+        setCountdownSeconds(remaining)
+        if (remaining <= 0) {
+          clearCountdown()
+        }
+      }, 250)
+    },
+    [clearCountdown],
+  )
 
   const updateEntry = useCallback((index, patch) => {
     setEntries((previous) =>
@@ -140,6 +174,7 @@ export default function EmotionEmojiFoundry({ svgApiBaseUrl }) {
       if (cancelledRef.current) return
       if (index >= EMOTIONS.length) {
         setTrackedGenerationState({ running: false, completed: true })
+        clearCountdown()
         timeoutsRef.current = undefined
         return
       }
@@ -178,12 +213,15 @@ export default function EmotionEmojiFoundry({ svgApiBaseUrl }) {
           })
         } finally {
           if (!cancelledRef.current) {
+            beginCountdown(LOAD_INTERVAL_MS)
             timeoutsRef.current = setTimeout(() => runGenerationStep(index + 1), LOAD_INTERVAL_MS)
+          } else {
+            clearCountdown()
           }
         }
       })()
     },
-    [apiBaseUrl, updateEntry, setTrackedGenerationState],
+    [apiBaseUrl, updateEntry, setTrackedGenerationState, beginCountdown, clearCountdown],
   )
 
   const startGeneration = useCallback(
@@ -195,10 +233,11 @@ export default function EmotionEmojiFoundry({ svgApiBaseUrl }) {
       setTrackedGenerationState({ running: true, completed: false })
 
       if (timeoutsRef.current) clearTimeout(timeoutsRef.current)
+      clearCountdown()
 
       timeoutsRef.current = setTimeout(() => runGenerationStep(0), 200)
     },
-    [runGenerationStep, setTrackedGenerationState],
+    [runGenerationStep, setTrackedGenerationState, clearCountdown],
   )
 
   useEffect(() => {
@@ -210,8 +249,9 @@ export default function EmotionEmojiFoundry({ svgApiBaseUrl }) {
     return () => {
       cancelledRef.current = true
       if (timeoutsRef.current) clearTimeout(timeoutsRef.current)
+      clearCountdown()
     }
-  }, [startGeneration])
+  }, [startGeneration, clearCountdown])
 
   const { running, completed } = generationState
   const statusLabel = running ? 'Running sequence…' : completed ? 'Completed — tap regenerate to refresh.' : 'Idle — tap regenerate to begin.'
@@ -240,6 +280,9 @@ export default function EmotionEmojiFoundry({ svgApiBaseUrl }) {
               <span aria-hidden>↻</span>
             </button>
             <p className="text-xs font-semibold uppercase tracking-[0.35em] text-amber-600 dark:text-amber-300">{statusLabel}</p>
+            {running && countdownSeconds > 0 ? (
+              <p className="text-xs font-semibold text-amber-600 dark:text-amber-300">Next request in {countdownSeconds}s</p>
+            ) : null}
             <p className="text-xs text-slate-500 dark:text-slate-400">
               Requests sleep for five seconds between calls to respect rate limits.
             </p>
