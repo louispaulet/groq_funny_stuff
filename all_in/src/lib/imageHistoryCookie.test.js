@@ -1,11 +1,51 @@
-import { beforeEach, describe, expect, test } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 import { clearImageHistory, readImageHistory, writeImageHistory } from './imageHistoryCookie'
 import { installCookieStub } from './testCookieStub'
 
 const cookieStub = installCookieStub()
 
+const originalLocalStorage =
+  typeof window !== 'undefined' && Object.prototype.hasOwnProperty.call(window, 'localStorage')
+    ? window.localStorage
+    : undefined
+
+function disableLocalStorage() {
+  if (typeof window === 'undefined') return
+  Object.defineProperty(window, 'localStorage', {
+    configurable: true,
+    value: {
+      getItem() {
+        return null
+      },
+      setItem() {
+        throw new Error('localStorage disabled for cookie chunking tests')
+      },
+      removeItem() {},
+      key() {
+        return null
+      },
+      get length() {
+        return 0
+      },
+    },
+  })
+}
+
 beforeEach(() => {
   cookieStub.reset()
+  disableLocalStorage()
+})
+
+afterEach(() => {
+  if (typeof window === 'undefined') return
+  if (originalLocalStorage === undefined) {
+    delete window.localStorage
+  } else {
+    Object.defineProperty(window, 'localStorage', {
+      configurable: true,
+      value: originalLocalStorage,
+    })
+  }
 })
 
 describe('image history cookie persistence', () => {
