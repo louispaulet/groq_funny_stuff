@@ -129,6 +129,17 @@ const detailedCopyById = {
       </p>
     </>
   ),
+  emotionfoundry: (
+    <>
+      <p>
+        😊 Emotion Emoji Foundry taps the <code className="rounded bg-slate-900/80 px-1 py-0.5 text-[0.7rem] text-white">/svg_deluxe</code>{' '}
+        route to choreograph seven expressive faces. Each request sleeps for five seconds so the free tier never panics while oss-120B sketches heart eyes, quivering lips, and joyful blushes.
+      </p>
+      <p>
+        Watch every emotion stream into a gallery with pacing controls, regenerate the full lineup on demand, and compare the AI&apos;s take on universal moods. It&apos;s a playful stress test for deluxe SVG rendering inside the studio shell. 🎭
+      </p>
+    </>
+  ),
   pizzamaker: (
     <>
       <p>
@@ -198,6 +209,7 @@ const tagsById = {
   mermaidstudio: ['diagramming', 'mermaid', 'cookie-gallery'],
   timelinestudio: ['diagramming', 'storytelling', 'obj-powered'],
   flagfoundry: ['image-based', 'svg-automation', 'slow-drip'],
+  emotionfoundry: ['image-based', 'svg-deluxe', 'emoji-lab'],
   pizzamaker: ['image-based', 'guided-prompts', 'culinary'],
   carmaker: ['image-based', 'cinematic', 'automotive'],
   newsanalyzer: ['chat-based', 'data-connected', 'real-time'],
@@ -224,7 +236,7 @@ const baseExperienceCategories = [
     id: 'svg',
     title: 'SVG Studios',
     description: 'Vector-first workspaces for programmatic art and evolving flags.',
-    experienceIds: ['svglab', 'flagfoundry'],
+    experienceIds: ['svglab', 'flagfoundry', 'emotionfoundry'],
   },
   {
     id: 'diagramming',
@@ -340,17 +352,6 @@ const heroStats = [
 ]
 
 const curatedSpotlights = [
-  {
-    id: 'mermaid',
-    eyebrow: '🧭 New · Diagramming',
-    title: 'Mermaid Display',
-    description:
-      'Sketch customer journeys, pipelines, or onboarding flows with pure Mermaid syntax. Each render saves to a live gallery so you can branch ideas without version fatigue.',
-    to: '/mermaid-studio',
-    cta: 'Open Mermaid Display',
-    badge: 'Cookie-backed gallery',
-    accent: 'from-sky-500/20 via-cyan-500/20 to-transparent',
-  },
   {
     id: 'timeline',
     eyebrow: '📜 New · Diagramming',

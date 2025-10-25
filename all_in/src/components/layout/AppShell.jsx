@@ -85,6 +85,7 @@ export default function AppShell({ children }) {
                   experience.id !== 'pizzamaker' &&
                   experience.id !== 'carmaker' &&
                   experience.id !== 'mermaidstudio' &&
+                  experience.id !== 'pokedex' &&
                   experience.id !== 'pongshowdown',
               )
               .map((experience) => (

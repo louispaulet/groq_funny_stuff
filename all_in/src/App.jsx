@@ -24,6 +24,7 @@ import PizzaMakerPage from './pages/PizzaMakerPage'
 import CarMakerPage from './pages/CarMakerPage'
 import SvgPlaygroundPage from './pages/SvgPlaygroundPage'
 import FlagFoundryPage from './pages/FlagFoundryPage'
+import EmotionEmojiFoundryPage from './pages/EmotionEmojiFoundryPage'
 import SecondHandFoodMarketPage from './pages/SecondHandFoodMarketPage'
 import PongShowdownPage from './pages/PongShowdownPage'
 import DalleVsFluxPage from './pages/DalleVsFluxPage'
@@ -129,6 +130,16 @@ export default function App() {
                   element={(
                     <ExperiencePage experience={experience}>
                       <FlagFoundryPage experience={experience} />
+                    </ExperiencePage>
+                  )}
+                />
+              ) : experience.id === 'emotionfoundry' ? (
+                <Route
+                  key={experience.id}
+                  path={experience.path}
+                  element={(
+                    <ExperiencePage experience={experience}>
+                      <EmotionEmojiFoundryPage experience={experience} />
                     </ExperiencePage>
                   )}
                 />
