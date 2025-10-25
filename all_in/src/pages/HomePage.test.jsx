@@ -17,6 +17,8 @@ describe('HomePage', () => {
       </MemoryRouter>
     )
 
+    expect(screen.getByRole('heading', { name: /Emotion Emoji Foundry/i })).toBeInTheDocument()
+
     const indexSection = document.getElementById('experience-index')
     expect(indexSection).not.toBeNull()
 

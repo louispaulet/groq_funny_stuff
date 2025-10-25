@@ -1,6 +1,7 @@
 import { useMemo, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import ExperienceCard from '../components/home/ExperienceCard'
+import EmotionEmojiFoundry from '../components/home/EmotionEmojiFoundry'
 import GameOfLifeShowcase from '../components/home/GameOfLifeShowcase'
 import { experiences } from '../config/experiences'
 
@@ -432,6 +433,16 @@ export default function HomePage() {
       ? 'Meet the Game of Life Lab'
       : `Meet ${randomHeroExperience.name}`
 
+  const svgDeluxeBaseUrl = useMemo(() => {
+    const flagFoundryExperience = experiences.find((experience) => experience.id === 'flagfoundry')
+    const baseUrl =
+      flagFoundryExperience?.svgApiBaseUrl ||
+      flagFoundryExperience?.defaultBaseUrl ||
+      'https://groq-endpoint.louispaulet13.workers.dev'
+
+    return baseUrl.replace(/\/$/, '')
+  }, [])
+
   const handleBrowseExperiences = () => {
     collectionsSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
@@ -601,6 +612,8 @@ export default function HomePage() {
           ))}
         </div>
       </section>
+
+      <EmotionEmojiFoundry svgApiBaseUrl={svgDeluxeBaseUrl} />
 
       <GameOfLifeShowcase />
 
