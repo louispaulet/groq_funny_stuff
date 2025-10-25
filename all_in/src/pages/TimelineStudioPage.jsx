@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { getExperienceById } from '../config/experiences'
 import { createRemoteObject } from '../lib/objectApi'
 import { normalizeBaseUrl } from '../lib/objectMakerUtils'
@@ -157,16 +157,25 @@ function formatTimelineDate(value) {
   return trimmed
 }
 
-function TimelineEventCard({ event, isLast, spacingAbove }) {
+function TimelineEventCard({ event, isLast, spacingAbove, variant = 'interactive' }) {
   const dateLabel = formatTimelineDate(event.date || '')
+  const containerClass =
+    variant === 'share'
+      ? 'relative rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_20px_40px_rgba(15,23,42,0.12)]'
+      : 'relative rounded-3xl border border-slate-200/70 bg-white/95 p-6 shadow-lg backdrop-blur-lg transition hover:-translate-y-1 hover:border-brand-300/80 hover:shadow-xl dark:border-slate-700 dark:bg-slate-900/70'
+  const dotClass =
+    variant === 'share'
+      ? 'border-brand-400 bg-gradient-to-br from-brand-500 via-purple-500 to-sky-500 text-white shadow-lg'
+      : 'border-white/60 bg-white text-brand-500 shadow-md dark:border-slate-700 dark:bg-slate-800/80'
+  const locationClass =
+    variant === 'share'
+      ? 'inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-500'
+      : 'inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:bg-slate-800/70 dark:text-slate-300'
+
   return (
     <li className="relative pl-16" style={spacingAbove ? { marginTop: spacingAbove } : undefined}>
       <span
-        className={`absolute left-0 top-1 flex h-10 w-10 items-center justify-center rounded-full border-2 text-lg shadow-sm ${
-          isLast
-            ? 'border-brand-500 bg-gradient-to-br from-brand-500 via-purple-500 to-sky-500 text-white'
-            : 'border-white/60 bg-white text-brand-500 shadow-md dark:border-slate-700 dark:bg-slate-800/80'
-        }`}
+        className={`absolute left-0 top-1 flex h-10 w-10 items-center justify-center rounded-full border-2 text-lg ${dotClass}`}
         aria-hidden
       >
         {event.icon ? event.icon : '✦'}
@@ -174,11 +183,11 @@ function TimelineEventCard({ event, isLast, spacingAbove }) {
       {!isLast ? (
         <span className="pointer-events-none absolute left-[18px] top-10 h-full w-[3px] bg-gradient-to-b from-brand-400 via-brand-500/40 to-transparent" aria-hidden />
       ) : null}
-      <div className="relative rounded-3xl border border-slate-200/70 bg-white/95 p-6 shadow-lg backdrop-blur-lg transition hover:-translate-y-1 hover:border-brand-300/80 hover:shadow-xl dark:border-slate-700 dark:bg-slate-900/70">
+      <div className={containerClass}>
         <div className="flex flex-wrap items-center justify-between gap-4">
           <p className="text-xs font-semibold uppercase tracking-[0.35em] text-brand-600 dark:text-brand-300">{dateLabel}</p>
           {event.location ? (
-            <p className="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:bg-slate-800/70 dark:text-slate-300">
+            <p className={locationClass}>
               {event.location}
             </p>
           ) : null}
@@ -190,7 +199,7 @@ function TimelineEventCard({ event, isLast, spacingAbove }) {
   )
 }
 
-function TimelineRail({ events }) {
+function TimelineRail({ events, variant = 'interactive' }) {
   if (!events?.length) {
     return (
       <div className="grid place-items-center rounded-3xl border border-dashed border-slate-300 bg-white/70 p-12 text-center text-slate-500 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-400">
@@ -249,9 +258,25 @@ function TimelineRail({ events }) {
           event={event}
           isLast={isLast}
           spacingAbove={spacingAbove}
+          variant={variant}
         />
       ))}
     </ol>
+  )
+}
+
+function TimelineSharePreview({ events, headline, summary }) {
+  return (
+    <div className="w-[960px] space-y-10 rounded-[3rem] border border-slate-200 bg-gradient-to-b from-slate-50 via-white to-slate-100 p-12 shadow-[0_40px_80px_rgba(15,23,42,0.12)]">
+      <div className="space-y-4 text-center">
+        <h2 className="text-3xl font-semibold text-slate-900">{headline || 'Timeline narrative'}</h2>
+        <p className="mx-auto max-w-2xl text-sm leading-relaxed text-slate-600">
+          {summary ||
+            'Scroll-worthy milestones mapped into a narrative sequence. Each event expands on the momentum, ready for sharing.'}
+        </p>
+      </div>
+      <TimelineRail events={events} variant="share" />
+    </div>
   )
 }
 
@@ -260,6 +285,7 @@ export default function TimelineStudioPage() {
   const normalizedBaseUrl = normalizeBaseUrl(objectMaker?.defaultBaseUrl)
   const model = objectMaker?.defaultModel || objectMaker?.modelOptions?.[0] || ''
 
+  const sharePreviewRef = useRef(null)
   const [prompt, setPrompt] = useState(FALLBACK_PROMPT)
   const [timeline, setTimeline] = useState(null)
   const [status, setStatus] = useState(null)
@@ -269,7 +295,7 @@ export default function TimelineStudioPage() {
 
   const timelineMetadata = useMemo(() => {
     if (!timeline || typeof timeline !== 'object') {
-      return { events: [], headline: '', summary: '', cta: null }
+      return { events: [], headline: '', summary: '' }
     }
     const events = Array.isArray(timeline.events)
       ? timeline.events
@@ -286,13 +312,6 @@ export default function TimelineStudioPage() {
       events,
       headline: typeof timeline.headline === 'string' ? timeline.headline.trim() : '',
       summary: typeof timeline.summary === 'string' ? timeline.summary.trim() : '',
-      cta:
-        timeline.cta && typeof timeline.cta === 'object'
-          ? {
-              label: typeof timeline.cta.label === 'string' ? timeline.cta.label.trim() : '',
-              url: typeof timeline.cta.url === 'string' ? timeline.cta.url.trim() : '',
-            }
-          : null,
     }
   }, [timeline])
 
@@ -372,7 +391,64 @@ export default function TimelineStudioPage() {
     setActiveScenarioId(null)
   }, [])
 
-  const { events, headline, summary, cta } = timelineMetadata
+  const { events, headline, summary } = timelineMetadata
+
+  const handleScrollTop = useCallback(() => {
+    if (typeof window === 'undefined') return
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [])
+
+  const handleShareTimeline = useCallback(async () => {
+    if (!events?.length) {
+      setStatus({ type: 'error', message: 'Generate a timeline before sharing a snapshot.' })
+      return
+    }
+
+    if (!sharePreviewRef.current) {
+      setStatus({ type: 'error', message: 'Timeline snapshot preview not ready. Try again in a moment.' })
+      return
+    }
+
+    if (typeof window === 'undefined') {
+      setStatus({ type: 'error', message: 'Sharing is only available in the browser.' })
+      return
+    }
+
+    try {
+      setStatus({ type: 'info', message: 'Preparing timeline snapshot…' })
+      if (document?.fonts?.ready) {
+        try {
+          await document.fonts.ready
+        } catch {
+          // ignore font load failures; fall back to system fonts
+        }
+      }
+      await new Promise((resolve) => requestAnimationFrame(resolve))
+      const targetNode = sharePreviewRef.current
+      const html2canvasModule = await import('html2canvas')
+      const html2canvas = html2canvasModule.default || html2canvasModule
+      const canvas = await html2canvas(targetNode, {
+        backgroundColor: '#f8fafc',
+        scale: Math.min(2, window.devicePixelRatio || 1.5),
+        useCORS: true,
+        width: targetNode.offsetWidth,
+        height: targetNode.offsetHeight,
+      })
+      const dataUrl = canvas.toDataURL('image/png')
+      const link = document.createElement('a')
+      link.href = dataUrl
+      link.download = 'timeline-snapshot.png'
+      link.rel = 'noopener'
+      link.click()
+      setStatus({ type: 'success', message: 'Snapshot downloaded. Share it with a friend!' })
+    } catch (error) {
+      console.error('Failed to share timeline snapshot', error)
+      setStatus({
+        type: 'error',
+        message: 'Could not capture the timeline automatically. Try a manual screenshot instead.',
+      })
+    }
+  }, [events])
 
   return (
     <div className="space-y-16 pb-24">
@@ -443,21 +519,35 @@ export default function TimelineStudioPage() {
 
           <TimelineRail events={events} />
 
-          {cta && cta.label && cta.url ? (
-            <div className="flex justify-center">
-              <a
-                href={cta.url}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-2 rounded-full border border-brand-400/70 bg-white px-5 py-2 text-sm font-semibold text-brand-600 shadow transition hover:border-brand-500 hover:text-brand-700 dark:border-brand-500/60 dark:bg-slate-900/70 dark:text-brand-300"
-              >
-                {cta.label}
-                <span aria-hidden>↗</span>
-              </a>
-            </div>
-          ) : null}
+          <div className="flex flex-wrap justify-center gap-3">
+            <button
+              type="button"
+              onClick={handleScrollTop}
+              className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-5 py-2 text-sm font-semibold text-slate-600 shadow transition hover:border-brand-400 hover:text-brand-600 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200"
+            >
+              ↑ Back to top
+            </button>
+            <button
+              type="button"
+              onClick={handleShareTimeline}
+              className="inline-flex items-center gap-2 rounded-full border border-brand-400/70 bg-gradient-to-r from-brand-500 via-purple-500 to-sky-500 px-5 py-2 text-sm font-semibold text-white shadow transition hover:shadow-lg"
+            >
+              Share timeline snapshot
+              <span aria-hidden>↗</span>
+            </button>
+          </div>
         </div>
       </section>
+
+      {events.length > 0 ? (
+        <div
+          aria-hidden
+          ref={sharePreviewRef}
+          style={{ position: 'fixed', top: '-10000px', left: '-10000px', pointerEvents: 'none' }}
+        >
+          <TimelineSharePreview events={events} headline={headline} summary={summary} />
+        </div>
+      ) : null}
     </div>
   )
 }
