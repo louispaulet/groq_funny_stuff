@@ -1,0 +1,17 @@
+export const tagsById = {
+  allergyfinder: ['chat-based', 'data-connected', 'safety-first'],
+  imagegen: ['image-based', 'flux-powered', 'gallery-backed'],
+  objectmaker: ['chat-based', 'schema-first', 'automation-ready'],
+  stlviewer: ['chat-based', '3d-workflow', 'viewer-embedded'],
+  pokedex: ['chat-based', 'fandom', 'api-powered'],
+  svglab: ['text-to-svg', 'gallery-backed', 'promptable'],
+  mermaidstudio: ['diagramming', 'mermaid', 'cookie-gallery'],
+  timelinestudio: ['diagramming', 'storytelling', 'obj-powered'],
+  flagfoundry: ['image-based', 'svg-automation', 'slow-drip'],
+  emotionfoundry: ['image-based', 'svg-deluxe', 'emoji-lab'],
+  pizzamaker: ['image-based', 'guided-prompts', 'culinary'],
+  carmaker: ['image-based', 'cinematic', 'automotive'],
+  newsanalyzer: ['chat-based', 'data-connected', 'real-time'],
+  sixdegrees: ['chat-based', 'humor', 'sequential'],
+  pongshowdown: ['arcade', 'structured-output', 'llama-4'],
+}
