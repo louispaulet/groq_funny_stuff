@@ -207,6 +207,30 @@ export const experiences = [
     svgApiBaseUrl: (getEnvValue('VITE_SVG_API_BASE_URL') || FALLBACK_BASE_URL).replace(/\/$/, ''),
   },
   {
+    id: 'emotionfoundry',
+    path: '/emotion-emoji-foundry',
+    name: 'Emotion Emoji Foundry',
+    headline: 'Stream deluxe emoji prompts without tripping rate limits.',
+    description:
+      'Queue seven foundational feelings through the /svg_deluxe route, spacing each call five seconds apart for smooth oss-120B rendering.',
+    badge: 'Emoji',
+    heroGradient: 'from-amber-500 to-pink-500',
+    panelAccent: 'bg-amber-100 text-amber-900 dark:bg-amber-500/20 dark:text-amber-200',
+    navAccent: {
+      gradient: 'from-amber-500 to-pink-500',
+      hover:
+        'hover:bg-amber-500/10 hover:text-amber-600 hover:border-amber-400/60 dark:hover:bg-amber-500/20 dark:hover:text-amber-200 dark:hover:border-amber-400/60',
+      focus: 'focus-visible:ring-amber-500/40',
+    },
+    defaultModel: 'svg-deluxe-route',
+    modelOptions: ['SVG deluxe worker route'],
+    allowBaseUrlOverride: false,
+    enableStlViewer: false,
+    enableBarcodeScanner: false,
+    logLabel: 'EmotionFoundry',
+    svgApiBaseUrl: (getEnvValue('VITE_SVG_API_BASE_URL') || FALLBACK_BASE_URL).replace(/\/$/, ''),
+  },
+  {
     id: 'mermaidstudio',
     path: '/mermaid-studio',
     name: 'Mermaid Display',

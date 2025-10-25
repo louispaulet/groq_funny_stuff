@@ -1,7 +1,6 @@
 import { useMemo, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import ExperienceCard from '../components/home/ExperienceCard'
-import EmotionEmojiFoundry from '../components/home/EmotionEmojiFoundry'
 import GameOfLifeShowcase from '../components/home/GameOfLifeShowcase'
 import { experiences } from '../config/experiences'
 
@@ -130,6 +129,17 @@ const detailedCopyById = {
       </p>
     </>
   ),
+  emotionfoundry: (
+    <>
+      <p>
+        😊 Emotion Emoji Foundry taps the <code className="rounded bg-slate-900/80 px-1 py-0.5 text-[0.7rem] text-white">/svg_deluxe</code>{' '}
+        route to choreograph seven expressive faces. Each request sleeps for five seconds so the free tier never panics while oss-120B sketches heart eyes, quivering lips, and joyful blushes.
+      </p>
+      <p>
+        Watch every emotion stream into a gallery with pacing controls, regenerate the full lineup on demand, and compare the AI&apos;s take on universal moods. It&apos;s a playful stress test for deluxe SVG rendering inside the studio shell. 🎭
+      </p>
+    </>
+  ),
   pizzamaker: (
     <>
       <p>
@@ -199,6 +209,7 @@ const tagsById = {
   mermaidstudio: ['diagramming', 'mermaid', 'cookie-gallery'],
   timelinestudio: ['diagramming', 'storytelling', 'obj-powered'],
   flagfoundry: ['image-based', 'svg-automation', 'slow-drip'],
+  emotionfoundry: ['image-based', 'svg-deluxe', 'emoji-lab'],
   pizzamaker: ['image-based', 'guided-prompts', 'culinary'],
   carmaker: ['image-based', 'cinematic', 'automotive'],
   newsanalyzer: ['chat-based', 'data-connected', 'real-time'],
@@ -225,7 +236,7 @@ const baseExperienceCategories = [
     id: 'svg',
     title: 'SVG Studios',
     description: 'Vector-first workspaces for programmatic art and evolving flags.',
-    experienceIds: ['svglab', 'flagfoundry'],
+    experienceIds: ['svglab', 'flagfoundry', 'emotionfoundry'],
   },
   {
     id: 'diagramming',
@@ -433,16 +444,6 @@ export default function HomePage() {
       ? 'Meet the Game of Life Lab'
       : `Meet ${randomHeroExperience.name}`
 
-  const svgDeluxeBaseUrl = useMemo(() => {
-    const flagFoundryExperience = experiences.find((experience) => experience.id === 'flagfoundry')
-    const baseUrl =
-      flagFoundryExperience?.svgApiBaseUrl ||
-      flagFoundryExperience?.defaultBaseUrl ||
-      'https://groq-endpoint.louispaulet13.workers.dev'
-
-    return baseUrl.replace(/\/$/, '')
-  }, [])
-
   const handleBrowseExperiences = () => {
     collectionsSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
@@ -612,8 +613,6 @@ export default function HomePage() {
           ))}
         </div>
       </section>
-
-      <EmotionEmojiFoundry svgApiBaseUrl={svgDeluxeBaseUrl} />
 
       <GameOfLifeShowcase />
 
