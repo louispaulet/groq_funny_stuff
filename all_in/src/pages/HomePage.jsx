@@ -107,6 +107,18 @@ const detailedCopyById = {
       </p>
     </>
   ),
+  timelinestudio: (
+    <>
+      <p>
+        📜 Timeline Studio choreographs narrative arcs through Groq&apos;s <code className="rounded bg-slate-900/80 px-1 py-0.5 text-[0.7rem] text-white">/obj</code> route. Pick a preset brief
+        or write your own and Chronicle returns sequenced milestones with dates, descriptions, and optional calls to action.
+      </p>
+      <p>
+        Remix prompts to compare how each story unfolds in a scrolling rail—perfect for launch retrospectives, historical
+        exhibits, or product journeys that benefit from cinematic pacing. ⏱️
+      </p>
+    </>
+  ),
   flagfoundry: (
     <>
       <p>
@@ -184,6 +196,7 @@ const tagsById = {
   pokedex: ['chat-based', 'fandom', 'api-powered'],
   svglab: ['text-to-svg', 'gallery-backed', 'promptable'],
   mermaidstudio: ['diagramming', 'mermaid', 'cookie-gallery'],
+  timelinestudio: ['diagramming', 'storytelling', 'obj-powered'],
   flagfoundry: ['image-based', 'svg-automation', 'slow-drip'],
   pizzamaker: ['image-based', 'guided-prompts', 'culinary'],
   carmaker: ['image-based', 'cinematic', 'automotive'],
@@ -218,6 +231,13 @@ const baseExperienceCategories = [
     title: 'Diagram Studios',
     description: 'Prompt Mermaid to map flows and keep every render close by.',
     experienceIds: ['mermaidstudio'],
+    extraLinks: [
+      {
+        id: 'timeline-studio',
+        name: 'Timeline Studio',
+        to: '/timeline-studio',
+      },
+    ],
   },
   {
     id: 'visuals',
@@ -330,6 +350,17 @@ const curatedSpotlights = [
     cta: 'Open Mermaid Display',
     badge: 'Cookie-backed gallery',
     accent: 'from-sky-500/20 via-cyan-500/20 to-transparent',
+  },
+  {
+    id: 'timeline',
+    eyebrow: '📜 New · Diagramming',
+    title: 'Timeline Studio',
+    description:
+      'Compose narrative timelines with Chronicle and the /obj route. Explore curated scenarios or write your own brief to produce scrollable, date-rich stories.',
+    to: '/timeline-studio',
+    cta: 'Launch Timeline Studio',
+    badge: 'Chronicle-powered',
+    accent: 'from-amber-500/25 via-orange-500/20 to-transparent',
   },
   {
     id: 'bank-holiday',
@@ -513,6 +544,16 @@ export default function HomePage() {
                         <span aria-hidden>↗</span>
                       </Link>
                     ))}
+                  {(category.extraLinks ?? []).map((link) => (
+                    <Link
+                      key={link.id}
+                      to={link.to}
+                      className="inline-flex items-center gap-1 rounded-full border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-brand-500 hover:bg-brand-50 hover:text-brand-600 dark:border-slate-700 dark:text-slate-300 dark:hover:border-brand-400/60 dark:hover:bg-brand-500/10"
+                    >
+                      <span>{link.name}</span>
+                      <span aria-hidden>↗</span>
+                    </Link>
+                  ))}
                   {category.id === 'play' ? (
                     <Link
                       to="/game-of-life-lab"
