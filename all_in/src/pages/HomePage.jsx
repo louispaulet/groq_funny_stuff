@@ -353,17 +353,6 @@ const heroStats = [
 
 const curatedSpotlights = [
   {
-    id: 'mermaid',
-    eyebrow: '🧭 New · Diagramming',
-    title: 'Mermaid Display',
-    description:
-      'Sketch customer journeys, pipelines, or onboarding flows with pure Mermaid syntax. Each render saves to a live gallery so you can branch ideas without version fatigue.',
-    to: '/mermaid-studio',
-    cta: 'Open Mermaid Display',
-    badge: 'Cookie-backed gallery',
-    accent: 'from-sky-500/20 via-cyan-500/20 to-transparent',
-  },
-  {
     id: 'timeline',
     eyebrow: '📜 New · Diagramming',
     title: 'Timeline Studio',

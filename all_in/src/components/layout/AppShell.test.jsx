@@ -38,6 +38,7 @@ describe('AppShell', () => {
           'flagfoundry',
           'pizzamaker',
           'carmaker',
+          'pokedex',
           'mermaidstudio',
           'pongshowdown',
         ].includes(experience.id)
