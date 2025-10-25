@@ -55,7 +55,7 @@ const EMOTIONS = [
   },
 ]
 
-const isTestEnvironment = typeof process !== 'undefined' && process.env?.NODE_ENV === 'test'
+const isTestEnvironment = typeof globalThis !== 'undefined' && globalThis.process?.env?.NODE_ENV === 'test'
 
 const buildDataUrl = (payload) => {
   const inline = typeof payload?.dataUrl === 'string' ? payload.dataUrl.trim() : ''

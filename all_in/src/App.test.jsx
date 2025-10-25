@@ -268,6 +268,7 @@ describe('App routing', () => {
       'objectmaker',
       'imagegen',
       'svglab',
+      'emotionfoundry',
       'mermaidstudio',
       'flagfoundry',
       'pizzamaker',
