@@ -1,3 +1,4 @@
+import { useRef } from 'react'
 import { Link } from 'react-router-dom'
 import ExperienceCard from '../components/home/ExperienceCard'
 import GameOfLifeShowcase from '../components/home/GameOfLifeShowcase'
@@ -366,6 +367,12 @@ const curatedSpotlights = [
 ]
 
 export default function HomePage() {
+  const collectionsSectionRef = useRef(null)
+
+  const handleBrowseExperiences = () => {
+    collectionsSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
   return (
     <div className="space-y-16">
       <section className="relative overflow-hidden rounded-[3rem] bg-gradient-to-br from-brand-600 via-indigo-600 to-slate-900 px-8 py-14 text-white shadow-2xl">
@@ -384,13 +391,14 @@ export default function HomePage() {
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
-              <Link
-                to="/experience-index"
+              <button
+                type="button"
+                onClick={handleBrowseExperiences}
                 className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2 text-sm font-semibold text-brand-600 shadow transition hover:bg-brand-50"
               >
                 Browse experiences
                 <span aria-hidden>→</span>
-              </Link>
+              </button>
               <Link
                 to="/game-of-life-lab"
                 className="inline-flex items-center gap-2 rounded-full border border-white/40 px-4 py-2 text-sm font-semibold text-white transition hover:border-white/60 hover:bg-white/10"
@@ -471,7 +479,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="space-y-8">
+      <section ref={collectionsSectionRef} id="experience-collections" className="space-y-8">
         <header className="space-y-3">
           <p className="text-xs font-semibold uppercase tracking-[0.35em] text-slate-400 dark:text-slate-500">Collections</p>
           <h2 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">Choose the flow that fits your next sprint</h2>
@@ -523,7 +531,7 @@ export default function HomePage() {
 
       <GameOfLifeShowcase />
 
-      <section className="space-y-8">
+      <section id="experience-index" className="space-y-8">
         <header className="space-y-3">
           <p className="text-xs font-semibold uppercase tracking-[0.35em] text-slate-400 dark:text-slate-500">Studio index</p>
           <h2 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">Explore every workspace in depth</h2>
