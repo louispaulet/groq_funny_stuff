@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import ExperienceCard from '../components/home/ExperienceCard'
 import GameOfLifeShowcase from '../components/home/GameOfLifeShowcase'
 import { experiences } from '../config/experiences'
 
@@ -281,368 +282,275 @@ const gameOfLifeLabDetails = (
 
 const gameOfLifeLabTags = ['cellular-automaton', 'toroidal-grid', 'live-controls']
 
+const heroHighlights = [
+  {
+    title: 'Curated copilots',
+    description:
+      'Launch assistants tuned for research, image generation, structured data, and story-driven experiments — all inside the same shell.',
+  },
+  {
+    title: 'Shared workflows',
+    description:
+      'Every project inherits chat history, saved galleries, and quick actions so you can hop between labs without context loss.',
+  },
+  {
+    title: 'Playful iteration',
+    description:
+      'Mix benchmark labs with satirical pop-ups and toroidal automata. The Studio thrives on experimentation and delight.',
+  },
+]
+
+const heroStats = [
+  {
+    value: `${experiences.length}`,
+    label: 'Studios & labs',
+    detail: 'From allergy intelligence to cinematic car shoots.',
+  },
+  {
+    value: `${experienceCategories.length}`,
+    label: 'Curated collections',
+    detail: 'Browse by workflow, data source, or creative medium.',
+  },
+  {
+    value: '< 1s',
+    label: 'Groq response time',
+    detail: 'Lightning-fast generations power every workspace.',
+  },
+]
+
+const curatedSpotlights = [
+  {
+    id: 'mermaid',
+    eyebrow: '🧭 New · Diagramming',
+    title: 'Mermaid Display',
+    description:
+      'Sketch customer journeys, pipelines, or onboarding flows with pure Mermaid syntax. Each render saves to a live gallery so you can branch ideas without version fatigue.',
+    to: '/mermaid-studio',
+    cta: 'Open Mermaid Display',
+    badge: 'Cookie-backed gallery',
+    accent: 'from-sky-500/20 via-cyan-500/20 to-transparent',
+  },
+  {
+    id: 'bank-holiday',
+    eyebrow: '📅 Spotlight · Planning utility',
+    title: 'Bank Holiday Planner',
+    description:
+      'Blend paid leave with official holidays across the USA, UK, France, Spain, and Italy. Compare streaks, track PTO totals, and export a ready-to-share itinerary.',
+    to: '/bank-holiday-planner',
+    cta: 'Launch planner',
+    badge: 'Calendar heatmap included',
+    accent: 'from-emerald-500/25 via-teal-500/20 to-transparent',
+  },
+  {
+    id: 'second-hand-market',
+    eyebrow: '🧤 Pop-up · Satirical',
+    title: 'Second-Hand Food Market',
+    description:
+      'Wander a cursed bazaar of pre-loved cuisine. It is a playful stress test for Groq chat, UI theming, and whimsical copywriting inside the Studio shell.',
+    to: '/second-hand-food-market',
+    cta: 'Visit the market',
+    badge: 'Curses included',
+    accent: 'from-rose-500/25 via-amber-400/20 to-transparent',
+  },
+  {
+    id: 'dalle-vs-flux',
+    eyebrow: '🎨 Research drop',
+    title: 'Flux vs DALL·E Comparison Lab',
+    description:
+      'Inspect 186 paired prompts rendered by Groq-hosted Flux Schnell and OpenAI’s DALL·E 3. Scan cost breakdowns, gallery pagination, and prompt-level metadata.',
+    to: '/dalle-vs-flux',
+    cta: 'Open comparison',
+    badge: 'Cost transparency',
+    accent: 'from-fuchsia-500/25 via-violet-500/20 to-transparent',
+  },
+]
+
 export default function HomePage() {
-
   return (
-    <div className="space-y-12">
-      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-brand-600 to-indigo-700 px-8 py-12 text-white shadow-xl">
-        <div className="max-w-5xl space-y-6">
-          <div className="space-y-2">
-            <p className="text-sm uppercase tracking-[0.3em] text-white/80">Groq Studio</p>
-            <h1 className="text-3xl font-semibold sm:text-4xl">All experiences in one workspace.</h1>
-            <p className="text-base text-white/90">
-              Launch the assistants that fit your workflow—whether you are prototyping JSON schemas, staging cinematic imagery,
-              or diving into trusted domain research. ⚡️
-            </p>
-          </div>
-          <div className="grid gap-4 pt-2 sm:grid-cols-2">
-            {experienceCategories.map((category) => (
-              <div
-                key={category.id}
-                className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/10 p-5 shadow-sm backdrop-blur transition hover:border-white/20 hover:bg-white/15"
-              >
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/5 via-white/0 to-white/10 opacity-0 transition group-hover:opacity-100" aria-hidden />
-                <div className="relative space-y-3">
-                  <div>
-                    <h2 className="text-lg font-semibold text-white">{category.title}</h2>
-                    <p className="text-sm text-white/80">{category.description}</p>
-                  </div>
-                  <div className="flex flex-wrap gap-2 pt-1">
-                    {category.experienceIds
-                      .map((experienceId) => experienceLookup[experienceId])
-                      .filter(Boolean)
-                      .map((experience) => (
-                        <Link
-                          key={experience.id}
-                          to={experience.path}
-                          className="inline-flex items-center gap-1 rounded-full bg-white/90 px-3 py-1.5 text-xs font-semibold text-slate-900 transition hover:bg-white"
-                        >
-                          <span>{experience.name}</span>
-                          <span aria-hidden>↗</span>
-                        </Link>
-                      ))}
-                    {category.id === 'play' ? (
-                      <Link
-                        to="/game-of-life-lab"
-                        className="inline-flex items-center gap-1 rounded-full bg-white/90 px-3 py-1.5 text-xs font-semibold text-slate-900 transition hover:bg-white"
-                      >
-                        <span>Game of Life Lab</span>
-                        <span aria-hidden>↗</span>
-                      </Link>
-                    ) : null}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="flex flex-wrap items-center gap-3 pt-4">
-            <Link
-              to="/dalle-vs-flux"
-              className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-brand-600 shadow transition hover:bg-brand-50"
-            >
-              View the DALL·E 3 vs Flux comparison
-              <span aria-hidden>→</span>
-            </Link>
-            <span className="inline-flex items-center gap-2 rounded-full border border-dashed border-white/40 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white/80">
-              New spotlight
-            </span>
-          </div>
-        </div>
-        <div className="absolute -right-24 -top-24 h-56 w-56 rounded-full bg-white/10 blur-3xl" aria-hidden />
-      </section>
-
-      <section className="relative overflow-hidden rounded-[2.75rem] border border-cyan-200 bg-white/90 px-6 py-8 shadow-sm transition hover:shadow-xl dark:border-cyan-800 dark:bg-slate-900/80 sm:px-8 sm:py-10">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(6,182,212,0.18),_transparent_60%)] dark:bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.22),_transparent_65%)]" aria-hidden />
-        <div className="relative z-10 grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] lg:items-center">
-          <div className="space-y-4">
-            <p className="inline-flex items-center gap-2 rounded-full bg-cyan-500/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.35em] text-cyan-600 dark:text-cyan-300">
-              🧭 New · Diagramming
-            </p>
-            <h2 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">Mermaid Display</h2>
-            <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-              Compose Mermaid syntax, press render, and watch the canvas update without leaving the AllIn shell. Perfect for flowcharts, customer journeys, and system diagrams that need to evolve in seconds.
-            </p>
-            <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-              Each iteration sweeps the previous diagram into a cookie-backed gallery, complete with live SVG thumbnails so you can revisit every branch of your idea.
-            </p>
-            <div className="flex flex-wrap items-center gap-3">
-              <Link
-                to="/mermaid-studio"
-                className="inline-flex items-center gap-2 rounded-full bg-cyan-600 px-4 py-2 text-sm font-semibold text-white shadow transition hover:bg-cyan-500"
-              >
-                Open Mermaid Display
-                <span aria-hidden>→</span>
-              </Link>
-              <span className="inline-flex items-center gap-2 rounded-full border border-dashed border-cyan-500/40 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-cyan-600 dark:text-cyan-300">
-                Cookie-backed gallery
-              </span>
-            </div>
-          </div>
-          <div className="relative hidden justify-center lg:flex">
-            <div className="relative w-full max-w-sm overflow-hidden rounded-3xl border border-cyan-200 bg-white/90 p-6 text-left shadow-sm dark:border-cyan-700 dark:bg-slate-900/80">
-              <div className="absolute -top-6 right-6 h-20 w-20 rounded-full bg-cyan-500/20 blur-3xl" aria-hidden />
-              <p className="text-xs uppercase tracking-[0.4em] text-cyan-500 dark:text-cyan-300">Sample prompt</p>
-              <pre className="mt-3 rounded-2xl bg-slate-900/90 p-4 text-[0.7rem] leading-relaxed text-cyan-100">
-                {`graph TD
-  Idea[Sketch prompt]
-  Idea --> Review{Happy with it?}
-  Review -- Yes --> Render[Render diagram]
-  Review -- No --> Iterate[Adjust prompt]`}
-              </pre>
-              <p className="mt-4 text-xs text-slate-500 dark:text-slate-400">
-                Rendering saves the previous diagram to the gallery so you can compare every iteration.
+    <div className="space-y-16">
+      <section className="relative overflow-hidden rounded-[3rem] bg-gradient-to-br from-brand-600 via-indigo-600 to-slate-900 px-8 py-14 text-white shadow-2xl">
+        <div className="absolute -left-24 top-0 h-72 w-72 rounded-full bg-white/20 blur-3xl" aria-hidden />
+        <div className="absolute bottom-0 right-0 h-80 w-80 rounded-full bg-indigo-400/30 blur-3xl" aria-hidden />
+        <div className="relative grid gap-12 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] lg:items-start">
+          <div className="space-y-6">
+            <div className="space-y-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.4em] text-white/80">Groq AllIn Studio</p>
+              <h1 className="text-3xl font-semibold leading-tight sm:text-4xl lg:text-5xl">
+                Design, research, and play — every project in one inviting launchpad.
+              </h1>
+              <p className="text-base text-white/85 sm:text-lg">
+                Spin up structured JSON briefs, cinematic Flux renders, diagramming consoles, and tongue-in-cheek pop-ups without
+                leaving the Groq shell. Every workspace streams Groq-accelerated responses so you can iterate while ideas are hot.
               </p>
             </div>
+            <div className="flex flex-wrap gap-3">
+              <Link
+                to="/experience-index"
+                className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2 text-sm font-semibold text-brand-600 shadow transition hover:bg-brand-50"
+              >
+                Browse experiences
+                <span aria-hidden>→</span>
+              </Link>
+              <Link
+                to="/game-of-life-lab"
+                className="inline-flex items-center gap-2 rounded-full border border-white/40 px-4 py-2 text-sm font-semibold text-white transition hover:border-white/60 hover:bg-white/10"
+              >
+                Meet the Game of Life Lab
+                <span aria-hidden>↗</span>
+              </Link>
+            </div>
           </div>
+          <div className="space-y-6 rounded-3xl border border-white/15 bg-white/10 p-6 shadow-xl backdrop-blur">
+            <h2 className="text-sm font-semibold uppercase tracking-[0.35em] text-white/80">Why AllIn Studio?</h2>
+            <ul className="space-y-5">
+              {heroHighlights.map((item) => (
+                <li key={item.title} className="space-y-2">
+                  <p className="text-sm font-semibold uppercase tracking-wide text-white/80">{item.title}</p>
+                  <p className="text-sm leading-relaxed text-white/85">{item.description}</p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+        <div className="relative z-10 grid gap-4 pt-12 sm:grid-cols-2 lg:grid-cols-3">
+          {heroStats.map((stat) => (
+            <div
+              key={stat.label}
+              className="rounded-2xl border border-white/15 bg-white/10 p-5 text-left shadow-lg transition hover:border-white/25"
+            >
+              <p className="text-3xl font-semibold sm:text-4xl">{stat.value}</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.4em] text-white/70">{stat.label}</p>
+              <p className="pt-2 text-sm text-white/80">{stat.detail}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="space-y-8">
+        <header className="space-y-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.35em] text-slate-400 dark:text-slate-500">Spotlights</p>
+          <h2 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">Fresh drops and featured experiments</h2>
+          <p className="text-sm text-slate-600 dark:text-slate-400">
+            These rotating highlights surface the latest utilities, research labs, and satire-filled sandboxes built on Groq.
+            Explore them to feel how each idea pushes the shared Studio shell in a new direction.
+          </p>
+        </header>
+        <div className="grid gap-6 lg:grid-cols-2">
+          {curatedSpotlights.map((spotlight) => (
+            <article
+              key={spotlight.id}
+              className="group relative overflow-hidden rounded-3xl border border-slate-200 bg-white/90 p-7 shadow-sm transition hover:-translate-y-1 hover:border-slate-300 hover:shadow-2xl dark:border-slate-800 dark:bg-slate-900/90"
+            >
+              <div
+                className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${spotlight.accent} opacity-0 transition duration-500 group-hover:opacity-100`}
+                aria-hidden
+              />
+              <div className="relative space-y-5">
+                <div className="flex flex-wrap items-center gap-3">
+                  <span className="inline-flex items-center rounded-full bg-slate-900/5 px-3 py-1 text-xs font-semibold text-slate-500 dark:bg-slate-100/10 dark:text-slate-300">
+                    {spotlight.eyebrow}
+                  </span>
+                  <span className="inline-flex items-center rounded-full border border-dashed border-slate-300 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:border-slate-600 dark:text-slate-300">
+                    {spotlight.badge}
+                  </span>
+                </div>
+                <div className="space-y-3">
+                  <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100">{spotlight.title}</h3>
+                  <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-300">{spotlight.description}</p>
+                </div>
+                <Link
+                  to={spotlight.to}
+                  className="inline-flex items-center gap-2 rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-brand-500 hover:bg-brand-50 hover:text-brand-600 dark:border-slate-700 dark:text-slate-200 dark:hover:border-brand-400/60 dark:hover:bg-brand-500/10"
+                >
+                  {spotlight.cta}
+                  <span aria-hidden>→</span>
+                </Link>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="space-y-8">
+        <header className="space-y-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.35em] text-slate-400 dark:text-slate-500">Collections</p>
+          <h2 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">Choose the flow that fits your next sprint</h2>
+          <p className="text-sm text-slate-600 dark:text-slate-400">
+            Each collection bundles experiences that share a mindset — from structured schema builders to image-first ateliers.
+            Jump in through a category or dive straight into a workspace.
+          </p>
+        </header>
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {experienceCategories.map((category) => (
+            <div
+              key={category.id}
+              className="group relative overflow-hidden rounded-3xl border border-slate-200 bg-white/90 p-6 shadow-sm transition hover:-translate-y-1 hover:border-slate-300 hover:shadow-xl dark:border-slate-800 dark:bg-slate-900/90"
+            >
+              <div className="space-y-4">
+                <div className="space-y-1">
+                  <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">{category.title}</h3>
+                  <p className="text-sm text-slate-600 dark:text-slate-300">{category.description}</p>
+                </div>
+                <div className="flex flex-wrap gap-2 pt-1">
+                  {category.experienceIds
+                    .map((experienceId) => experienceLookup[experienceId])
+                    .filter(Boolean)
+                    .map((experience) => (
+                      <Link
+                        key={experience.id}
+                        to={experience.path}
+                        className="inline-flex items-center gap-1 rounded-full border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-brand-500 hover:bg-brand-50 hover:text-brand-600 dark:border-slate-700 dark:text-slate-300 dark:hover:border-brand-400/60 dark:hover:bg-brand-500/10"
+                      >
+                        <span>{experience.name}</span>
+                        <span aria-hidden>↗</span>
+                      </Link>
+                    ))}
+                  {category.id === 'play' ? (
+                    <Link
+                      to="/game-of-life-lab"
+                      className="inline-flex items-center gap-1 rounded-full border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-brand-500 hover:bg-brand-50 hover:text-brand-600 dark:border-slate-700 dark:text-slate-300 dark:hover:border-brand-400/60 dark:hover:bg-brand-500/10"
+                    >
+                      <span>Game of Life Lab</span>
+                      <span aria-hidden>↗</span>
+                    </Link>
+                  ) : null}
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 
       <GameOfLifeShowcase />
 
-      <section className="relative overflow-hidden rounded-[2.75rem] border border-slate-200 bg-white/90 px-6 py-8 shadow-sm transition hover:shadow-xl dark:border-slate-800 dark:bg-slate-900/80 sm:px-8 sm:py-10">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(99,102,241,0.08),_transparent_60%)] dark:bg-[radial-gradient(circle_at_top,_rgba(99,102,241,0.18),_transparent_65%)]" aria-hidden />
-        <div className="relative z-10 grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] lg:items-center">
-          <div className="space-y-4">
-            <p className="inline-flex items-center gap-2 rounded-full bg-brand-500/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.35em] text-brand-600 dark:text-brand-300">
-              🧤 Pop-up · Satirical
-            </p>
-            <h2 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">Second-Hand Food Market</h2>
-            <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-              Browse a cursed catalogue of pre-loved cuisine featuring seven-eighths of a pizza, artisanal bath water, and other
-              hygienically questionable delights. The storefront leans into cozy flea-market vibes while staying inside the AllIn shell.
-            </p>
-            <div className="flex flex-wrap items-center gap-3">
-              <Link
-                to="/second-hand-food-market"
-                className="inline-flex items-center gap-2 rounded-full bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow transition hover:bg-brand-500"
-              >
-                Visit the market
-                <span aria-hidden>→</span>
-              </Link>
-              <span className="inline-flex items-center gap-2 rounded-full border border-dashed border-brand-500/40 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-brand-600 dark:text-brand-300">
-                Curses included
-              </span>
-            </div>
-          </div>
-          <div className="relative hidden justify-center lg:flex">
-            <div className="relative w-full max-w-sm overflow-hidden rounded-3xl border border-slate-200 bg-slate-50/80 p-6 text-left shadow-sm dark:border-slate-700 dark:bg-slate-900/80">
-              <div className="absolute -top-8 right-4 h-16 w-16 rounded-full bg-brand-500/20 blur-2xl" aria-hidden />
-              <p className="text-xs uppercase tracking-[0.4em] text-slate-400 dark:text-slate-500">Sample listings</p>
-              <ul className="mt-4 space-y-3 text-sm text-slate-600 dark:text-slate-300">
-                <li className="flex items-start gap-2">
-                  <span aria-hidden>🍕</span>
-                  <span>
-                    <span className="font-semibold">Foot-Stomped Pizza</span>
-                    <span className="block text-xs text-slate-500 dark:text-slate-400">Pairs best with a tetanus shot.</span>
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span aria-hidden>🥤</span>
-                  <span>
-                    <span className="font-semibold">Lipstick Latte (Half)</span>
-                    <span className="block text-xs text-slate-500 dark:text-slate-400">Now with bonus secrets.</span>
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span aria-hidden>🧴</span>
-                  <span>
-                    <span className="font-semibold">Bath Water Vial</span>
-                    <span className="block text-xs text-slate-500 dark:text-slate-400">Serve chilled. Question why later.</span>
-                  </span>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="relative mx-auto max-w-6xl overflow-hidden rounded-[2.75rem] bg-gradient-to-br from-emerald-500 via-cyan-500 to-sky-500 px-6 py-8 text-white shadow-xl sm:px-8 sm:py-10">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.25),_transparent_55%)]" aria-hidden />
-        <div className="relative z-10 grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] lg:items-center">
-          <div className="space-y-4">
-            <p className="text-xs uppercase tracking-[0.35em] text-white/80">Spotlight · New utility</p>
-            <h2 className="text-2xl font-semibold sm:text-3xl">BHP — Bank Holiday Planner</h2>
-            <p className="text-sm leading-relaxed text-white/80">
-              Optimize your paid leave around official bank holidays for the USA, UK, France, Spain, and Italy. BHP prepares a
-              strict
-              <code className="mx-1 rounded bg-white/20 px-1 py-0.5 text-[0.7rem] font-semibold text-white">/obj</code>
-              schema request so the assistant can return PTO blocks, totals, and a comparison against randomly scattered leave
-              days.
-            </p>
-            <div className="flex flex-wrap items-center gap-3">
-              <Link
-                to="/bank-holiday-planner"
-                className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-emerald-700 shadow transition hover:bg-emerald-50"
-              >
-                Launch planner
-                <span aria-hidden>→</span>
-              </Link>
-              <span className="inline-flex items-center gap-2 rounded-full bg-white/20 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white/80">
-                Calendar heatmap included
-              </span>
-            </div>
-          </div>
-          <div className="relative hidden justify-center lg:flex">
-            <div className="relative w-full max-w-xs rounded-3xl border border-white/25 bg-white/10 p-6 text-left shadow-lg">
-              <div className="absolute -top-10 right-6 h-20 w-20 rounded-full bg-white/10 blur-2xl" aria-hidden />
-              <p className="text-xs uppercase tracking-[0.35em] text-white/70">Sample itinerary</p>
-              <div className="mt-4 space-y-4">
-                <div className="rounded-2xl bg-white/10 p-3 shadow-sm">
-                  <p className="text-xs uppercase tracking-[0.4em] text-white/60">Stretch</p>
-                  <p className="text-lg font-semibold text-white">Apr 27 → May 12</p>
-                  <p className="text-xs text-white/70">Wrap two long weekends into a 16 day break.</p>
-                </div>
-                <dl className="grid grid-cols-2 gap-3 text-white">
-                  <div>
-                    <dt className="text-[0.65rem] uppercase tracking-[0.3em] text-white/60">PTO Used</dt>
-                    <dd className="text-xl font-semibold">6 days</dd>
-                  </div>
-                  <div>
-                    <dt className="text-[0.65rem] uppercase tracking-[0.3em] text-white/60">Coverage</dt>
-                    <dd className="text-xl font-semibold">16 days</dd>
-                  </div>
-                  <div className="col-span-2">
-                    <dt className="text-[0.65rem] uppercase tracking-[0.3em] text-white/60">Next best option</dt>
-                    <dd className="text-sm text-white/75">
-                      4 PTO days · 11 days off total — BHP highlights why the top plan wins.
-                    </dd>
-                  </div>
-                </dl>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="space-y-10">
+      <section className="space-y-8">
         <header className="space-y-3">
-          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Deep dive into each workspace ✨</h2>
+          <p className="text-xs font-semibold uppercase tracking-[0.35em] text-slate-400 dark:text-slate-500">Studio index</p>
+          <h2 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">Explore every workspace in depth</h2>
           <p className="text-sm text-slate-600 dark:text-slate-400">
-            Every experience shares the core Groq Studio shell, but the long-form briefs below highlight their data sources,
-            inline tools, and standout workflows so you can choose the right copilot for the moment. 🎯
+            Long-form briefs, embedded galleries, and structured prompts give each project its own personality. Browse the full
+            roster and pick the copilots that match your next build.
           </p>
         </header>
-        <div className="space-y-8">
+        <div className="grid gap-8 xl:grid-cols-2">
           {experiences.map((experience) => {
             const detailedCopy = detailedCopyById[experience.id] ?? <p>{experience.description}</p>
             const tags = tagsById[experience.id] ?? []
-            const modelOptions = Array.isArray(experience.modelOptions) ? experience.modelOptions : []
 
             return (
-              <article
+              <ExperienceCard
                 key={experience.id}
-                className="group relative overflow-hidden rounded-3xl border border-slate-200 bg-white/90 p-8 shadow-sm transition hover:shadow-xl dark:border-slate-800 dark:bg-slate-900"
-              >
-                <div
-                  className="pointer-events-none absolute inset-0 opacity-0 transition-opacity group-hover:opacity-100"
-                  aria-hidden
-                >
-                  <div className="absolute -top-20 right-0 h-40 w-40 rounded-full bg-brand-500/10 blur-3xl" />
-                  <div className="absolute -bottom-24 left-6 h-36 w-36 rounded-full bg-slate-400/10 blur-3xl" />
-                </div>
-                <div className="relative space-y-5">
-                  <div className="flex flex-wrap items-center gap-4">
-                    <div className="flex flex-col gap-2">
-                      <div className={`h-1 w-16 rounded-full bg-gradient-to-r ${experience.heroGradient}`} aria-hidden />
-                      <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">{experience.name}</h3>
-                    </div>
-                    <span
-                      className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${experience.panelAccent}`}
-                    >
-                      {experience.badge}
-                    </span>
-                    <Link
-                      to={experience.path}
-                      className="ml-auto inline-flex items-center gap-2 rounded-full border border-slate-300 px-3 py-1 text-sm font-medium text-slate-700 transition hover:border-brand-500 hover:bg-brand-50 hover:text-brand-600 dark:border-slate-700 dark:text-slate-200 dark:hover:border-brand-400/60 dark:hover:bg-brand-500/10"
-                    >
-                      Enter workspace
-                      <span aria-hidden>→</span>
-                    </Link>
-                  </div>
-                  <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{experience.headline}</p>
-                  <div className="space-y-3 text-sm leading-relaxed text-slate-600 dark:text-slate-300">{detailedCopy}</div>
-                  {tags.length > 0 && (
-                    <div className="flex flex-wrap gap-2 pt-2">
-                      {tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="inline-flex items-center rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:border-slate-700 dark:text-slate-300"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                  {modelOptions.length > 0 && (
-                    <div className="text-xs uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                      {modelOptions.join(' • ')}
-                    </div>
-                  )}
-                </div>
-              </article>
+                experience={experience}
+                detailedCopy={detailedCopy}
+                tags={tags}
+              />
             )
           })}
-          <article className="group relative overflow-hidden rounded-3xl border border-slate-200 bg-white/90 p-8 shadow-sm transition hover:shadow-xl dark:border-slate-800 dark:bg-slate-900">
+          <article className="group relative overflow-hidden rounded-3xl border border-slate-200 bg-white/90 p-8 shadow-sm transition hover:-translate-y-1 hover:border-slate-300 hover:shadow-2xl dark:border-slate-800 dark:bg-slate-900/90">
             <div
-              className="pointer-events-none absolute inset-0 opacity-0 transition-opacity group-hover:opacity-100"
+              className="pointer-events-none absolute inset-0 bg-gradient-to-br from-sky-500/20 via-cyan-500/20 to-transparent opacity-0 transition duration-500 group-hover:opacity-100"
               aria-hidden
-            >
-              <div className="absolute -top-20 right-0 h-40 w-40 rounded-full bg-fuchsia-500/10 blur-3xl" />
-              <div className="absolute -bottom-24 left-6 h-36 w-36 rounded-full bg-amber-400/10 blur-3xl" />
-            </div>
-            <div className="relative space-y-5">
-              <div className="flex flex-wrap items-center gap-4">
-                <div className="flex flex-col gap-2">
-                  <div className="h-1 w-16 rounded-full bg-gradient-to-r from-fuchsia-500 via-amber-400 to-rose-500" aria-hidden />
-                  <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Flux vs DALL·E Comparison Lab</h3>
-                </div>
-                <span className="inline-flex items-center rounded-full bg-fuchsia-100 px-3 py-1 text-xs font-semibold text-fuchsia-800 dark:bg-fuchsia-500/20 dark:text-fuchsia-200">
-                  Research drop
-                </span>
-                <Link
-                  to="/dalle-vs-flux"
-                  className="ml-auto inline-flex items-center gap-2 rounded-full border border-slate-300 px-3 py-1 text-sm font-medium text-slate-700 transition hover:border-fuchsia-500 hover:bg-fuchsia-50 hover:text-fuchsia-600 dark:border-slate-700 dark:text-slate-200 dark:hover:border-fuchsia-400/60 dark:hover:bg-fuchsia-500/10"
-                >
-                  Open comparison
-                  <span aria-hidden>→</span>
-                </Link>
-              </div>
-              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-                See how Groq-hosted Flux Schnell stacks up against OpenAI’s latest DALL·E 3 release across shared prompts, styles, and budgets.
-              </p>
-              <div className="space-y-3 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-                <p>
-                  We logged 186 matched prompts and streamed both renders via public endpoints. Flux Schnell ran on GroqCloud for free,
-                  while the DALL·E 3 set consumed $30 of credits — a practical look at cost-per-image trade-offs.
-                </p>
-                <p>
-                  The gallery batches ten comparisons per page for quick scanning, and every tile links to the original export so you can inspect details, brushwork, and color handling up close.
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-2 pt-2">
-                <span className="inline-flex items-center rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:border-slate-700 dark:text-slate-300">
-                  image-benchmark
-                </span>
-                <span className="inline-flex items-center rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:border-slate-700 dark:text-slate-300">
-                  pagination-ready
-                </span>
-                <span className="inline-flex items-center rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:border-slate-700 dark:text-slate-300">
-                  cost-transparency
-                </span>
-              </div>
-              <div className="text-xs uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                Flux Schnell (GroqCloud) • DALL·E 3 (OpenAI) • 186 prompts tracked
-              </div>
-            </div>
-          </article>
-          <article className="group relative overflow-hidden rounded-3xl border border-slate-200 bg-white/90 p-8 shadow-sm transition hover:shadow-xl dark:border-slate-800 dark:bg-slate-900">
-            <div
-              className="pointer-events-none absolute inset-0 opacity-0 transition-opacity group-hover:opacity-100"
-              aria-hidden
-            >
-              <div className="absolute -top-20 right-0 h-40 w-40 rounded-full bg-sky-500/10 blur-3xl" />
-              <div className="absolute -bottom-24 left-6 h-36 w-36 rounded-full bg-cyan-400/10 blur-3xl" />
-            </div>
+            />
             <div className="relative space-y-5">
               <div className="flex flex-wrap items-center gap-4">
                 <div className="flex flex-col gap-2">
@@ -654,17 +562,17 @@ export default function HomePage() {
                 </span>
                 <Link
                   to="/game-of-life-lab"
-                  className="ml-auto inline-flex items-center gap-2 rounded-full border border-slate-300 px-3 py-1 text-sm font-medium text-slate-700 transition hover:border-sky-500 hover:bg-sky-50 hover:text-sky-600 dark:border-slate-700 dark:text-slate-200 dark:hover:border-sky-400/60 dark:hover:bg-sky-500/10"
+                  className="ml-auto inline-flex items-center gap-2 rounded-full border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-700 transition hover:border-sky-500 hover:bg-sky-50 hover:text-sky-600 dark:border-slate-700 dark:text-slate-200 dark:hover:border-sky-400/60 dark:hover:bg-sky-500/10"
                 >
                   Enter workspace
                   <span aria-hidden>→</span>
                 </Link>
               </div>
-              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Explore Conway&apos;s classic automaton with live controls and toroidal wrap.</p>
-              <div className="space-y-3 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-                {gameOfLifeLabDetails}
-              </div>
-              {gameOfLifeLabTags.length > 0 && (
+              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+                Explore Conway&apos;s classic automaton with live controls, toroidal wrap, and curated presets.
+              </p>
+              <div className="space-y-3 text-sm leading-relaxed text-slate-600 dark:text-slate-300">{gameOfLifeLabDetails}</div>
+              {gameOfLifeLabTags.length > 0 ? (
                 <div className="flex flex-wrap gap-2 pt-2">
                   {gameOfLifeLabTags.map((tag) => (
                     <span
@@ -675,8 +583,8 @@ export default function HomePage() {
                     </span>
                   ))}
                 </div>
-              )}
-              <div className="text-xs uppercase tracking-wider text-slate-400 dark:text-slate-500">
+              ) : null}
+              <div className="text-xs uppercase tracking-[0.35em] text-slate-400 dark:text-slate-500">
                 Toroidal wrap • Live controls • Preset seeds
               </div>
             </div>
