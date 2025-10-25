@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useMemo, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import ExperienceCard from '../components/home/ExperienceCard'
 import GameOfLifeShowcase from '../components/home/GameOfLifeShowcase'
@@ -397,8 +397,40 @@ const curatedSpotlights = [
   },
 ]
 
+const heroExperienceOptions = [
+  ...experiences
+    .filter((experience) => experience.path && experience.name)
+    .map((experience) => ({
+      id: experience.id,
+      path: experience.path,
+      name: experience.name,
+    })),
+  {
+    id: 'game-of-life-lab',
+    path: '/game-of-life-lab',
+    name: 'Game of Life Lab',
+  },
+]
+
 export default function HomePage() {
   const collectionsSectionRef = useRef(null)
+  const randomHeroExperience = useMemo(() => {
+    if (heroExperienceOptions.length === 0) {
+      return {
+        id: 'game-of-life-lab',
+        path: '/game-of-life-lab',
+        name: 'Game of Life Lab',
+      }
+    }
+
+    const randomIndex = Math.floor(Math.random() * heroExperienceOptions.length)
+    return heroExperienceOptions[randomIndex]
+  }, [])
+
+  const heroCtaLabel =
+    randomHeroExperience.id === 'game-of-life-lab'
+      ? 'Meet the Game of Life Lab'
+      : `Meet ${randomHeroExperience.name}`
 
   const handleBrowseExperiences = () => {
     collectionsSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -431,10 +463,10 @@ export default function HomePage() {
                 <span aria-hidden>→</span>
               </button>
               <Link
-                to="/game-of-life-lab"
+                to={randomHeroExperience.path}
                 className="inline-flex items-center gap-2 rounded-full border border-white/40 px-4 py-2 text-sm font-semibold text-white transition hover:border-white/60 hover:bg-white/10"
               >
-                Meet the Game of Life Lab
+                {heroCtaLabel}
                 <span aria-hidden>↗</span>
               </Link>
             </div>
