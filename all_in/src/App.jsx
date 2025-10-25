@@ -28,6 +28,7 @@ import SecondHandFoodMarketPage from './pages/SecondHandFoodMarketPage'
 import PongShowdownPage from './pages/PongShowdownPage'
 import DalleVsFluxPage from './pages/DalleVsFluxPage'
 import MermaidStudioPage from './pages/MermaidStudioPage'
+import TimelineStudioPage from './pages/TimelineStudioPage'
 import ScrollToTop from './components/ScrollToTop'
 
 export default function App() {
@@ -42,6 +43,7 @@ export default function App() {
             <Route path="/second-hand-food-market" element={<SecondHandFoodMarketPage />} />
             <Route path="/game-of-life-lab" element={<GameOfLifeLabPage />} />
             <Route path="/dalle-vs-flux" element={<DalleVsFluxPage />} />
+            <Route path="/timeline-studio" element={<TimelineStudioPage />} />
             {experiences.map((experience) =>
               experience.id === 'allergyfinder' ? (
                 <Fragment key={experience.id}>
