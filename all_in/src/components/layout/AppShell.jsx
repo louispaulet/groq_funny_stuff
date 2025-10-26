@@ -1,5 +1,6 @@
+import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
-import { MoonIcon, SunIcon, UserCircleIcon } from '@heroicons/react/24/outline'
+import { Bars3Icon, MoonIcon, SunIcon, UserCircleIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import { experiences } from '../../config/experiences'
 import { useTheme } from '../../theme'
 
@@ -20,7 +21,7 @@ function ThemeToggle() {
 }
 
 function defaultNavClasses({ isActive }) {
-  const base = 'inline-flex items-center rounded-full border px-4 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900'
+  const base = 'inline-flex items-center whitespace-nowrap rounded-full border px-4 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900'
   const focus = 'focus-visible:ring-brand-500/40'
   if (isActive) {
     return `${base} border-transparent bg-brand-600 text-white shadow ${focus}`
@@ -33,7 +34,7 @@ function experienceNavClasses(accent) {
   const hover = accent?.hover || 'hover:bg-brand-500/10 hover:text-brand-600 hover:border-brand-400/60'
   const focus = accent?.focus || 'focus-visible:ring-brand-500/40'
   return ({ isActive }) => {
-    const base = 'inline-flex items-center rounded-full border px-4 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900'
+    const base = 'inline-flex items-center whitespace-nowrap rounded-full border px-4 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900'
     if (isActive) {
       return `${base} border-transparent bg-gradient-to-r ${gradient} text-white shadow ${focus}`
     }
@@ -55,7 +56,23 @@ function profileNavClasses({ isActive }) {
   return `${base} border-slate-300 bg-white/80 hover:border-brand-500/60 hover:bg-brand-500/10 hover:text-brand-600 dark:border-slate-700 dark:bg-slate-800/70`
 }
 
+const includedExperience = (experience) =>
+  experience.id !== 'objectmaker' &&
+  experience.id !== 'stlviewer' &&
+  experience.id !== 'sixdegrees' &&
+  experience.id !== 'imagegen' &&
+  experience.id !== 'svglab' &&
+  experience.id !== 'flagfoundry' &&
+  experience.id !== 'pizzamaker' &&
+  experience.id !== 'carmaker' &&
+  experience.id !== 'mermaidstudio' &&
+  experience.id !== 'pokedex' &&
+  experience.id !== 'pongshowdown'
+
 export default function AppShell({ children }) {
+  const [mobileNavOpen, setMobileNavOpen] = useState(false)
+  const primaryExperiences = experiences.filter(includedExperience)
+
   return (
     <div className="min-h-screen flex flex-col">
       <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:border-slate-800 dark:bg-slate-900/70">
@@ -69,32 +86,26 @@ export default function AppShell({ children }) {
               <div className="text-lg font-semibold text-slate-900 dark:text-slate-100">AllIn Studio</div>
             </div>
           </NavLink>
+          <button
+            type="button"
+            className="inline-flex items-center justify-center rounded-full border border-slate-300 bg-white/80 p-2 text-slate-600 shadow-sm transition hover:border-brand-500/60 hover:bg-brand-500/10 hover:text-brand-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-200 md:hidden"
+            onClick={() => setMobileNavOpen((open) => !open)}
+            aria-label="Toggle navigation menu"
+            aria-expanded={mobileNavOpen}
+          >
+            {mobileNavOpen ? <XMarkIcon className="h-5 w-5" /> : <Bars3Icon className="h-5 w-5" />}
+          </button>
           <nav className="hidden items-center gap-2 md:flex">
             <NavLink to="/" className={defaultNavClasses} end>
               Overview
             </NavLink>
-            {experiences
-              .filter(
-                experience =>
-                  experience.id !== 'objectmaker' &&
-                  experience.id !== 'stlviewer' &&
-                  experience.id !== 'sixdegrees' &&
-                  experience.id !== 'imagegen' &&
-                  experience.id !== 'svglab' &&
-                  experience.id !== 'flagfoundry' &&
-                  experience.id !== 'pizzamaker' &&
-                  experience.id !== 'carmaker' &&
-                  experience.id !== 'mermaidstudio' &&
-                  experience.id !== 'pokedex' &&
-                  experience.id !== 'pongshowdown',
-              )
-              .map((experience) => (
+            {primaryExperiences.map((experience) => (
               <NavLink
                 key={experience.id}
                 to={experience.path}
                 className={experienceNavClasses(experience.navAccent)}
               >
-                {experience.name}
+                {experience.navLabel ?? experience.name}
               </NavLink>
             ))}
             <NavLink to="/about" className={defaultNavClasses}>About</NavLink>
@@ -107,6 +118,37 @@ export default function AppShell({ children }) {
             <ThemeToggle />
           </div>
         </div>
+        {mobileNavOpen && (
+          <div className="border-t border-slate-200 bg-white/95 px-4 py-4 shadow-sm dark:border-slate-800 dark:bg-slate-900/95 md:hidden">
+            <nav className="mx-auto flex w-full max-w-6xl flex-col gap-2">
+              <NavLink
+                to="/"
+                className={defaultNavClasses}
+                end
+                onClick={() => setMobileNavOpen(false)}
+              >
+                Overview
+              </NavLink>
+              {primaryExperiences.map((experience) => (
+                <NavLink
+                  key={experience.id}
+                  to={experience.path}
+                  className={experienceNavClasses(experience.navAccent)}
+                  onClick={() => setMobileNavOpen(false)}
+                >
+                  {experience.navLabel ?? experience.name}
+                </NavLink>
+              ))}
+              <NavLink
+                to="/about"
+                className={defaultNavClasses}
+                onClick={() => setMobileNavOpen(false)}
+              >
+                About
+              </NavLink>
+            </nav>
+          </div>
+        )}
       </header>
       <main className="flex-1">
         <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
