@@ -105,7 +105,7 @@ export default function AppShell({ children }) {
                 to={experience.path}
                 className={experienceNavClasses(experience.navAccent)}
               >
-                {experience.name}
+                {experience.navLabel ?? experience.name}
               </NavLink>
             ))}
             <NavLink to="/about" className={defaultNavClasses}>About</NavLink>
@@ -136,7 +136,7 @@ export default function AppShell({ children }) {
                   className={experienceNavClasses(experience.navAccent)}
                   onClick={() => setMobileNavOpen(false)}
                 >
-                  {experience.name}
+                  {experience.navLabel ?? experience.name}
                 </NavLink>
               ))}
               <NavLink

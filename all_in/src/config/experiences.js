@@ -210,6 +210,7 @@ export const experiences = [
     id: 'emotionfoundry',
     path: '/emotion-emoji-foundry',
     name: 'Emotion Emoji Foundry',
+    navLabel: 'Emotion Emoji',
     headline: 'Stream deluxe emoji prompts without tripping rate limits.',
     description:
       'Queue seven foundational feelings through the /svg_deluxe route, spacing each call five seconds apart for smooth oss-120B rendering.',
