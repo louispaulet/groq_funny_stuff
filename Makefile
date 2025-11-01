@@ -2,12 +2,12 @@ ALLIN_DIR := all_in
 ALLIN_PORT := 5175
 INSTALL_STAMP := $(ALLIN_DIR)/node_modules/.install.stamp
 
-.PHONY: install run build lint test check deploy clean
+.PHONY: install run build lint test check deploy clean sitemap
 
 install: $(INSTALL_STAMP)
 
 $(INSTALL_STAMP): $(ALLIN_DIR)/package-lock.json
-	cd $(ALLIN_DIR) && npm install
+	cd $(ALLIN_DIR) && npm install --legacy-peer-deps
 	touch $(INSTALL_STAMP)
 
 run:
@@ -24,7 +24,10 @@ test: install
 
 check: lint test
 
-deploy: install
+sitemap: install
+	cd $(ALLIN_DIR) && npm run generate:sitemap
+
+deploy: sitemap
 	cd $(ALLIN_DIR) && npm run deploy
 
 clean:

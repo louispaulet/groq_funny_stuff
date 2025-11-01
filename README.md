@@ -56,9 +56,10 @@ Groq AllIn Studio is the flagship experience in this repo: a single React worksp
 * Install dependencies: `make install`
 * Run the studio locally: `make run` (defaults to port `5175` with `--host` enabled)
 * Lint and test: `make lint` / `make test`
-* Build or deploy: `make build` / `make deploy` (deploys the latest build to Cloudflare Pages)
+* Build or deploy: `make build` / `make deploy` (deploy runs a sitemap refresh before publishing to Cloudflare Pages)
 * Clean dependencies: `make clean`
 * Need a fresh install? `make clean install` removes the cached stamp and reinstalls packages.
+* Update sitemap without deploying: `make sitemap` (or `npm run generate:sitemap` in `all_in/`).
 
 All commands simply shell into `all_in/` and wrap the corresponding npm scripts, so you can run them directly if you prefer.【F:Makefile†L1-L31】
 
