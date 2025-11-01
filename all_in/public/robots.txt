@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://groq-allin.thefrenchartist.dev/sitemap.xml

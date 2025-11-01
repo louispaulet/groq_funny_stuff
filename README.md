@@ -9,6 +9,8 @@ Groq AllIn Studio is the flagship experience in this repo: a single React worksp
 * Core chat behaviour (conversation history, barcode scanning, cookie persistence, and Groq API calls) is abstracted by `useChatSession`, which normalizes base URLs, injects AllergyFinder context, and calls the shared `/chat` worker endpoint via `callRemoteChat`. Structured generations reuse `createRemoteObject` to negotiate `/obj` paths with schema-aware retries.【F:all_in/src/components/chat/useChatSession.js†L22-L360】【F:all_in/src/lib/remoteChat.js†L1-L83】【F:all_in/src/lib/objectApi.js†L1-L128】【F:all_in/src/lib/objectApi.js†L129-L205】
 * The Cloudflare Worker that backs the studio exposes focused routes—`/chat`, `/flavor-finder`, `/news`, `/flux`, `/svg`, `/svg_deluxe`, and `/obj`—letting each experience call the same low-latency services with zero bespoke wiring.【F:all_in/src/pages/AboutPage.jsx†L3-L162】
 * `MetadataManager` centralizes page titles, descriptions, canonical URLs, and social tags via `react-helmet-async`, auto-populating entries for every experience route.【F:all_in/src/seo/MetadataManager.jsx†L1-L146】
+* Static SEO assets (`robots.txt`, `sitemap.xml`) live in `all_in/public/` so Vite copies them directly into every Pages deployment.【F:all_in/public/robots.txt†L1-L4】【F:all_in/public/sitemap.xml†L1-L106】
+* Refresh the sitemap whenever routes change: `npm run generate:sitemap` regenerates `public/sitemap.xml` from the route configuration (honours `SITE_URL` if set).【F:all_in/scripts/generate-sitemap.mjs†L1-L129】
 
 ## Cloud worker routes
 
