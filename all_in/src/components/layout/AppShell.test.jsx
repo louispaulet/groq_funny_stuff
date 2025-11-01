@@ -27,7 +27,7 @@ describe('AppShell', () => {
   test('renders experience shortcuts in header nav', () => {
     renderShell()
     const [headerNav] = screen.getAllByRole('navigation')
-    const visibleNames = experiences
+    const visibleLabels = experiences
       .filter((experience) =>
         ![
           'objectmaker',
@@ -43,10 +43,10 @@ describe('AppShell', () => {
           'pongshowdown',
         ].includes(experience.id)
       )
-      .map((exp) => exp.name)
+      .map((exp) => exp.navLabel ?? exp.name)
 
-    visibleNames.forEach((name) => {
-      expect(screen.getAllByRole('link', { name })).not.toHaveLength(0)
+    visibleLabels.forEach((label) => {
+      expect(screen.getAllByRole('link', { name: label })).not.toHaveLength(0)
     })
 
     expect(headerNav).not.toHaveTextContent(/Object Maker/i)

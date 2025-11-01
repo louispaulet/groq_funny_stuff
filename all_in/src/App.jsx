@@ -1,5 +1,5 @@
 import { Fragment } from 'react'
-import { HashRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import AppShell from './components/layout/AppShell'
 import HomePage from './pages/HomePage'
 import ExperiencePage from './pages/ExperiencePage'
@@ -31,11 +31,13 @@ import DalleVsFluxPage from './pages/DalleVsFluxPage'
 import MermaidStudioPage from './pages/MermaidStudioPage'
 import TimelineStudioPage from './pages/TimelineStudioPage'
 import ScrollToTop from './components/ScrollToTop'
+import MetadataManager from './seo/MetadataManager'
 
 export default function App() {
   return (
     <ThemeProvider>
-      <HashRouter>
+      <BrowserRouter>
+        <MetadataManager />
         <ScrollToTop />
         <AppShell>
           <Routes>
@@ -198,7 +200,7 @@ export default function App() {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </AppShell>
-      </HashRouter>
+      </BrowserRouter>
     </ThemeProvider>
   )
 }

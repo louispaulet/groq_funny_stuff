@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, test, vi } from 'vitest'
 import { cleanup, render, screen } from '@testing-library/react'
+import { HelmetProvider } from 'react-helmet-async'
 import { ThemeProvider } from './theme'
 import { experiences } from './config/experiences'
 import App from './App'
@@ -152,19 +153,22 @@ vi.mock('./components/ScrollToTop', () => ({
 afterEach(() => {
   cleanup()
   if (typeof window !== 'undefined') {
-    window.location.hash = '#/'
+    window.history.replaceState({}, '', '/')
   }
 })
 
 describe('App routing', () => {
   function renderAt(path) {
     if (typeof window !== 'undefined') {
-      window.location.hash = `#${path.startsWith('/') ? path : `/${path}`}`
+      const targetPath = path.startsWith('/') ? path : `/${path}`
+      window.history.pushState({}, '', targetPath)
     }
     return render(
-      <ThemeProvider>
-        <App />
-      </ThemeProvider>
+      <HelmetProvider>
+        <ThemeProvider>
+          <App />
+        </ThemeProvider>
+      </HelmetProvider>
     )
   }
 
