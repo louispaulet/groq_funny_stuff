@@ -53,9 +53,15 @@ Groq AllIn Studio is the flagship experience in this repo: a single React worksp
 * Install dependencies: `make install allin`
 * Run the studio locally: `make run allin` (defaults to port `5175` with `--host` enabled)
 * Lint and test: `make lint` / `make test`
-* Build or deploy: `make build` / `make deploy`
+* Build or deploy: `make build` / `make deploy` (deploys the latest build to Cloudflare Pages)
 * Clean dependencies: `make clean`
 
 All commands simply shell into `all_in/` and wrap the corresponding npm scripts, so you can run them directly if you prefer.【F:Makefile†L1-L31】
 
 Questions or tweaks? Check `all_in/README.md` for deeper implementation details, and keep new experiences surfaced on the overview page rather than adding navigation tabs.
+
+## Cloudflare Pages deployment
+* Authenticate (per developer/machine): `wrangler login`
+* One-time setup: `wrangler pages project create groq-allin --production-branch main`. (Project now lives at https://dash.cloudflare.com/c3b4ea7fa6d620cb4ed20c889fabdcdd/pages/view/groq-allin.)
+* Deployments: `make deploy` builds the Vite app and runs `wrangler pages deploy dist --project-name groq-allin --branch main`.
+* Production URL: published versions are available at https://groq-allin.pages.dev/ (and the existing https://groq-allin.thefrenchartist.dev/ once the DNS CNAME is updated to point at the Cloudflare Pages project).

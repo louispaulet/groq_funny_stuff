@@ -24,7 +24,7 @@ test: install
 
 check: lint test
 
-deploy:
+deploy: install
 	cd $(ALLIN_DIR) && npm run deploy
 
 clean:
