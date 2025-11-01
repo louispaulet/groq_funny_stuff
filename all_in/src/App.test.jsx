@@ -152,14 +152,15 @@ vi.mock('./components/ScrollToTop', () => ({
 afterEach(() => {
   cleanup()
   if (typeof window !== 'undefined') {
-    window.location.hash = '#/'
+    window.history.replaceState({}, '', '/')
   }
 })
 
 describe('App routing', () => {
   function renderAt(path) {
     if (typeof window !== 'undefined') {
-      window.location.hash = `#${path.startsWith('/') ? path : `/${path}`}`
+      const targetPath = path.startsWith('/') ? path : `/${path}`
+      window.history.pushState({}, '', targetPath)
     }
     return render(
       <ThemeProvider>

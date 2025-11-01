@@ -5,7 +5,7 @@
 Groq AllIn Studio is the flagship experience in this repo: a single React workspace that bundles specialist copilots, structured data labs, image generators, and playful experiments under one navigation shell. The live deployment is available at https://groq-allin.thefrenchartist.dev/, and the `all_in` directory is the only production target in this repository.
 
 ## Architecture
-* The `all_in/` app is a Vite-powered React front end that mounts every page inside a `HashRouter`, `ThemeProvider`, and shared `AppShell`. The shell owns the navbar, footer, theme toggle, and keeps the experience list in sync with `src/config/experiences.js` so new workspaces surface on the overview rather than the top navigation.【F:all_in/src/App.jsx†L1-L199】【F:all_in/src/components/layout/AppShell.jsx†L1-L131】【F:all_in/src/config/experiences.js†L1-L119】
+* The `all_in/` app is a Vite-powered React front end that mounts every page inside a `BrowserRouter`, `ThemeProvider`, and shared `AppShell`. The shell owns the navbar, footer, theme toggle, and keeps the experience list in sync with `src/config/experiences.js` so new workspaces surface on the overview rather than the top navigation.【F:all_in/src/App.jsx†L1-L199】【F:all_in/src/components/layout/AppShell.jsx†L1-L131】【F:all_in/src/config/experiences.js†L1-L119】
 * Core chat behaviour (conversation history, barcode scanning, cookie persistence, and Groq API calls) is abstracted by `useChatSession`, which normalizes base URLs, injects AllergyFinder context, and calls the shared `/chat` worker endpoint via `callRemoteChat`. Structured generations reuse `createRemoteObject` to negotiate `/obj` paths with schema-aware retries.【F:all_in/src/components/chat/useChatSession.js†L22-L360】【F:all_in/src/lib/remoteChat.js†L1-L83】【F:all_in/src/lib/objectApi.js†L1-L128】【F:all_in/src/lib/objectApi.js†L129-L205】
 * The Cloudflare Worker that backs the studio exposes focused routes—`/chat`, `/flavor-finder`, `/news`, `/flux`, `/svg`, `/svg_deluxe`, and `/obj`—letting each experience call the same low-latency services with zero bespoke wiring.【F:all_in/src/pages/AboutPage.jsx†L3-L162】
 
@@ -50,11 +50,12 @@ Groq AllIn Studio is the flagship experience in this repo: a single React worksp
 * **Second-Hand Food Market** – A satire storefront fed by local JSON that demonstrates rich storytelling components and cross-links to other experiences—no API calls required.【F:all_in/src/pages/SecondHandFoodMarketPage.jsx†L1-L183】
 
 ## Local development
-* Install dependencies: `make install allin`
-* Run the studio locally: `make run allin` (defaults to port `5175` with `--host` enabled)
+* Install dependencies: `make install`
+* Run the studio locally: `make run` (defaults to port `5175` with `--host` enabled)
 * Lint and test: `make lint` / `make test`
 * Build or deploy: `make build` / `make deploy` (deploys the latest build to Cloudflare Pages)
 * Clean dependencies: `make clean`
+* Need a fresh install? `make clean install` removes the cached stamp and reinstalls packages.
 
 All commands simply shell into `all_in/` and wrap the corresponding npm scripts, so you can run them directly if you prefer.【F:Makefile†L1-L31】
 
@@ -64,4 +65,5 @@ Questions or tweaks? Check `all_in/README.md` for deeper implementation details,
 * Authenticate (per developer/machine): `wrangler login`
 * One-time setup: `wrangler pages project create groq-allin --production-branch main`. (Project now lives at https://dash.cloudflare.com/c3b4ea7fa6d620cb4ed20c889fabdcdd/pages/view/groq-allin.)
 * Deployments: `make deploy` builds the Vite app and runs `wrangler pages deploy dist --project-name groq-allin --branch main`.
+* Client routing: `_redirects` in `all_in/public/` ensures `/*` rewrites to `/index.html` so BrowserRouter routes resolve on Cloudflare Pages.
 * Production URL: published versions are available at https://groq-allin.pages.dev/ (and the existing https://groq-allin.thefrenchartist.dev/ once the DNS CNAME is updated to point at the Cloudflare Pages project).
