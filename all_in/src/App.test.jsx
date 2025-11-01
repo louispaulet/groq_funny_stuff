@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, test, vi } from 'vitest'
 import { cleanup, render, screen } from '@testing-library/react'
+import { HelmetProvider } from 'react-helmet-async'
 import { ThemeProvider } from './theme'
 import { experiences } from './config/experiences'
 import App from './App'
@@ -163,9 +164,11 @@ describe('App routing', () => {
       window.history.pushState({}, '', targetPath)
     }
     return render(
-      <ThemeProvider>
-        <App />
-      </ThemeProvider>
+      <HelmetProvider>
+        <ThemeProvider>
+          <App />
+        </ThemeProvider>
+      </HelmetProvider>
     )
   }
 
