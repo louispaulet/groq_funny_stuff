@@ -6,32 +6,55 @@ const MODEL_TOKEN_THEME = {
     label: 'A',
     base: 'bg-sky-500 text-white shadow-[0_0_18px_rgba(56,189,248,0.35)]',
     pendingRing: 'ring-sky-200/80 dark:ring-sky-500/60',
+    pie: 'rgba(56,189,248,0.75)',
   },
   modelB: {
     label: 'B',
     base: 'bg-rose-500 text-white shadow-[0_0_18px_rgba(244,114,182,0.35)]',
     pendingRing: 'ring-rose-200/90 dark:ring-rose-500/70',
+    pie: 'rgba(244,114,182,0.75)',
   },
   default: {
     label: '?',
     base: 'bg-slate-500 text-white shadow-[0_0_18px_rgba(148,163,184,0.35)]',
     pendingRing: 'ring-slate-200/80 dark:ring-slate-500/60',
+    pie: 'rgba(148,163,184,0.7)',
   },
 }
 
-function ModelToken({ modelKey, state, shortName, title }) {
+function ModelToken({ modelKey, state, shortName, title, pendingCountdown }) {
   const theme = MODEL_TOKEN_THEME[modelKey] || MODEL_TOKEN_THEME.default
-  const baseClasses = 'relative flex h-8 w-8 items-center justify-center rounded-full text-xs font-black uppercase tracking-[0.2em] transition'
+  const baseClasses = 'relative flex h-8 w-8 items-center justify-center overflow-hidden rounded-full text-xs font-black uppercase tracking-[0.2em] transition'
   const stateClasses = clsx('ring-2 ring-white/20 dark:ring-white/10', theme.base, {
     'animate-pulse': state === 'pending',
     'ring-emerald-400 shadow-[0_0_22px_rgba(16,185,129,0.38)]': state === 'correct',
     'ring-rose-400 shadow-[0_0_22px_rgba(244,114,182,0.38)]': state === 'incorrect',
     [theme.pendingRing]: state === 'pending',
   })
+  const hasCountdown =
+    state === 'pending' &&
+    pendingCountdown &&
+    Number.isFinite(pendingCountdown.current) &&
+    Number.isFinite(pendingCountdown.max) &&
+    pendingCountdown.max > 0
+  const remaining = hasCountdown ? Math.max(pendingCountdown.current, 0) : 0
+  const usedFraction = hasCountdown ? Math.min(Math.max(1 - remaining / pendingCountdown.max, 0), 1) : 0
+  const sweep = usedFraction * 360
+  const pieStyle = hasCountdown
+    ? {
+        background: `conic-gradient(${theme.pie} ${sweep}deg, rgba(255,255,255,0.15) ${sweep}deg 360deg)`,
+      }
+    : {}
 
   return (
     <span className={clsx(baseClasses, stateClasses)} title={title} aria-label={`${shortName} token: ${state}`}>
-      {theme.label}
+      {hasCountdown ? <span className="absolute inset-0" style={pieStyle} aria-hidden="true" /> : null}
+      <span className="relative z-10">{theme.label}</span>
+      {hasCountdown ? (
+        <span className="pointer-events-none absolute inset-0 flex items-center justify-center text-[10px] font-black tracking-[0.25em] text-white drop-shadow-sm">
+          {Math.ceil(remaining)}
+        </span>
+      ) : null}
       {state === 'pending' ? (
         <span className="pointer-events-none absolute inset-0 rounded-full border border-white/60 opacity-70 animate-ping" aria-hidden="true" />
       ) : null}
@@ -88,7 +111,18 @@ function ShuffleOverlay() {
   )
 }
 
-export function QAArenaQuestionCard({ question, questionIndex, totalQuestions, modelAnswers, correctAnswer, activeModel, models, isShuffling }) {
+export function QAArenaQuestionCard({
+  question,
+  questionIndex,
+  totalQuestions,
+  modelAnswers,
+  correctAnswer,
+  activeModel,
+  models,
+  isShuffling,
+  countdown,
+  countdownMax,
+}) {
   const [hoverTargets, setHoverTargets] = useState({ modelA: null, modelB: null })
   const [showShuffleOverlay, setShowShuffleOverlay] = useState(false)
   const hoverTimerRef = useRef(null)
@@ -167,6 +201,7 @@ export function QAArenaQuestionCard({ question, questionIndex, totalQuestions, m
           state: finalAnswer === correctAnswer ? 'correct' : 'incorrect',
           shortName,
           title: `${displayTitle} chose option ${finalAnswer}`,
+          pendingCountdown: null,
         })
         return
       }
@@ -177,12 +212,18 @@ export function QAArenaQuestionCard({ question, questionIndex, totalQuestions, m
           state: 'pending',
           shortName,
           title: `${displayTitle} is hovering option ${hoverLabel}`,
+          pendingCountdown: countdown
+            ? {
+                current: Number.isFinite(countdown.seconds) ? countdown.seconds : null,
+                max: Number.isFinite(countdownMax) && countdownMax > 0 ? countdownMax : Number.isFinite(countdown.seconds) ? Math.ceil(countdown.seconds) : null,
+              }
+            : null,
         })
       }
     })
 
     return map
-  }, [activeModel, correctAnswer, hoverTargets, modelAnswers, models, options])
+  }, [activeModel, correctAnswer, countdown?.seconds, countdownMax, hoverTargets, modelAnswers, models, options])
 
   if (!question) {
     return (

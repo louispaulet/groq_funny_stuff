@@ -633,6 +633,8 @@ export default function QAArenaPage() {
           activeModel={activeModel}
           models={MODEL_METADATA}
           isShuffling={questionShuffleActive}
+          countdown={countdown}
+          countdownMax={COUNTDOWN_SECONDS}
         />
 
         <QAArenaCountdown countdown={countdown} />
