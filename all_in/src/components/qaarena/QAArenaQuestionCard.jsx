@@ -22,6 +22,32 @@ const MODEL_TOKEN_THEME = {
   },
 }
 
+const SHUFFLE_STYLE_ID = 'qa-arena-card-shuffle-styles'
+
+function ensureShuffleStyles() {
+  if (typeof document === 'undefined') return
+  if (document.getElementById(SHUFFLE_STYLE_ID)) return
+  const style = document.createElement('style')
+  style.id = SHUFFLE_STYLE_ID
+  style.textContent = `
+    @keyframes qaShuffleCard {
+      0% {
+        opacity: 0;
+        transform: var(--qa-start-transform);
+      }
+      45% {
+        opacity: 0.95;
+        transform: var(--qa-mid-transform);
+      }
+      100% {
+        opacity: 0;
+        transform: var(--qa-end-transform);
+      }
+    }
+  `
+  document.head.appendChild(style)
+}
+
 function ModelToken({ modelKey, state, shortName, title, pendingCountdown }) {
   const theme = MODEL_TOKEN_THEME[modelKey] || MODEL_TOKEN_THEME.default
   const baseClasses = 'relative flex h-8 w-8 items-center justify-center overflow-hidden rounded-full text-xs font-black uppercase tracking-[0.2em] transition'
@@ -110,12 +136,64 @@ function OptionCard({ option, tokens, isCorrect }) {
   )
 }
 
+const SHUFFLE_CARD_BASE =
+  'absolute left-1/2 top-1/2 h-40 w-28 -translate-x-1/2 rounded-3xl border border-white/80 bg-white/95 shadow-xl shadow-slate-900/25 dark:border-slate-600/70 dark:bg-slate-800/90'
+const SHUFFLE_CARD_GRADIENTS = [
+  'bg-gradient-to-br from-sky-100/80 via-white/90 to-white/60 dark:from-sky-500/30 dark:via-slate-800/60 dark:to-slate-900/40',
+  'bg-gradient-to-br from-rose-100/75 via-white/90 to-white/60 dark:from-rose-500/30 dark:via-slate-800/60 dark:to-slate-900/40',
+  'bg-gradient-to-br from-purple-100/75 via-white/90 to-white/60 dark:from-purple-500/30 dark:via-slate-800/60 dark:to-slate-900/40',
+]
+
 function ShuffleOverlay() {
+  const cards = [
+    {
+      delay: 0,
+      start: 'translate(-55%, -55%) scale(0.85) rotate(-22deg)',
+      mid: 'translate(-48%, -78%) scale(1.05) rotate(8deg)',
+      end: 'translate(-38%, -25%) scale(0.92) rotate(-5deg)',
+    },
+    {
+      delay: 0.12,
+      start: 'translate(-45%, -52%) scale(0.8) rotate(18deg)',
+      mid: 'translate(-50%, -74%) scale(1.08) rotate(-6deg)',
+      end: 'translate(-55%, -18%) scale(0.9) rotate(4deg)',
+    },
+    {
+      delay: 0.24,
+      start: 'translate(-50%, -48%) scale(0.82) rotate(-12deg)',
+      mid: 'translate(-52%, -70%) scale(1.07) rotate(4deg)',
+      end: 'translate(-47%, -12%) scale(0.9) rotate(-3deg)',
+    },
+  ]
+
   return (
     <div className="pointer-events-none absolute inset-0 z-10 overflow-hidden">
-      <div className="absolute -top-6 left-8 h-24 w-16 -rotate-6 rounded-2xl border border-slate-200/70 bg-white/80 shadow-lg shadow-slate-900/10 backdrop-blur-sm animate-bounce dark:border-slate-700/60 dark:bg-slate-800/70" style={{ animationDuration: '1.3s' }} />
-      <div className="absolute -bottom-10 right-10 h-28 w-[4.5rem] rotate-6 rounded-2xl border border-slate-200/70 bg-slate-100/80 shadow-lg shadow-slate-900/10 backdrop-blur-sm animate-bounce dark:border-slate-700/60 dark:bg-slate-700/70" style={{ animationDelay: '0.15s', animationDuration: '1.4s' }} />
-      <div className="absolute top-1/2 left-1/2 h-24 w-20 -translate-x-1/2 -translate-y-1/2 rotate-3 rounded-3xl border border-indigo-200/70 bg-gradient-to-br from-sky-400/40 via-indigo-400/30 to-purple-400/30 shadow-xl shadow-indigo-500/40 animate-ping dark:border-indigo-500/40" style={{ animationDuration: '1.1s' }} />
+      {cards.map((card, index) => (
+        <div
+          key={index}
+          className={clsx(
+            SHUFFLE_CARD_BASE,
+            SHUFFLE_CARD_GRADIENTS[index % SHUFFLE_CARD_GRADIENTS.length],
+            'flex flex-col items-center justify-center overflow-hidden',
+          )}
+          style={{
+            animation: `qaShuffleCard 0.85s ease-in-out ${card.delay}s forwards`,
+            transformOrigin: 'center',
+            pointerEvents: 'none',
+            '--qa-start-transform': card.start,
+            '--qa-mid-transform': card.mid,
+            '--qa-end-transform': card.end,
+          }}
+        >
+          <div className="absolute inset-4 rounded-2xl border border-white/60 opacity-80 dark:border-white/10" />
+          <div className="relative z-10 flex h-full w-full flex-col items-center justify-center gap-2">
+            <span className="text-xs font-black uppercase tracking-[0.5em] text-slate-500 dark:text-slate-200">QA</span>
+            <span className="rounded-full bg-white/70 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.35em] text-slate-600 shadow-sm dark:bg-slate-900/60 dark:text-slate-200">
+              Arena
+            </span>
+          </div>
+        </div>
+      ))}
     </div>
   )
 }
@@ -136,6 +214,10 @@ export function QAArenaQuestionCard({
   const [showShuffleOverlay, setShowShuffleOverlay] = useState(false)
   const hoverTimerRef = useRef(null)
   const shuffleTimerRef = useRef(null)
+
+  useEffect(() => {
+    ensureShuffleStyles()
+  }, [])
 
   useEffect(() => {
     setHoverTargets({ modelA: null, modelB: null })
