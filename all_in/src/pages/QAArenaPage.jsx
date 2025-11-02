@@ -24,8 +24,6 @@ const QUESTION_STRUCTURE = {
   properties: {
     questions: {
       type: 'array',
-      minItems: 5,
-      maxItems: 5,
       items: {
         type: 'object',
         additionalProperties: false,
@@ -33,8 +31,6 @@ const QUESTION_STRUCTURE = {
           prompt: { type: 'string' },
           options: {
             type: 'array',
-            minItems: 4,
-            maxItems: 4,
             items: {
               type: 'object',
               additionalProperties: false,
