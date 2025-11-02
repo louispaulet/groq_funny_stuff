@@ -12,11 +12,20 @@ import { QA_ARENA_CATEGORIES, QA_ARENA_TOPICS, pickRandomTopic } from '../conten
 const EXPERIENCE_ID = 'qaarena'
 const QUESTION_OBJECT_TYPE = 'qa_arena_round'
 const ANSWER_OBJECT_TYPE = 'qa_arena_answer'
-const QUESTION_MODEL_ID = 'openai/gpt-oss-120b'
 const MODEL_A_ID = 'openai/gpt-oss-20b'
 const MODEL_B_ID = 'openai/gpt-oss-120b'
+const RAW_ENV_QUIZ_MODEL_ID = typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env.VITE_QA_ARENA_QUIZ_MODEL_ID : undefined
+const STRUCTURED_MODEL_PRIORITIES = [
+  RAW_ENV_QUIZ_MODEL_ID,
+  'moonshotai/kimi-k2-instruct-0905',
+  'meta-llama/llama-4-maverick-17b',
+  MODEL_A_ID,
+  MODEL_B_ID,
+].filter(Boolean)
+const QUESTION_MODEL_ID = STRUCTURED_MODEL_PRIORITIES.find((candidate) => candidate !== MODEL_A_ID && candidate !== MODEL_B_ID) || MODEL_A_ID
 const COUNTDOWN_SECONDS = 5
 const HISTORY_LIMIT = 5
+const ANSWER_LETTERS = ['A', 'B', 'C', 'D']
 
 function buildModelMetadata(shortName, modelId) {
   const cleanId = typeof modelId === 'string' ? modelId.trim() : ''
@@ -40,6 +49,8 @@ function buildModelMetadata(shortName, modelId) {
   }
 }
 
+const QUIZMASTER_METADATA = buildModelMetadata('Quizzer', QUESTION_MODEL_ID)
+
 const MODEL_METADATA = {
   modelA: buildModelMetadata('Model A', MODEL_A_ID),
   modelB: buildModelMetadata('Model B', MODEL_B_ID),
@@ -62,13 +73,13 @@ const QUESTION_STRUCTURE = {
               type: 'object',
               additionalProperties: false,
               properties: {
-                label: { type: 'string', enum: ['A', 'B', 'C', 'D'] },
+                label: { type: 'string', enum: ANSWER_LETTERS },
                 text: { type: 'string' },
               },
               required: ['label', 'text'],
             },
           },
-          answer: { type: 'string', enum: ['A', 'B', 'C', 'D'] },
+          answer: { type: 'string', enum: ANSWER_LETTERS },
         },
         required: ['prompt', 'options', 'answer'],
       },
@@ -81,7 +92,7 @@ const ANSWER_STRUCTURE = {
   type: 'object',
   additionalProperties: false,
   properties: {
-    answer: { type: 'string', enum: ['A', 'B', 'C', 'D'] },
+    answer: { type: 'string', enum: ANSWER_LETTERS },
   },
   required: ['answer'],
 }
@@ -100,6 +111,31 @@ function formatSummary(summary) {
   const trimmed = summary.trim()
   if (trimmed.length <= 900) return trimmed
   return `${trimmed.slice(0, 900)}…`
+}
+
+function getSecureRandomIndex(upperBound) {
+  if (upperBound <= 0) return 0
+  const cryptoSource = typeof globalThis !== 'undefined' && globalThis.crypto && typeof globalThis.crypto.getRandomValues === 'function' ? globalThis.crypto : null
+  if (cryptoSource) {
+    const maxUint32 = 0xffffffff
+    const bucket = new Uint32Array(1)
+    let randomFraction = 0
+    do {
+      cryptoSource.getRandomValues(bucket)
+      randomFraction = bucket[0] / (maxUint32 + 1)
+    } while (randomFraction >= 1)
+    return Math.floor(randomFraction * upperBound)
+  }
+  return Math.floor(Math.random() * upperBound)
+}
+
+function shuffleArray(items) {
+  const list = Array.isArray(items) ? [...items] : []
+  for (let index = list.length - 1; index > 0; index -= 1) {
+    const swapIndex = getSecureRandomIndex(index + 1)
+    ;[list[index], list[swapIndex]] = [list[swapIndex], list[index]]
+  }
+  return list
 }
 
 async function fetchWikipediaSummary(articleTitle) {
@@ -216,23 +252,34 @@ export default function QAArenaPage() {
         .slice(0, 5)
         .map((item, index) => {
           const promptText = typeof item?.prompt === 'string' ? item.prompt.trim() : ''
-          const options = Array.isArray(item?.options)
+          const rawOptions = Array.isArray(item?.options)
             ? item.options
                 .map((option, optionIndex) => ({
-                  label: typeof option?.label === 'string' ? option.label.trim().slice(0, 1).toUpperCase() : ['A', 'B', 'C', 'D'][optionIndex] || 'A',
+                  label: typeof option?.label === 'string' ? option.label.trim().slice(0, 1).toUpperCase() : ANSWER_LETTERS[optionIndex] || ANSWER_LETTERS[0],
                   text: typeof option?.text === 'string' ? option.text.trim() : '',
                 }))
                 .filter((opt) => opt.label && opt.text)
             : []
-          const paddedOptions = ['A', 'B', 'C', 'D'].map((letter, optionIndex) => {
-            return options.find((opt) => opt.label === letter) || { label: letter, text: `Option ${letter} ${optionIndex + 1}` }
+          const normalizedOptions = ANSWER_LETTERS.map((letter, optionIndex) => {
+            const existing = rawOptions.find((opt) => opt.label === letter)
+            const text = existing?.text || `Option ${letter} ${optionIndex + 1}`
+            return { originalLabel: letter, text }
           })
-          const answer = typeof item?.answer === 'string' ? item.answer.trim().toUpperCase() : 'A'
+          const answerLetter = typeof item?.answer === 'string' ? item.answer.trim().toUpperCase() : ''
+          const originalCorrectOption =
+            normalizedOptions.find((opt) => opt.originalLabel === answerLetter) || normalizedOptions[0]
+          const shuffledOptions = shuffleArray(normalizedOptions)
+          const reletteredOptions = shuffledOptions.map((opt, optionIndex) => ({
+            label: ANSWER_LETTERS[optionIndex],
+            text: opt.text,
+          }))
+          const correctIndex = shuffledOptions.findIndex((opt) => opt === originalCorrectOption)
+          const resolvedAnswer = correctIndex >= 0 ? ANSWER_LETTERS[correctIndex] : ANSWER_LETTERS[0]
           return {
             id: `${Date.now()}-${index}`,
             prompt: promptText || `Question ${index + 1}`,
-            options: paddedOptions,
-            answer: ['A', 'B', 'C', 'D'].includes(answer) ? answer : 'A',
+            options: reletteredOptions,
+            answer: resolvedAnswer,
           }
         })
     },
@@ -241,9 +288,7 @@ export default function QAArenaPage() {
 
   const callAnswerModel = useCallback(
     async ({ question, modelId, baseUrl }) => {
-      const optionsText = question.options
-        .map((option) => `${option.label}. ${option.text}`)
-        .join('\n')
+      const optionsText = question.options.map((option) => `${option.label}. ${option.text}`).join('\n')
       const promptLines = [
         'You are competing in a multiple-choice quiz. Your answer must be a single capital letter: A, B, C, or D.',
         'Read the prompt carefully and pick the best answer using only the information provided.',
@@ -264,7 +309,7 @@ export default function QAArenaPage() {
       })
       const payload = response?.payload || {}
       const raw = typeof payload.answer === 'string' ? payload.answer.trim().toUpperCase() : ''
-      return ['A', 'B', 'C', 'D'].includes(raw) ? raw : null
+      return ANSWER_LETTERS.includes(raw) ? raw : null
     },
     [],
   )
@@ -438,8 +483,15 @@ export default function QAArenaPage() {
           </div>
           <div className="space-y-3">
             <div className="rounded-3xl border border-slate-900/10 bg-white/95 p-4 text-sm text-slate-700 shadow-sm dark:border-white/10 dark:bg-slate-900/70 dark:text-slate-200">
-              <p className="text-xs font-semibold uppercase tracking-[0.45em] text-slate-500 dark:text-slate-400">Tonight&apos;s matchup</p>
-              <div className="mt-3 flex flex-col gap-2 text-sm">
+              <p className="text-xs font-semibold uppercase tracking-[0.45em] text-slate-500 dark:text-slate-400">Tonight&apos;s lineup</p>
+              <div className="mt-3 flex flex-col gap-3 text-sm">
+                <div className="flex flex-col gap-1 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-600 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200">
+                  <span className="text-xs font-semibold uppercase tracking-widest text-indigo-600 dark:text-indigo-300">{QUIZMASTER_METADATA.shortName}</span>
+                  <span className="text-sm font-semibold text-slate-900 dark:text-white" title={QUIZMASTER_METADATA.display}>
+                    {QUIZMASTER_METADATA.display || QUIZMASTER_METADATA.id}
+                  </span>
+                  <span className="text-[11px] uppercase tracking-[0.3em] text-slate-400 dark:text-slate-500">Generates every quiz round</span>
+                </div>
                 <div className="flex items-center justify-between">
                   <div className="flex flex-col">
                     <span className="text-xs font-semibold uppercase tracking-widest text-sky-600 dark:text-sky-300">{MODEL_METADATA.modelA.shortName}</span>
@@ -458,7 +510,7 @@ export default function QAArenaPage() {
                   </div>
                 </div>
                 <p className="text-[11px] uppercase tracking-[0.3em] text-slate-400 dark:text-slate-500">
-                  Duel between {MODEL_METADATA.modelA.id} and {MODEL_METADATA.modelB.id}
+                  Duel between {MODEL_METADATA.modelA.id} and {MODEL_METADATA.modelB.id}. Questions curated by {QUIZMASTER_METADATA.id}.
                 </p>
               </div>
             </div>
