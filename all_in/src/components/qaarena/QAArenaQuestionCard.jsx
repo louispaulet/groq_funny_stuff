@@ -26,7 +26,6 @@ function ModelToken({ modelKey, state, shortName, title, pendingCountdown }) {
   const theme = MODEL_TOKEN_THEME[modelKey] || MODEL_TOKEN_THEME.default
   const baseClasses = 'relative flex h-8 w-8 items-center justify-center overflow-hidden rounded-full text-xs font-black uppercase tracking-[0.2em] transition'
   const stateClasses = clsx('ring-2 ring-white/20 dark:ring-white/10', theme.base, {
-    'animate-pulse': state === 'pending',
     'ring-emerald-400 shadow-[0_0_22px_rgba(16,185,129,0.38)]': state === 'correct',
     'ring-rose-400 shadow-[0_0_22px_rgba(244,114,182,0.38)]': state === 'incorrect',
     [theme.pendingRing]: state === 'pending',
@@ -39,24 +38,34 @@ function ModelToken({ modelKey, state, shortName, title, pendingCountdown }) {
     pendingCountdown.max > 0
   const remaining = hasCountdown ? Math.max(pendingCountdown.current, 0) : 0
   const usedFraction = hasCountdown ? Math.min(Math.max(1 - remaining / pendingCountdown.max, 0), 1) : 0
-  const sweep = usedFraction * 360
-  const pieStyle = hasCountdown
-    ? {
-        background: `conic-gradient(${theme.pie} ${sweep}deg, rgba(255,255,255,0.15) ${sweep}deg 360deg)`,
-      }
-    : {}
+  const RADIUS = 24
+  const TRACK_WIDTH = 6
+  const circumference = 2 * Math.PI * RADIUS
 
   return (
     <span className={clsx(baseClasses, stateClasses)} title={title} aria-label={`${shortName} token: ${state}`}>
-      {hasCountdown ? <span className="absolute inset-0" style={pieStyle} aria-hidden="true" /> : null}
+      {hasCountdown ? (
+        <svg className="pointer-events-none absolute -inset-[10px] h-[56px] w-[56px]" viewBox="0 0 64 64" aria-hidden="true">
+          <circle cx="32" cy="32" r={RADIUS} className="fill-none opacity-20" stroke="rgba(255,255,255,0.35)" strokeWidth={TRACK_WIDTH} />
+          <circle
+            cx="32"
+            cy="32"
+            r={RADIUS}
+            className="fill-none transition-[stroke-dashoffset]"
+            stroke={theme.pie}
+            strokeWidth={TRACK_WIDTH}
+            strokeLinecap="round"
+            strokeDasharray={circumference}
+            strokeDashoffset={usedFraction * circumference}
+            transform="rotate(-90 32 32)"
+          />
+        </svg>
+      ) : null}
       <span className="relative z-10">{theme.label}</span>
       {hasCountdown ? (
         <span className="pointer-events-none absolute inset-0 flex items-center justify-center text-[10px] font-black tracking-[0.25em] text-white drop-shadow-sm">
           {Math.ceil(remaining)}
         </span>
-      ) : null}
-      {state === 'pending' ? (
-        <span className="pointer-events-none absolute inset-0 rounded-full border border-white/60 opacity-70 animate-ping" aria-hidden="true" />
       ) : null}
     </span>
   )
