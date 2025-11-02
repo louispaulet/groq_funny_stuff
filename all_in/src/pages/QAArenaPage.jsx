@@ -130,14 +130,20 @@ export default function QAArenaPage() {
   const [modelAnswers, setModelAnswers] = useState({ modelA: null, modelB: null })
   const [scoreboard, setScoreboard] = useState({ total: { modelA: 0, modelB: 0 }, categories: {} })
   const [history, setHistory] = useState([])
+  const [historyOpen, setHistoryOpen] = useState(false)
+  const [historyHighlight, setHistoryHighlight] = useState(false)
   const [abstractOpen, setAbstractOpen] = useState(false)
   const [activeModel, setActiveModel] = useState(null)
   const isMountedRef = useRef(true)
+  const historyHighlightTimeoutRef = useRef(null)
 
   useEffect(() => {
     isMountedRef.current = true
     return () => {
       isMountedRef.current = false
+      if (historyHighlightTimeoutRef.current) {
+        clearTimeout(historyHighlightTimeoutRef.current)
+      }
     }
   }, [])
 
@@ -169,9 +175,23 @@ export default function QAArenaPage() {
     setError(message)
   }, [])
 
+  const triggerHistoryHighlight = useCallback(() => {
+    if (!isMountedRef.current) return
+    setHistoryHighlight(true)
+    if (historyHighlightTimeoutRef.current) {
+      clearTimeout(historyHighlightTimeoutRef.current)
+    }
+    historyHighlightTimeoutRef.current = setTimeout(() => {
+      if (!isMountedRef.current) return
+      setHistoryHighlight(false)
+      historyHighlightTimeoutRef.current = null
+    }, 1200)
+  }, [])
+
   const callQuestionGenerator = useCallback(
     async ({ topic, article, baseUrl }) => {
       const promptLines = [
+        // Only pass the chosen topic metadata and the article abstract to the quizmaster.
         'You are a competitive quiz composer creating five multiple-choice questions from a single Wikipedia summary.',
         'Only use the provided abstract—do not invent facts beyond it.',
         'Return exactly five questions. Each must have four options labelled A, B, C, D and indicate the correct answer letter.',
@@ -271,13 +291,17 @@ export default function QAArenaPage() {
     })
   }, [])
 
-  const appendHistory = useCallback((entry) => {
-    if (!isMountedRef.current) return
-    setHistory((prev) => {
-      const next = [entry, ...prev]
-      return next.slice(0, HISTORY_LIMIT)
-    })
-  }, [])
+  const appendHistory = useCallback(
+    (entry) => {
+      if (!isMountedRef.current) return
+      setHistory((prev) => {
+        const next = [entry, ...prev]
+        return next.slice(0, HISTORY_LIMIT)
+      })
+      triggerHistoryHighlight()
+    },
+    [triggerHistoryHighlight],
+  )
 
   const resetActiveQuestion = useCallback(() => {
     if (!isMountedRef.current) return
@@ -349,7 +373,7 @@ export default function QAArenaPage() {
           correctAnswer,
         })
 
-        await runCooldown('Resetting buzzers for the next volley…')
+        await runCooldown('Review window—compare their answers before the next round…')
       }
 
       setStatusSafely('Match complete! Queue another duel when ready.')
@@ -371,7 +395,7 @@ export default function QAArenaPage() {
   }, [])
 
   const categoryBadge = currentCategoryMeta ? (
-    <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-white">
+    <span className="inline-flex items-center gap-2 rounded-full border border-slate-900/10 bg-slate-200 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-slate-700 dark:border-white/20 dark:bg-white/10 dark:text-white">
       {currentCategoryMeta.label}
     </span>
   ) : null
@@ -379,73 +403,71 @@ export default function QAArenaPage() {
   const summaryText = formatSummary(articleInfo?.extract || '')
 
   return (
-    <div className="space-y-10">
-      <section className="relative overflow-hidden rounded-4xl border border-slate-200/30 bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 px-6 py-8 text-white shadow-2xl shadow-brand-500/20">
-        <div className="absolute -top-24 right-0 h-64 w-64 rounded-full bg-sky-500/20 blur-3xl" aria-hidden="true" />
-        <div className="absolute -bottom-24 left-10 h-72 w-72 rounded-full bg-purple-500/10 blur-3xl" aria-hidden="true" />
-        <div className="relative flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-4 pb-16 pt-6 md:px-6 lg:px-0">
+      <section className="relative overflow-hidden rounded-4xl border border-slate-900/10 bg-white/95 px-6 py-8 text-slate-900 shadow-xl shadow-slate-900/10 dark:border-slate-700/60 dark:bg-slate-950 dark:text-white">
+        <div className="absolute -top-28 right-6 h-60 w-60 rounded-full bg-sky-400/20 blur-3xl dark:bg-sky-500/30" aria-hidden="true" />
+        <div className="absolute -bottom-32 left-0 h-72 w-72 rounded-full bg-purple-400/15 blur-3xl dark:bg-purple-500/25" aria-hidden="true" />
+        <div className="relative flex flex-col gap-6">
           <div className="space-y-4">
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.5em] text-white/90">
+            <span className="inline-flex items-center gap-2 rounded-full border border-slate-900/10 bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.5em] text-slate-700 dark:border-white/20 dark:bg-white/10 dark:text-white">
               New Arena
             </span>
-            <h1 className="text-4xl font-black sm:text-5xl">QA Arena · LLM Quiz Showdown</h1>
-            <p className="max-w-2xl text-lg text-slate-100">
+            <h1 className="text-4xl font-black text-slate-900 sm:text-5xl dark:text-white">QA Arena · LLM Quiz Showdown</h1>
+            <p className="max-w-3xl text-lg text-slate-600 dark:text-slate-200">
               Watch two Groq-hosted models clash over freshly minted questions from a random Wikipedia theme. Suspenseful cooldowns, live scoring, and a running highlight reel keep the arena electric.
             </p>
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <button
                 type="button"
                 onClick={handleStart}
                 disabled={isRunning || !defaultBaseUrl}
-                className="inline-flex items-center gap-2 rounded-full border border-transparent bg-gradient-to-r from-sky-500 via-purple-500 to-rose-500 px-5 py-3 text-sm font-semibold uppercase tracking-widest text-white shadow-lg shadow-sky-500/30 transition hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-70"
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-transparent bg-gradient-to-r from-sky-500 via-purple-500 to-rose-500 px-5 py-3 text-sm font-semibold uppercase tracking-widest text-white shadow-lg shadow-sky-500/30 transition hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-70"
               >
-                {isRunning ? (
-                  <ArrowPathIcon className="h-5 w-5 animate-spin" />
-                ) : (
-                  <PlayIcon className="h-5 w-5" />
-                )}
+                {isRunning ? <ArrowPathIcon className="h-5 w-5 animate-spin" /> : <PlayIcon className="h-5 w-5" />}
                 {isRunning ? 'Match in progress…' : 'Launch a new match'}
               </button>
               <button
                 type="button"
                 onClick={handleResetScoreboard}
-                className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-white/80 transition hover:border-white/40 hover:text-white"
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-slate-900/10 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-slate-700 shadow-sm transition hover:border-slate-900/20 hover:text-slate-900 dark:border-white/20 dark:bg-white/10 dark:text-white"
               >
                 <SparklesIcon className="h-4 w-4" />
                 Reset scoreboard
               </button>
             </div>
           </div>
-          <div className="flex flex-col gap-3">
-            <div className="rounded-3xl border border-white/10 bg-slate-900/60 p-4 text-sm text-slate-200 shadow-lg">
-              <p className="text-xs font-semibold uppercase tracking-[0.4em] text-slate-500">Tonight&apos;s matchup</p>
-              <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-                <div className="flex flex-col">
-                  <span className="text-xs font-semibold uppercase tracking-widest text-sky-200">{MODEL_METADATA.modelA.shortName}</span>
-                  <span className="text-sm font-semibold text-white" title={MODEL_METADATA.modelA.display}>
-                    {MODEL_METADATA.modelA.display || MODEL_METADATA.modelA.id}
+          <div className="space-y-3">
+            <div className="rounded-3xl border border-slate-900/10 bg-white/95 p-4 text-sm text-slate-700 shadow-sm dark:border-white/10 dark:bg-slate-900/70 dark:text-slate-200">
+              <p className="text-xs font-semibold uppercase tracking-[0.45em] text-slate-500 dark:text-slate-400">Tonight&apos;s matchup</p>
+              <div className="mt-3 flex flex-col gap-2 text-sm">
+                <div className="flex items-center justify-between">
+                  <div className="flex flex-col">
+                    <span className="text-xs font-semibold uppercase tracking-widest text-sky-600 dark:text-sky-300">{MODEL_METADATA.modelA.shortName}</span>
+                    <span className="text-sm font-semibold text-slate-900 dark:text-white" title={MODEL_METADATA.modelA.display}>
+                      {MODEL_METADATA.modelA.display || MODEL_METADATA.modelA.id}
+                    </span>
+                  </div>
+                  <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.4em] text-slate-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                    vs
                   </span>
+                  <div className="flex flex-col items-end">
+                    <span className="text-xs font-semibold uppercase tracking-widest text-rose-600 dark:text-rose-300">{MODEL_METADATA.modelB.shortName}</span>
+                    <span className="text-sm font-semibold text-slate-900 dark:text-white" title={MODEL_METADATA.modelB.display}>
+                      {MODEL_METADATA.modelB.display || MODEL_METADATA.modelB.id}
+                    </span>
+                  </div>
                 </div>
-                <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.4em] text-white/80">
-                  vs
-                </span>
-                <div className="flex flex-col items-end">
-                  <span className="text-xs font-semibold uppercase tracking-widest text-rose-200">{MODEL_METADATA.modelB.shortName}</span>
-                  <span className="text-sm font-semibold text-white text-right" title={MODEL_METADATA.modelB.display}>
-                    {MODEL_METADATA.modelB.display || MODEL_METADATA.modelB.id}
-                  </span>
-                </div>
+                <p className="text-[11px] uppercase tracking-[0.3em] text-slate-400 dark:text-slate-500">
+                  Duel between {MODEL_METADATA.modelA.id} and {MODEL_METADATA.modelB.id}
+                </p>
               </div>
-              <p className="mt-3 text-[11px] uppercase tracking-[0.3em] text-slate-500">
-                Duel between {MODEL_METADATA.modelA.id} and {MODEL_METADATA.modelB.id}
-              </p>
             </div>
-            <div className="rounded-3xl border border-white/10 bg-slate-900/60 p-4 text-sm text-slate-200 shadow-lg">
-              <div className="flex items-center gap-2 text-slate-100">
-                <ClockIcon className="h-5 w-5 text-sky-400" />
-                <span className="text-sm font-semibold uppercase tracking-widest text-slate-300">5s cooldowns between calls</span>
+            <div className="rounded-3xl border border-slate-900/10 bg-white/95 p-4 text-sm text-slate-700 shadow-sm dark:border-white/10 dark:bg-slate-900/70 dark:text-slate-200">
+              <div className="flex items-center gap-2 text-slate-900 dark:text-slate-100">
+                <ClockIcon className="h-5 w-5 text-sky-500 dark:text-sky-300" />
+                <span className="text-sm font-semibold uppercase tracking-widest text-slate-600 dark:text-slate-300">{COUNTDOWN_SECONDS}s cooldowns between calls</span>
               </div>
-              <p className="text-xs text-slate-400">
+              <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
                 After each /obj request the arena pauses for {COUNTDOWN_SECONDS} seconds to respect rate limits. Countdown updates in real time so you feel the suspense.
               </p>
             </div>
@@ -453,74 +475,79 @@ export default function QAArenaPage() {
         </div>
       </section>
 
-      <section className="grid gap-6 lg:grid-cols-[2fr,1fr]">
-        <div className="space-y-6">
-          <div className="space-y-4 rounded-3xl border border-slate-200/20 bg-slate-900/40 p-6 text-white shadow-lg backdrop-blur-xl dark:border-slate-700/40">
-            <header className="flex flex-wrap items-center justify-between gap-4">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.5em] text-slate-500">Current Article</p>
-                <h2 className="text-2xl font-black text-white">{currentTheme ? currentTheme.theme : 'Awaiting selection'}</h2>
-              </div>
-              {categoryBadge}
-            </header>
-            {articleInfo ? (
-              <div className="space-y-3 text-sm text-slate-200">
-                <div className="flex flex-wrap items-center gap-3 text-xs uppercase tracking-widest text-slate-400">
-                  <span>Wikipedia source</span>
-                  <a
-                    href={articleInfo.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-1 rounded-full border border-sky-400/40 bg-sky-500/20 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] text-sky-100 transition hover:border-sky-300/60 hover:text-white"
-                  >
-                    Open article
-                  </a>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setAbstractOpen((open) => !open)}
-                  className="flex w-full items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-left text-sm font-semibold uppercase tracking-[0.3em] text-white/80 transition hover:border-white/30 hover:text-white"
+      <section className="flex flex-col gap-6">
+        <div className="space-y-4 rounded-3xl border border-slate-900/10 bg-white/95 p-6 text-slate-900 shadow-md shadow-slate-900/15 dark:border-slate-700/60 dark:bg-slate-900/75 dark:text-slate-100">
+          <header className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.5em] text-slate-500 dark:text-slate-400">Current Article</p>
+              <h2 className="text-2xl font-black text-slate-900 dark:text-white">{currentTheme ? currentTheme.theme : 'Awaiting selection'}</h2>
+            </div>
+            {categoryBadge}
+          </header>
+          {articleInfo ? (
+            <div className="space-y-3 text-sm text-slate-600 dark:text-slate-200">
+              <div className="flex flex-wrap items-center gap-3 text-xs uppercase tracking-widest text-slate-500 dark:text-slate-400">
+                <span>Wikipedia source</span>
+                <a
+                  href={articleInfo.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1 rounded-full border border-sky-400/70 bg-sky-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] text-sky-700 transition hover:border-sky-400 hover:text-sky-900 dark:border-sky-400/60 dark:bg-sky-500/15 dark:text-sky-100"
                 >
-                  <span>Article abstract</span>
-                  {abstractOpen ? <ChevronUpIcon className="h-5 w-5" /> : <ChevronDownIcon className="h-5 w-5" />}
-                </button>
-                {abstractOpen ? (
-                  <p className="rounded-2xl border border-white/10 bg-slate-900/60 px-4 py-4 text-sm leading-relaxed text-slate-200">
-                    {summaryText || 'No summary available for this article.'}
-                  </p>
-                ) : null}
+                  Open article
+                </a>
               </div>
-            ) : (
-              <p className="text-sm text-slate-400">Spin up a match to load a random article and abstract.</p>
-            )}
-          </div>
-
-          <div className="grid gap-6 sm:grid-cols-2">
-            <QAArenaCountdown countdown={countdown} />
-            <div className="rounded-3xl border border-slate-200/20 bg-slate-900/40 p-4 text-sm text-slate-200 shadow-inner backdrop-blur-xl dark:border-slate-700/40">
-              <p className="text-xs font-semibold uppercase tracking-[0.4em] text-slate-500">Arena Status</p>
-              <p className="mt-2 text-base font-semibold text-white">{status || 'Press the button to start the battle!'}</p>
-              {error ? (
-                <p className="mt-2 rounded-2xl border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-sm text-rose-100">{error}</p>
+              <button
+                type="button"
+                onClick={() => setAbstractOpen((open) => !open)}
+                className="flex w-full items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-left text-sm font-semibold uppercase tracking-[0.3em] text-slate-600 transition hover:border-slate-300 hover:text-slate-900 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-500"
+              >
+                <span>Article abstract</span>
+                {abstractOpen ? <ChevronUpIcon className="h-5 w-5" /> : <ChevronDownIcon className="h-5 w-5" />}
+              </button>
+              {abstractOpen ? (
+                <p className="rounded-2xl border border-slate-200 bg-white px-4 py-4 text-sm leading-relaxed text-slate-600 shadow-sm dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200">
+                  {summaryText || 'No summary available for this article.'}
+                </p>
               ) : null}
             </div>
-          </div>
-
-          <QAArenaQuestionCard
-            question={currentQuestion}
-            questionIndex={questionIndex}
-            totalQuestions={questions.length || 5}
-            modelAnswers={modelAnswers}
-            correctAnswer={currentQuestion?.answer}
-            activeModel={activeModel}
-            models={MODEL_METADATA}
-          />
+          ) : (
+            <p className="text-sm text-slate-500 dark:text-slate-400">Spin up a match to load a random article and abstract.</p>
+          )}
         </div>
 
-        <div className="space-y-6">
-          <QAArenaScoreboard scoreboard={scoreboard} models={MODEL_METADATA} />
-          <QAArenaHistory history={history} models={MODEL_METADATA} />
+        <QAArenaQuestionCard
+          question={currentQuestion}
+          questionIndex={questionIndex}
+          totalQuestions={questions.length || 5}
+          modelAnswers={modelAnswers}
+          correctAnswer={currentQuestion?.answer}
+          activeModel={activeModel}
+          models={MODEL_METADATA}
+        />
+
+        <QAArenaCountdown countdown={countdown} />
+
+        <div className="rounded-3xl border border-slate-900/10 bg-white/95 p-6 text-slate-900 shadow-md shadow-slate-900/15 dark:border-slate-700/60 dark:bg-slate-900/75 dark:text-slate-100">
+          <p className="text-xs font-semibold uppercase tracking-[0.5em] text-slate-500 dark:text-slate-400">Arena Status</p>
+          <p className="mt-3 text-base font-semibold text-slate-900 dark:text-white">{status || 'Press the button to start the battle!'}</p>
+          <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">Live updates appear here while the arena runs.</p>
+          {error ? (
+            <p className="mt-3 rounded-2xl border border-rose-300 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700 dark:border-rose-400/60 dark:bg-rose-500/15 dark:text-rose-100">
+              {error}
+            </p>
+          ) : null}
         </div>
+
+        <QAArenaScoreboard scoreboard={scoreboard} models={MODEL_METADATA} />
+
+        <QAArenaHistory
+          history={history}
+          models={MODEL_METADATA}
+          isOpen={historyOpen}
+          onToggle={() => setHistoryOpen((open) => !open)}
+          isHighlighting={historyHighlight}
+        />
       </section>
     </div>
   )

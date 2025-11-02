@@ -9,13 +9,14 @@ function OptionButton({ option, modelAnswers, correctAnswer, activeModel, models
   const activeModelId = activeModel?.id
   const activeModelWaiting = activeModelId ? modelAnswers?.[activeModelId] == null : false
 
-  const baseClasses = 'relative w-full overflow-hidden rounded-2xl border px-4 py-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900'
+  const baseClasses =
+    'relative w-full overflow-hidden rounded-2xl border border-slate-300 bg-white px-5 py-4 text-left transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white disabled:cursor-default dark:border-slate-700/70 dark:bg-slate-900/80 dark:focus-visible:ring-sky-500 dark:focus-visible:ring-offset-slate-900'
 
   const stateClasses = clsx({
-    'border-emerald-400/80 bg-emerald-500/20 text-emerald-100 shadow-[0_0_20px_rgba(16,185,129,0.45)]': isCorrect,
-    'border-sky-400/70 bg-sky-500/10 text-sky-100': pickedByA && !isCorrect,
-    'border-rose-400/70 bg-rose-500/10 text-rose-100': pickedByB && !isCorrect,
-    'border-indigo-500/40 bg-slate-900/40 text-slate-100': !pickedByA && !pickedByB && !isCorrect,
+    'border-emerald-400 bg-emerald-50 text-emerald-800 shadow-[0_18px_45px_-20px_rgba(16,185,129,0.65)] dark:border-emerald-400/80 dark:bg-emerald-500/20 dark:text-emerald-100': isCorrect,
+    'border-sky-300 bg-sky-50 text-sky-800 shadow-[0_18px_45px_-24px_rgba(56,189,248,0.65)] dark:border-sky-400/80 dark:bg-sky-500/20 dark:text-sky-100': pickedByA && !isCorrect,
+    'border-rose-300 bg-rose-50 text-rose-800 shadow-[0_18px_45px_-24px_rgba(244,114,182,0.55)] dark:border-rose-400/80 dark:bg-rose-500/20 dark:text-rose-100': pickedByB && !isCorrect,
+    'text-slate-900 dark:text-slate-100': !pickedByA && !pickedByB && !isCorrect,
   })
 
   const glowLayers = []
@@ -23,7 +24,7 @@ function OptionButton({ option, modelAnswers, correctAnswer, activeModel, models
     glowLayers.push(
       <span
         key="a"
-        className="pointer-events-none absolute inset-0 rounded-2xl bg-sky-500/20 blur-md"
+        className="pointer-events-none absolute inset-0 rounded-2xl bg-sky-400/15 blur-lg dark:bg-sky-500/20"
         aria-hidden="true"
       />,
     )
@@ -31,7 +32,7 @@ function OptionButton({ option, modelAnswers, correctAnswer, activeModel, models
     glowLayers.push(
       <span
         key="b"
-        className="pointer-events-none absolute inset-0 rounded-2xl bg-rose-500/20 blur-md"
+        className="pointer-events-none absolute inset-0 rounded-2xl bg-rose-400/15 blur-lg dark:bg-rose-500/25"
         aria-hidden="true"
       />,
     )
@@ -39,28 +40,28 @@ function OptionButton({ option, modelAnswers, correctAnswer, activeModel, models
     glowLayers.push(
       <span
         key="active"
-        className="pointer-events-none absolute inset-0 animate-pulse rounded-2xl bg-indigo-500/15"
+        className="pointer-events-none absolute inset-0 animate-pulse rounded-2xl bg-indigo-400/10 dark:bg-indigo-500/25"
         aria-hidden="true"
       />,
     )
 
   return (
-    <button type="button" className={clsx(baseClasses, stateClasses)} disabled>
-      <span className="relative z-10 flex items-center gap-3">
-        <span className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-slate-900/80 text-lg font-extrabold text-white">
+    <button type="button" className={clsx(baseClasses, stateClasses, 'min-h-[92px]')} disabled>
+      <span className="relative z-10 flex items-start gap-4">
+        <span className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-slate-100 text-lg font-extrabold text-slate-900 shadow-sm dark:border-slate-600 dark:bg-slate-800 dark:text-white">
           {letter}
         </span>
-        <span className="flex-1 text-base font-medium leading-snug text-slate-100">{text}</span>
+        <span className="flex-1 text-base font-semibold leading-snug">{text}</span>
       </span>
       {glowLayers}
       {isCorrect ? (
-        <span className="pointer-events-none absolute right-3 top-3 inline-flex items-center gap-2 rounded-full border border-emerald-400/80 bg-emerald-500/20 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-emerald-100">
+        <span className="pointer-events-none absolute right-4 top-4 inline-flex items-center gap-2 rounded-full border border-emerald-400/70 bg-emerald-100 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.35em] text-emerald-800 shadow-sm dark:bg-emerald-500/20 dark:text-emerald-100">
           Correct
         </span>
       ) : null}
       {pickedByA && !pickedByB ? (
         <span
-          className="pointer-events-none absolute left-3 bottom-3 inline-flex items-center gap-2 rounded-full border border-sky-500/40 bg-sky-500/20 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-widest text-sky-100"
+          className="pointer-events-none absolute left-4 bottom-4 inline-flex items-center gap-2 rounded-full border border-sky-300/70 bg-sky-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.35em] text-sky-700 shadow-sm dark:border-sky-400/60 dark:bg-sky-500/20 dark:text-sky-100"
           title={models?.modelA?.display || models?.modelA?.id || models?.modelA?.shortName || 'Model A'}
         >
           {models?.modelA?.badgeLabel || models?.modelA?.shortName || 'Model A'}
@@ -68,14 +69,14 @@ function OptionButton({ option, modelAnswers, correctAnswer, activeModel, models
       ) : null}
       {pickedByB && !pickedByA ? (
         <span
-          className="pointer-events-none absolute left-3 bottom-3 inline-flex items-center gap-2 rounded-full border border-rose-500/40 bg-rose-500/20 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-widest text-rose-100"
+          className="pointer-events-none absolute left-4 bottom-4 inline-flex items-center gap-2 rounded-full border border-rose-300/70 bg-rose-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.35em] text-rose-700 shadow-sm dark:border-rose-400/60 dark:bg-rose-500/20 dark:text-rose-100"
           title={models?.modelB?.display || models?.modelB?.id || models?.modelB?.shortName || 'Model B'}
         >
           {models?.modelB?.badgeLabel || models?.modelB?.shortName || 'Model B'}
         </span>
       ) : null}
       {pickedByA && pickedByB ? (
-        <span className="pointer-events-none absolute left-3 bottom-3 inline-flex items-center gap-2 rounded-full border border-purple-500/40 bg-purple-500/30 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-widest text-purple-100">
+        <span className="pointer-events-none absolute left-4 bottom-4 inline-flex items-center gap-2 rounded-full border border-purple-300/80 bg-purple-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.35em] text-purple-700 shadow-sm dark:border-purple-400/60 dark:bg-purple-500/25 dark:text-purple-100">
           Duel Lock
         </span>
       ) : null}
@@ -86,22 +87,22 @@ function OptionButton({ option, modelAnswers, correctAnswer, activeModel, models
 export function QAArenaQuestionCard({ question, questionIndex, totalQuestions, modelAnswers, correctAnswer, activeModel, models }) {
   if (!question) {
     return (
-      <div className="flex min-h-[260px] items-center justify-center rounded-3xl border border-dashed border-slate-600/60 bg-slate-900/30 text-slate-400">
+      <section className="flex min-h-[420px] flex-col justify-center rounded-3xl border border-slate-900/10 bg-white/95 p-6 text-center text-sm font-semibold text-slate-500 shadow-md shadow-slate-900/10 dark:border-slate-700/60 dark:bg-slate-900/70 dark:text-slate-300">
         Awaiting the next challenge…
-      </div>
+      </section>
     )
   }
 
   const title = `Question ${questionIndex + 1} of ${totalQuestions}`
 
   return (
-    <section className="relative overflow-hidden rounded-3xl border border-slate-200/30 bg-gradient-to-br from-slate-900 via-slate-900/90 to-slate-800 p-6 text-white shadow-xl shadow-slate-900/40">
-      <div className="absolute -top-20 -right-24 h-64 w-64 rounded-full bg-brand-500/10 blur-3xl" aria-hidden="true" />
-      <header className="mb-6 space-y-2">
-        <p className="text-xs font-semibold uppercase tracking-[0.4em] text-slate-400">{title}</p>
-        <h2 className="text-3xl font-black leading-tight text-white">{question.prompt}</h2>
+    <section className="relative flex min-h-[420px] flex-col gap-6 overflow-hidden rounded-3xl border border-slate-900/10 bg-white/95 p-6 text-slate-900 shadow-md shadow-slate-900/10 transition dark:border-slate-700/60 dark:bg-slate-900/70 dark:text-slate-100">
+      <div className="pointer-events-none absolute -top-32 right-16 h-72 w-72 rounded-full bg-sky-400/10 blur-3xl dark:bg-sky-500/20" aria-hidden="true" />
+      <header className="space-y-3">
+        <p className="text-xs font-semibold uppercase tracking-[0.45em] text-slate-500 dark:text-slate-400">{title}</p>
+        <h2 className="text-2xl font-black leading-snug text-slate-900 dark:text-white">{question.prompt}</h2>
       </header>
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="flex flex-col gap-3">
         {question.options.map((option) => (
           <OptionButton
             key={option.label}

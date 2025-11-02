@@ -237,8 +237,44 @@ export const QA_ARENA_TOPICS = [
   { theme: 'Cartography', articleTitle: 'Cartography', categoryId: 'culture-art-misc' },
 ]
 
+let topicDeck = []
+let lastTopicTheme = null
+
+function getSecureRandomIndex(upperBound) {
+  if (upperBound <= 0) return 0
+  const cryptoSource = typeof globalThis !== 'undefined' && globalThis.crypto && typeof globalThis.crypto.getRandomValues === 'function' ? globalThis.crypto : null
+  if (cryptoSource) {
+    const maxUint32 = 0xffffffff
+    const bucket = new Uint32Array(1)
+    let randomFraction = 0
+    do {
+      cryptoSource.getRandomValues(bucket)
+      randomFraction = bucket[0] / (maxUint32 + 1)
+    } while (randomFraction >= 1)
+    return Math.floor(randomFraction * upperBound)
+  }
+  return Math.floor(Math.random() * upperBound)
+}
+
+function reshuffleTopicDeck() {
+  topicDeck = QA_ARENA_TOPICS.slice()
+  for (let index = topicDeck.length - 1; index > 0; index -= 1) {
+    const swapIndex = getSecureRandomIndex(index + 1)
+    ;[topicDeck[index], topicDeck[swapIndex]] = [topicDeck[swapIndex], topicDeck[index]]
+  }
+  if (lastTopicTheme && topicDeck.length > 1 && topicDeck[0]?.theme === lastTopicTheme) {
+    const swapIndex = 1 + getSecureRandomIndex(topicDeck.length - 1)
+    ;[topicDeck[0], topicDeck[swapIndex]] = [topicDeck[swapIndex], topicDeck[0]]
+  }
+}
+
 export function pickRandomTopic() {
   if (!QA_ARENA_TOPICS.length) return null
-  const index = Math.floor(Math.random() * QA_ARENA_TOPICS.length)
-  return QA_ARENA_TOPICS[index]
+  if (!topicDeck.length) {
+    reshuffleTopicDeck()
+  }
+  const nextTopic = topicDeck.shift()
+  if (!nextTopic) return null
+  lastTopicTheme = nextTopic.theme
+  return { ...nextTopic }
 }
