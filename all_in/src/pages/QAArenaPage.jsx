@@ -18,6 +18,33 @@ const MODEL_B_ID = 'openai/gpt-oss-120b'
 const COUNTDOWN_SECONDS = 5
 const HISTORY_LIMIT = 5
 
+function buildModelMetadata(shortName, modelId) {
+  const cleanId = typeof modelId === 'string' ? modelId.trim() : ''
+  let provider = ''
+  let name = cleanId
+  if (cleanId.includes('/')) {
+    const parts = cleanId.split('/')
+    provider = parts.shift() || ''
+    name = parts.join('/')
+  }
+  const uppercaseName = name ? name.replace(/[_]/g, '-').toUpperCase() : ''
+  const display = provider && name ? `${provider} · ${name}` : cleanId
+  const badgeLabel = uppercaseName ? `${shortName} · ${uppercaseName}` : shortName
+  return {
+    shortName,
+    id: cleanId,
+    provider,
+    name,
+    display,
+    badgeLabel,
+  }
+}
+
+const MODEL_METADATA = {
+  modelA: buildModelMetadata('Model A', MODEL_A_ID),
+  modelB: buildModelMetadata('Model B', MODEL_B_ID),
+}
+
 const QUESTION_STRUCTURE = {
   type: 'object',
   additionalProperties: false,
@@ -389,14 +416,39 @@ export default function QAArenaPage() {
               </button>
             </div>
           </div>
-          <div className="flex flex-col gap-3 rounded-3xl border border-white/10 bg-slate-900/60 p-4 text-sm text-slate-200 shadow-lg">
-            <div className="flex items-center gap-2 text-slate-100">
-              <ClockIcon className="h-5 w-5 text-sky-400" />
-              <span className="text-sm font-semibold uppercase tracking-widest text-slate-300">5s cooldowns between calls</span>
+          <div className="flex flex-col gap-3">
+            <div className="rounded-3xl border border-white/10 bg-slate-900/60 p-4 text-sm text-slate-200 shadow-lg">
+              <p className="text-xs font-semibold uppercase tracking-[0.4em] text-slate-500">Tonight&apos;s matchup</p>
+              <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+                <div className="flex flex-col">
+                  <span className="text-xs font-semibold uppercase tracking-widest text-sky-200">{MODEL_METADATA.modelA.shortName}</span>
+                  <span className="text-sm font-semibold text-white" title={MODEL_METADATA.modelA.display}>
+                    {MODEL_METADATA.modelA.display || MODEL_METADATA.modelA.id}
+                  </span>
+                </div>
+                <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.4em] text-white/80">
+                  vs
+                </span>
+                <div className="flex flex-col items-end">
+                  <span className="text-xs font-semibold uppercase tracking-widest text-rose-200">{MODEL_METADATA.modelB.shortName}</span>
+                  <span className="text-sm font-semibold text-white text-right" title={MODEL_METADATA.modelB.display}>
+                    {MODEL_METADATA.modelB.display || MODEL_METADATA.modelB.id}
+                  </span>
+                </div>
+              </div>
+              <p className="mt-3 text-[11px] uppercase tracking-[0.3em] text-slate-500">
+                Duel between {MODEL_METADATA.modelA.id} and {MODEL_METADATA.modelB.id}
+              </p>
             </div>
-            <p className="text-xs text-slate-400">
-              After each /obj request the arena pauses for {COUNTDOWN_SECONDS} seconds to respect rate limits. Countdown updates in real time so you feel the suspense.
-            </p>
+            <div className="rounded-3xl border border-white/10 bg-slate-900/60 p-4 text-sm text-slate-200 shadow-lg">
+              <div className="flex items-center gap-2 text-slate-100">
+                <ClockIcon className="h-5 w-5 text-sky-400" />
+                <span className="text-sm font-semibold uppercase tracking-widest text-slate-300">5s cooldowns between calls</span>
+              </div>
+              <p className="text-xs text-slate-400">
+                After each /obj request the arena pauses for {COUNTDOWN_SECONDS} seconds to respect rate limits. Countdown updates in real time so you feel the suspense.
+              </p>
+            </div>
           </div>
         </div>
       </section>
@@ -461,12 +513,13 @@ export default function QAArenaPage() {
             modelAnswers={modelAnswers}
             correctAnswer={currentQuestion?.answer}
             activeModel={activeModel}
+            models={MODEL_METADATA}
           />
         </div>
 
         <div className="space-y-6">
-          <QAArenaScoreboard scoreboard={scoreboard} />
-          <QAArenaHistory history={history} />
+          <QAArenaScoreboard scoreboard={scoreboard} models={MODEL_METADATA} />
+          <QAArenaHistory history={history} models={MODEL_METADATA} />
         </div>
       </section>
     </div>

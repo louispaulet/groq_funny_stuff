@@ -11,8 +11,14 @@ function HistoryBadge({ categoryId }) {
   )
 }
 
-export function QAArenaHistory({ history }) {
+export function QAArenaHistory({ history, models }) {
   const entries = history || []
+  const modelAInfo = models?.modelA || {}
+  const modelBInfo = models?.modelB || {}
+  const modelALabel = modelAInfo.badgeLabel || modelAInfo.shortName || 'Model A'
+  const modelBLabel = modelBInfo.badgeLabel || modelBInfo.shortName || 'Model B'
+  const modelATitle = modelAInfo.display || modelAInfo.id || modelALabel
+  const modelBTitle = modelBInfo.display || modelBInfo.id || modelBLabel
   return (
     <section className="space-y-4 rounded-3xl border border-slate-200/20 bg-slate-900/40 p-6 text-white shadow-lg backdrop-blur-xl dark:border-slate-700/40">
       <header className="flex items-center justify-between">
@@ -50,11 +56,15 @@ export function QAArenaHistory({ history }) {
                 <p className="text-base font-semibold text-white">{item.question}</p>
                 <div className="grid gap-2 sm:grid-cols-2">
                   <div className="flex items-center gap-2 rounded-2xl border border-sky-500/40 bg-sky-500/10 px-3 py-2 text-sky-100">
-                    <span className="text-xs font-semibold uppercase tracking-widest text-sky-200/80">Model A</span>
+                    <span className="text-xs font-semibold uppercase tracking-widest text-sky-200/80" title={modelATitle}>
+                      {modelALabel}
+                    </span>
                     <span className="text-sm font-semibold">{item.answers?.modelA ?? '—'}</span>
                   </div>
                   <div className="flex items-center gap-2 rounded-2xl border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-rose-100">
-                    <span className="text-xs font-semibold uppercase tracking-widest text-rose-200/80">Model B</span>
+                    <span className="text-xs font-semibold uppercase tracking-widest text-rose-200/80" title={modelBTitle}>
+                      {modelBLabel}
+                    </span>
                     <span className="text-sm font-semibold">{item.answers?.modelB ?? '—'}</span>
                   </div>
                 </div>

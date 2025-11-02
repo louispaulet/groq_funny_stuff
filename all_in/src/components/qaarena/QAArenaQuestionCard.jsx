@@ -1,6 +1,6 @@
 import clsx from 'clsx'
 
-function OptionButton({ option, modelAnswers, correctAnswer, activeModel }) {
+function OptionButton({ option, modelAnswers, correctAnswer, activeModel, models }) {
   const letter = option.label
   const text = option.text
   const isCorrect = correctAnswer === letter
@@ -59,13 +59,19 @@ function OptionButton({ option, modelAnswers, correctAnswer, activeModel }) {
         </span>
       ) : null}
       {pickedByA && !pickedByB ? (
-        <span className="pointer-events-none absolute left-3 bottom-3 inline-flex items-center gap-2 rounded-full border border-sky-500/40 bg-sky-500/20 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-widest text-sky-100">
-          Model A pick
+        <span
+          className="pointer-events-none absolute left-3 bottom-3 inline-flex items-center gap-2 rounded-full border border-sky-500/40 bg-sky-500/20 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-widest text-sky-100"
+          title={models?.modelA?.display || models?.modelA?.id || models?.modelA?.shortName || 'Model A'}
+        >
+          {models?.modelA?.badgeLabel || models?.modelA?.shortName || 'Model A'}
         </span>
       ) : null}
       {pickedByB && !pickedByA ? (
-        <span className="pointer-events-none absolute left-3 bottom-3 inline-flex items-center gap-2 rounded-full border border-rose-500/40 bg-rose-500/20 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-widest text-rose-100">
-          Model B pick
+        <span
+          className="pointer-events-none absolute left-3 bottom-3 inline-flex items-center gap-2 rounded-full border border-rose-500/40 bg-rose-500/20 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-widest text-rose-100"
+          title={models?.modelB?.display || models?.modelB?.id || models?.modelB?.shortName || 'Model B'}
+        >
+          {models?.modelB?.badgeLabel || models?.modelB?.shortName || 'Model B'}
         </span>
       ) : null}
       {pickedByA && pickedByB ? (
@@ -77,7 +83,7 @@ function OptionButton({ option, modelAnswers, correctAnswer, activeModel }) {
   )
 }
 
-export function QAArenaQuestionCard({ question, questionIndex, totalQuestions, modelAnswers, correctAnswer, activeModel }) {
+export function QAArenaQuestionCard({ question, questionIndex, totalQuestions, modelAnswers, correctAnswer, activeModel, models }) {
   if (!question) {
     return (
       <div className="flex min-h-[260px] items-center justify-center rounded-3xl border border-dashed border-slate-600/60 bg-slate-900/30 text-slate-400">
@@ -103,6 +109,7 @@ export function QAArenaQuestionCard({ question, questionIndex, totalQuestions, m
             modelAnswers={modelAnswers}
             correctAnswer={correctAnswer}
             activeModel={activeModel}
+            models={models}
           />
         ))}
       </div>
