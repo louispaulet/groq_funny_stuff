@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import clsx from 'clsx'
 import { SparklesIcon, PlayIcon, ArrowPathIcon, ClockIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline'
 import { getExperienceById } from '../config/experiences'
 import { normalizeBaseUrl } from '../lib/objectMakerUtils'
@@ -170,8 +171,12 @@ export default function QAArenaPage() {
   const [historyHighlight, setHistoryHighlight] = useState(false)
   const [abstractOpen, setAbstractOpen] = useState(false)
   const [activeModel, setActiveModel] = useState(null)
+  const [articleShuffleActive, setArticleShuffleActive] = useState(false)
+  const [questionShuffleActive, setQuestionShuffleActive] = useState(false)
   const isMountedRef = useRef(true)
   const historyHighlightTimeoutRef = useRef(null)
+  const articleShuffleTimeoutRef = useRef(null)
+  const questionShuffleTimeoutRef = useRef(null)
 
   useEffect(() => {
     isMountedRef.current = true
@@ -179,6 +184,12 @@ export default function QAArenaPage() {
       isMountedRef.current = false
       if (historyHighlightTimeoutRef.current) {
         clearTimeout(historyHighlightTimeoutRef.current)
+      }
+      if (articleShuffleTimeoutRef.current) {
+        clearTimeout(articleShuffleTimeoutRef.current)
+      }
+      if (questionShuffleTimeoutRef.current) {
+        clearTimeout(questionShuffleTimeoutRef.current)
       }
     }
   }, [])
@@ -222,6 +233,32 @@ export default function QAArenaPage() {
       setHistoryHighlight(false)
       historyHighlightTimeoutRef.current = null
     }, 1200)
+  }, [])
+
+  const triggerArticleShuffle = useCallback(() => {
+    if (!isMountedRef.current) return
+    setArticleShuffleActive(true)
+    if (articleShuffleTimeoutRef.current) {
+      clearTimeout(articleShuffleTimeoutRef.current)
+    }
+    articleShuffleTimeoutRef.current = setTimeout(() => {
+      if (!isMountedRef.current) return
+      setArticleShuffleActive(false)
+      articleShuffleTimeoutRef.current = null
+    }, 900)
+  }, [])
+
+  const triggerQuestionShuffle = useCallback(() => {
+    if (!isMountedRef.current) return
+    setQuestionShuffleActive(true)
+    if (questionShuffleTimeoutRef.current) {
+      clearTimeout(questionShuffleTimeoutRef.current)
+    }
+    questionShuffleTimeoutRef.current = setTimeout(() => {
+      if (!isMountedRef.current) return
+      setQuestionShuffleActive(false)
+      questionShuffleTimeoutRef.current = null
+    }, 900)
   }, [])
 
   const callQuestionGenerator = useCallback(
@@ -367,6 +404,7 @@ export default function QAArenaPage() {
       if (!topic) throw new Error('No topics configured')
       if (!isMountedRef.current) return
       setCurrentTheme(topic)
+      triggerArticleShuffle()
 
       setStatusSafely('Fetching the Wikipedia abstract…')
       const article = await fetchWikipediaSummary(topic.articleTitle)
@@ -379,26 +417,27 @@ export default function QAArenaPage() {
       if (!isMountedRef.current) return
       setQuestions(questionsList)
 
-      await runCooldown('Model A is stretching before the buzzer…')
-
       for (let index = 0; index < questionsList.length; index += 1) {
         if (!isMountedRef.current) return
         setQuestionIndex(index)
+        triggerQuestionShuffle()
         const question = questionsList[index]
         setStatusSafely(`Round ${index + 1}: Question deployed!`)
         setModelAnswers({ modelA: null, modelB: null })
-        setActiveModel({ id: 'modelA' })
+        setActiveModel({ id: 'modelA', phase: 'pending' })
 
-        setStatusSafely(`Model A is deliberating…`)
+        setStatusSafely('Model A is pacing the arena…')
+        await runCooldown('Model A reveals their answer in')
+        if (!isMountedRef.current) return
         const answerA = await callAnswerModel({ question, modelId: MODEL_A_ID, baseUrl: defaultBaseUrl })
         if (!isMountedRef.current) return
         setModelAnswers((prev) => ({ ...prev, modelA: answerA }))
         setActiveModel(null)
-        await runCooldown('Cooling arena before Model B enters…')
-        if (!isMountedRef.current) return
 
-        setActiveModel({ id: 'modelB' })
-        setStatusSafely(`Model B is calculating…`)
+        setActiveModel({ id: 'modelB', phase: 'pending' })
+        setStatusSafely('Model B is plotting their move…')
+        await runCooldown('Model B reveals their answer in')
+        if (!isMountedRef.current) return
         const answerB = await callAnswerModel({ question, modelId: MODEL_B_ID, baseUrl: defaultBaseUrl })
         if (!isMountedRef.current) return
         setModelAnswers((prev) => ({ ...prev, modelB: answerB }))
@@ -433,7 +472,7 @@ export default function QAArenaPage() {
         setIsRunning(false)
       }
     }
-  }, [appendHistory, callAnswerModel, callQuestionGenerator, defaultBaseUrl, isRunning, resetActiveQuestion, runCooldown, setErrorSafely, setStatusSafely, updateScoreboard])
+  }, [appendHistory, callAnswerModel, callQuestionGenerator, defaultBaseUrl, isRunning, resetActiveQuestion, runCooldown, setErrorSafely, setStatusSafely, triggerArticleShuffle, triggerQuestionShuffle, updateScoreboard])
 
   const handleResetScoreboard = useCallback(() => {
     setScoreboard({ total: { modelA: 0, modelB: 0 }, categories: {} })
@@ -528,7 +567,24 @@ export default function QAArenaPage() {
       </section>
 
       <section className="flex flex-col gap-6">
-        <div className="space-y-4 rounded-3xl border border-slate-900/10 bg-white/95 p-6 text-slate-900 shadow-md shadow-slate-900/15 dark:border-slate-700/60 dark:bg-slate-900/75 dark:text-slate-100">
+        <div
+          className={clsx(
+            'relative space-y-4 rounded-3xl border border-slate-900/10 bg-white/95 p-6 text-slate-900 shadow-md shadow-slate-900/15 transition dark:border-slate-700/60 dark:bg-slate-900/75 dark:text-slate-100',
+            articleShuffleActive && 'ring-2 ring-sky-300/70 shadow-xl shadow-sky-200/30 animate-pulse dark:ring-sky-500/60 dark:shadow-sky-500/25',
+          )}
+        >
+          {articleShuffleActive ? (
+            <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-3xl">
+              <span
+                className="absolute -top-6 left-8 h-20 w-16 -rotate-6 rounded-2xl border border-slate-200/70 bg-white/75 shadow-lg shadow-slate-900/10 backdrop-blur-sm animate-bounce dark:border-slate-700/60 dark:bg-slate-800/60"
+                style={{ animationDuration: '1.25s' }}
+              />
+              <span
+                className="absolute -bottom-8 right-10 h-24 w-[4.25rem] rotate-6 rounded-2xl border border-slate-200/70 bg-slate-100/75 shadow-lg shadow-slate-900/10 backdrop-blur-sm animate-bounce dark:border-slate-700/60 dark:bg-slate-700/60"
+                style={{ animationDelay: '0.12s', animationDuration: '1.35s' }}
+              />
+            </div>
+          ) : null}
           <header className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.5em] text-slate-500 dark:text-slate-400">Current Article</p>
@@ -576,6 +632,7 @@ export default function QAArenaPage() {
           correctAnswer={currentQuestion?.answer}
           activeModel={activeModel}
           models={MODEL_METADATA}
+          isShuffling={questionShuffleActive}
         />
 
         <QAArenaCountdown countdown={countdown} />

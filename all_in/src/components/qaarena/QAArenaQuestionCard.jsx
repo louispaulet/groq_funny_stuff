@@ -1,90 +1,189 @@
+import { useEffect, useMemo, useRef, useState } from 'react'
 import clsx from 'clsx'
 
-function OptionButton({ option, modelAnswers, correctAnswer, activeModel, models }) {
-  const letter = option.label
-  const text = option.text
-  const isCorrect = correctAnswer === letter
-  const pickedByA = modelAnswers?.modelA === letter
-  const pickedByB = modelAnswers?.modelB === letter
-  const activeModelId = activeModel?.id
-  const activeModelWaiting = activeModelId ? modelAnswers?.[activeModelId] == null : false
+const MODEL_TOKEN_THEME = {
+  modelA: {
+    label: 'A',
+    base: 'bg-sky-500 text-white shadow-[0_0_18px_rgba(56,189,248,0.35)]',
+    pendingRing: 'ring-sky-200/80 dark:ring-sky-500/60',
+  },
+  modelB: {
+    label: 'B',
+    base: 'bg-rose-500 text-white shadow-[0_0_18px_rgba(244,114,182,0.35)]',
+    pendingRing: 'ring-rose-200/90 dark:ring-rose-500/70',
+  },
+  default: {
+    label: '?',
+    base: 'bg-slate-500 text-white shadow-[0_0_18px_rgba(148,163,184,0.35)]',
+    pendingRing: 'ring-slate-200/80 dark:ring-slate-500/60',
+  },
+}
 
-  const baseClasses =
-    'relative w-full overflow-hidden rounded-2xl border border-slate-300 bg-white px-5 py-4 text-left transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white disabled:cursor-default dark:border-slate-700/70 dark:bg-slate-900/80 dark:focus-visible:ring-sky-500 dark:focus-visible:ring-offset-slate-900'
-
-  const stateClasses = clsx({
-    'border-emerald-400 bg-emerald-50 text-emerald-800 shadow-[0_18px_45px_-20px_rgba(16,185,129,0.65)] dark:border-emerald-400/80 dark:bg-emerald-500/20 dark:text-emerald-100': isCorrect,
-    'border-sky-300 bg-sky-50 text-sky-800 shadow-[0_18px_45px_-24px_rgba(56,189,248,0.65)] dark:border-sky-400/80 dark:bg-sky-500/20 dark:text-sky-100': pickedByA && !isCorrect,
-    'border-rose-300 bg-rose-50 text-rose-800 shadow-[0_18px_45px_-24px_rgba(244,114,182,0.55)] dark:border-rose-400/80 dark:bg-rose-500/20 dark:text-rose-100': pickedByB && !isCorrect,
-    'text-slate-900 dark:text-slate-100': !pickedByA && !pickedByB && !isCorrect,
+function ModelToken({ modelKey, state, shortName, title }) {
+  const theme = MODEL_TOKEN_THEME[modelKey] || MODEL_TOKEN_THEME.default
+  const baseClasses = 'relative flex h-8 w-8 items-center justify-center rounded-full text-xs font-black uppercase tracking-[0.2em] transition'
+  const stateClasses = clsx('ring-2 ring-white/20 dark:ring-white/10', theme.base, {
+    'animate-pulse': state === 'pending',
+    'ring-emerald-400 shadow-[0_0_22px_rgba(16,185,129,0.38)]': state === 'correct',
+    'ring-rose-400 shadow-[0_0_22px_rgba(244,114,182,0.38)]': state === 'incorrect',
+    [theme.pendingRing]: state === 'pending',
   })
 
-  const glowLayers = []
-  if (pickedByA)
-    glowLayers.push(
-      <span
-        key="a"
-        className="pointer-events-none absolute inset-0 rounded-2xl bg-sky-400/15 blur-lg dark:bg-sky-500/20"
-        aria-hidden="true"
-      />,
-    )
-  if (pickedByB)
-    glowLayers.push(
-      <span
-        key="b"
-        className="pointer-events-none absolute inset-0 rounded-2xl bg-rose-400/15 blur-lg dark:bg-rose-500/25"
-        aria-hidden="true"
-      />,
-    )
-  if (activeModelWaiting)
-    glowLayers.push(
-      <span
-        key="active"
-        className="pointer-events-none absolute inset-0 animate-pulse rounded-2xl bg-indigo-400/10 dark:bg-indigo-500/25"
-        aria-hidden="true"
-      />,
-    )
-
   return (
-    <button type="button" className={clsx(baseClasses, stateClasses, 'min-h-[92px]')} disabled>
-      <span className="relative z-10 flex items-start gap-4">
-        <span className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-slate-100 text-lg font-extrabold text-slate-900 shadow-sm dark:border-slate-600 dark:bg-slate-800 dark:text-white">
-          {letter}
-        </span>
-        <span className="flex-1 text-base font-semibold leading-snug">{text}</span>
-      </span>
-      {glowLayers}
-      {isCorrect ? (
-        <span className="pointer-events-none absolute right-4 top-4 inline-flex items-center gap-2 rounded-full border border-emerald-400/70 bg-emerald-100 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.35em] text-emerald-800 shadow-sm dark:bg-emerald-500/20 dark:text-emerald-100">
-          Correct
-        </span>
+    <span className={clsx(baseClasses, stateClasses)} title={title} aria-label={`${shortName} token: ${state}`}>
+      {theme.label}
+      {state === 'pending' ? (
+        <span className="pointer-events-none absolute inset-0 rounded-full border border-white/60 opacity-70 animate-ping" aria-hidden="true" />
       ) : null}
-      {pickedByA && !pickedByB ? (
-        <span
-          className="pointer-events-none absolute left-4 bottom-4 inline-flex items-center gap-2 rounded-full border border-sky-300/70 bg-sky-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.35em] text-sky-700 shadow-sm dark:border-sky-400/60 dark:bg-sky-500/20 dark:text-sky-100"
-          title={models?.modelA?.display || models?.modelA?.id || models?.modelA?.shortName || 'Model A'}
-        >
-          {models?.modelA?.badgeLabel || models?.modelA?.shortName || 'Model A'}
-        </span>
-      ) : null}
-      {pickedByB && !pickedByA ? (
-        <span
-          className="pointer-events-none absolute left-4 bottom-4 inline-flex items-center gap-2 rounded-full border border-rose-300/70 bg-rose-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.35em] text-rose-700 shadow-sm dark:border-rose-400/60 dark:bg-rose-500/20 dark:text-rose-100"
-          title={models?.modelB?.display || models?.modelB?.id || models?.modelB?.shortName || 'Model B'}
-        >
-          {models?.modelB?.badgeLabel || models?.modelB?.shortName || 'Model B'}
-        </span>
-      ) : null}
-      {pickedByA && pickedByB ? (
-        <span className="pointer-events-none absolute left-4 bottom-4 inline-flex items-center gap-2 rounded-full border border-purple-300/80 bg-purple-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.35em] text-purple-700 shadow-sm dark:border-purple-400/60 dark:bg-purple-500/25 dark:text-purple-100">
-          Duel Lock
-        </span>
-      ) : null}
-    </button>
+    </span>
   )
 }
 
-export function QAArenaQuestionCard({ question, questionIndex, totalQuestions, modelAnswers, correctAnswer, activeModel, models }) {
+function OptionCard({ option, tokens, isCorrect }) {
+  const hasPendingToken = tokens.some((token) => token.state === 'pending')
+  const hasSettledToken = tokens.some((token) => token.state === 'correct' || token.state === 'incorrect')
+
+  const cardClasses = clsx(
+    'relative overflow-hidden rounded-2xl border px-5 py-4 transition duration-300 ease-out',
+    'bg-white/95 text-slate-900 shadow-sm dark:border-slate-700/60 dark:bg-slate-900/75 dark:text-slate-100',
+    isCorrect
+      ? 'border-emerald-400/80 bg-emerald-50/80 shadow-[0_24px_45px_-28px_rgba(16,185,129,0.65)] dark:border-emerald-400/80 dark:bg-emerald-500/15'
+      : 'border-slate-200/80 dark:border-slate-700/60',
+    hasPendingToken &&
+      'ring-2 ring-sky-300/70 shadow-lg shadow-sky-200/40 dark:ring-sky-500/60 dark:shadow-sky-500/25',
+    hasSettledToken && !isCorrect && 'border-slate-300 shadow-md dark:border-slate-600/70',
+  )
+
+  return (
+    <div className={cardClasses}>
+      <div className="flex items-start gap-4">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-lg font-black text-slate-900 shadow-sm dark:border-slate-600 dark:bg-slate-800 dark:text-white">
+          {option.label}
+        </span>
+        <div className="flex-1 space-y-3">
+          <p className="text-base font-semibold leading-relaxed">{option.text}</p>
+          {isCorrect ? (
+            <span className="inline-flex items-center gap-2 rounded-full border border-emerald-400/80 bg-emerald-100 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.35em] text-emerald-700 shadow-sm dark:border-emerald-400/60 dark:bg-emerald-500/20 dark:text-emerald-100">
+              Correct Answer
+            </span>
+          ) : null}
+        </div>
+        <div className="flex min-h-[32px] shrink-0 items-start gap-2">
+          {tokens.map((token) => (
+            <ModelToken key={token.modelKey} {...token} />
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function ShuffleOverlay() {
+  return (
+    <div className="pointer-events-none absolute inset-0 z-10 overflow-hidden">
+      <div className="absolute -top-6 left-8 h-24 w-16 -rotate-6 rounded-2xl border border-slate-200/70 bg-white/80 shadow-lg shadow-slate-900/10 backdrop-blur-sm animate-bounce dark:border-slate-700/60 dark:bg-slate-800/70" style={{ animationDuration: '1.3s' }} />
+      <div className="absolute -bottom-10 right-10 h-28 w-[4.5rem] rotate-6 rounded-2xl border border-slate-200/70 bg-slate-100/80 shadow-lg shadow-slate-900/10 backdrop-blur-sm animate-bounce dark:border-slate-700/60 dark:bg-slate-700/70" style={{ animationDelay: '0.15s', animationDuration: '1.4s' }} />
+      <div className="absolute top-1/2 left-1/2 h-24 w-20 -translate-x-1/2 -translate-y-1/2 rotate-3 rounded-3xl border border-indigo-200/70 bg-gradient-to-br from-sky-400/40 via-indigo-400/30 to-purple-400/30 shadow-xl shadow-indigo-500/40 animate-ping dark:border-indigo-500/40" style={{ animationDuration: '1.1s' }} />
+    </div>
+  )
+}
+
+export function QAArenaQuestionCard({ question, questionIndex, totalQuestions, modelAnswers, correctAnswer, activeModel, models, isShuffling }) {
+  const [hoverTargets, setHoverTargets] = useState({ modelA: null, modelB: null })
+  const [showShuffleOverlay, setShowShuffleOverlay] = useState(false)
+  const hoverTimerRef = useRef(null)
+  const shuffleTimerRef = useRef(null)
+
+  useEffect(() => {
+    setHoverTargets({ modelA: null, modelB: null })
+  }, [question?.id])
+
+  useEffect(() => {
+    if (hoverTimerRef.current) {
+      clearTimeout(hoverTimerRef.current)
+      hoverTimerRef.current = null
+    }
+    const activeId = activeModel?.id
+    if (!activeId || !question?.options?.length || modelAnswers?.[activeId]) {
+      if (activeId) {
+        setHoverTargets((prev) => (prev[activeId] ? { ...prev, [activeId]: null } : prev))
+      }
+      return () => {}
+    }
+
+    const moveToken = () => {
+      if (!question?.options?.length) return
+      const randomIndex = Math.floor(Math.random() * question.options.length)
+      const nextLabel = question.options[randomIndex]?.label ?? null
+      setHoverTargets((prev) => ({ ...prev, [activeId]: nextLabel }))
+      hoverTimerRef.current = setTimeout(moveToken, 420 + Math.random() * 420)
+    }
+
+    moveToken()
+    return () => {
+      if (hoverTimerRef.current) {
+        clearTimeout(hoverTimerRef.current)
+        hoverTimerRef.current = null
+      }
+    }
+  }, [activeModel, modelAnswers, question?.options])
+
+  useEffect(() => {
+    if (!isShuffling) return
+    setShowShuffleOverlay(true)
+    if (shuffleTimerRef.current) {
+      clearTimeout(shuffleTimerRef.current)
+    }
+    shuffleTimerRef.current = setTimeout(() => {
+      setShowShuffleOverlay(false)
+      shuffleTimerRef.current = null
+    }, 750)
+  }, [isShuffling])
+
+  useEffect(() => () => {
+    if (hoverTimerRef.current) {
+      clearTimeout(hoverTimerRef.current)
+    }
+    if (shuffleTimerRef.current) {
+      clearTimeout(shuffleTimerRef.current)
+    }
+  }, [])
+
+  const options = question?.options || []
+  const tokensByOption = useMemo(() => {
+    const map = Object.fromEntries(options.map((opt) => [opt.label, []]))
+    const modelKeys = ['modelA', 'modelB']
+
+    modelKeys.forEach((modelKey) => {
+      const info = models?.[modelKey] || {}
+      const finalAnswer = modelAnswers?.[modelKey]
+      const hoverLabel = hoverTargets[modelKey]
+      const shortName = info.badgeLabel || info.shortName || info.id || modelKey.toUpperCase()
+      const displayTitle = info.display || info.id || shortName
+
+      if (finalAnswer && map[finalAnswer]) {
+        map[finalAnswer].push({
+          modelKey,
+          state: finalAnswer === correctAnswer ? 'correct' : 'incorrect',
+          shortName,
+          title: `${displayTitle} chose option ${finalAnswer}`,
+        })
+        return
+      }
+
+      if (activeModel?.id === modelKey && hoverLabel && map[hoverLabel]) {
+        map[hoverLabel].push({
+          modelKey,
+          state: 'pending',
+          shortName,
+          title: `${displayTitle} is hovering option ${hoverLabel}`,
+        })
+      }
+    })
+
+    return map
+  }, [activeModel, correctAnswer, hoverTargets, modelAnswers, models, options])
+
   if (!question) {
     return (
       <section className="flex min-h-[420px] flex-col justify-center rounded-3xl border border-slate-900/10 bg-white/95 p-6 text-center text-sm font-semibold text-slate-500 shadow-md shadow-slate-900/10 dark:border-slate-700/60 dark:bg-slate-900/70 dark:text-slate-300">
@@ -98,20 +197,14 @@ export function QAArenaQuestionCard({ question, questionIndex, totalQuestions, m
   return (
     <section className="relative flex min-h-[420px] flex-col gap-6 overflow-hidden rounded-3xl border border-slate-900/10 bg-white/95 p-6 text-slate-900 shadow-md shadow-slate-900/10 transition dark:border-slate-700/60 dark:bg-slate-900/70 dark:text-slate-100">
       <div className="pointer-events-none absolute -top-32 right-16 h-72 w-72 rounded-full bg-sky-400/10 blur-3xl dark:bg-sky-500/20" aria-hidden="true" />
-      <header className="space-y-3">
+      {showShuffleOverlay ? <ShuffleOverlay /> : null}
+      <header className="relative space-y-3">
         <p className="text-xs font-semibold uppercase tracking-[0.45em] text-slate-500 dark:text-slate-400">{title}</p>
         <h2 className="text-2xl font-black leading-snug text-slate-900 dark:text-white">{question.prompt}</h2>
       </header>
-      <div className="flex flex-col gap-3">
-        {question.options.map((option) => (
-          <OptionButton
-            key={option.label}
-            option={option}
-            modelAnswers={modelAnswers}
-            correctAnswer={correctAnswer}
-            activeModel={activeModel}
-            models={models}
-          />
+      <div className="relative flex flex-col gap-3">
+        {options.map((option) => (
+          <OptionCard key={option.label} option={option} tokens={tokensByOption[option.label] || []} isCorrect={correctAnswer === option.label} />
         ))}
       </div>
     </section>
