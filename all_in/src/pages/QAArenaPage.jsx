@@ -27,6 +27,7 @@ const QUESTION_MODEL_ID = STRUCTURED_MODEL_PRIORITIES.find((candidate) => candid
 const COUNTDOWN_SECONDS = 5
 const HISTORY_LIMIT = 5
 const ANSWER_LETTERS = ['A', 'B', 'C', 'D']
+const QUESTION_SHUFFLE_MS = 1100
 
 function buildModelMetadata(shortName, modelId) {
   const cleanId = typeof modelId === 'string' ? modelId.trim() : ''
@@ -245,7 +246,7 @@ export default function QAArenaPage() {
       if (!isMountedRef.current) return
       setArticleShuffleActive(false)
       articleShuffleTimeoutRef.current = null
-    }, 900)
+    }, QUESTION_SHUFFLE_MS)
   }, [])
 
   const triggerQuestionShuffle = useCallback(() => {
@@ -258,7 +259,7 @@ export default function QAArenaPage() {
       if (!isMountedRef.current) return
       setQuestionShuffleActive(false)
       questionShuffleTimeoutRef.current = null
-    }, 900)
+    }, QUESTION_SHUFFLE_MS)
   }, [])
 
   const callQuestionGenerator = useCallback(
@@ -424,6 +425,8 @@ export default function QAArenaPage() {
         const question = questionsList[index]
         setStatusSafely(`Round ${index + 1}: Question deployed!`)
         setModelAnswers({ modelA: null, modelB: null })
+        await wait(QUESTION_SHUFFLE_MS)
+        if (!isMountedRef.current) return
         setActiveModel({ id: 'modelA', phase: 'pending' })
 
         setStatusSafely('Model A is pacing the arena…')

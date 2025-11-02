@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { forwardRef, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import clsx from 'clsx'
 
 const MODEL_TOKEN_THEME = {
@@ -22,6 +22,8 @@ const MODEL_TOKEN_THEME = {
   },
 }
 
+const SHUFFLE_ANIMATION_MS = 1100
+
 const SHUFFLE_STYLE_ID = 'qa-arena-card-shuffle-styles'
 
 function ensureShuffleStyles() {
@@ -44,11 +46,22 @@ function ensureShuffleStyles() {
         transform: var(--qa-end-transform);
       }
     }
+    @keyframes qaTokenSlam {
+      0% {
+        transform: scale(0.6);
+      }
+      55% {
+        transform: scale(1.3);
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
   `
   document.head.appendChild(style)
 }
 
-function ModelToken({ modelKey, state, shortName, title, pendingCountdown }) {
+function ModelToken({ modelKey, state, shortName, title, pendingCountdown, slam }) {
   const theme = MODEL_TOKEN_THEME[modelKey] || MODEL_TOKEN_THEME.default
   const baseClasses = 'relative flex h-8 w-8 items-center justify-center overflow-hidden rounded-full text-xs font-black uppercase tracking-[0.2em] transition'
   const stateClasses = clsx('ring-2 ring-white/20 dark:ring-white/10', theme.base, {
@@ -69,7 +82,15 @@ function ModelToken({ modelKey, state, shortName, title, pendingCountdown }) {
   const circumference = 2 * Math.PI * RADIUS
 
   return (
-    <span className={clsx(baseClasses, stateClasses)} title={title} aria-label={`${shortName} token: ${state}`}>
+    <span
+      className={clsx(
+        baseClasses,
+        stateClasses,
+        slam ? 'animate-[qaTokenSlam_0.45s_cubic-bezier(0.2,1,0.4,1)_forwards]' : '',
+      )}
+      title={title}
+      aria-label={`${shortName} token: ${state}`}
+    >
       {hasCountdown ? (
         <svg className="pointer-events-none absolute -inset-[10px] h-[56px] w-[56px]" viewBox="0 0 64 64" aria-hidden="true">
           <circle cx="32" cy="32" r={RADIUS} className="fill-none opacity-20" stroke="rgba(255,255,255,0.35)" strokeWidth={TRACK_WIDTH} />
@@ -97,7 +118,7 @@ function ModelToken({ modelKey, state, shortName, title, pendingCountdown }) {
   )
 }
 
-function OptionCard({ option, tokens, isCorrect }) {
+const OptionCard = forwardRef(function OptionCard({ option, tokens, isCorrect }, ref) {
   const hasPendingToken = tokens.some((token) => token.state === 'pending')
   const hasSettledToken = tokens.some((token) => token.state === 'correct' || token.state === 'incorrect')
 
@@ -113,7 +134,7 @@ function OptionCard({ option, tokens, isCorrect }) {
   )
 
   return (
-    <div className={cardClasses}>
+    <div ref={ref} className={cardClasses} data-option-label={option.label}>
       <div className="flex items-start gap-4">
         <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-lg font-black text-slate-900 shadow-sm dark:border-slate-600 dark:bg-slate-800 dark:text-white">
           {option.label}
@@ -134,7 +155,7 @@ function OptionCard({ option, tokens, isCorrect }) {
       </div>
     </div>
   )
-}
+})
 
 const SHUFFLE_CARD_BASE =
   'absolute left-1/2 top-1/2 h-40 w-28 -translate-x-1/2 rounded-3xl border border-white/80 bg-white/95 shadow-xl shadow-slate-900/25 dark:border-slate-600/70 dark:bg-slate-800/90'
@@ -177,7 +198,7 @@ function ShuffleOverlay() {
             'flex flex-col items-center justify-center overflow-hidden',
           )}
           style={{
-            animation: `qaShuffleCard 0.85s ease-in-out ${card.delay}s forwards`,
+            animation: `qaShuffleCard ${SHUFFLE_ANIMATION_MS}ms ease-in-out ${card.delay}s forwards`,
             transformOrigin: 'center',
             pointerEvents: 'none',
             '--qa-start-transform': card.start,
@@ -214,6 +235,12 @@ export function QAArenaQuestionCard({
   const [showShuffleOverlay, setShowShuffleOverlay] = useState(false)
   const hoverTimerRef = useRef(null)
   const shuffleTimerRef = useRef(null)
+  const optionRefs = useRef({})
+  const containerRef = useRef(null)
+  const [floatingTokens, setFloatingTokens] = useState({ modelA: null, modelB: null })
+  const [slamLabels, setSlamLabels] = useState({})
+  const slamTimeoutsRef = useRef({})
+  const prevAnswersRef = useRef({ modelA: null, modelB: null })
 
   useEffect(() => {
     ensureShuffleStyles()
@@ -221,6 +248,7 @@ export function QAArenaQuestionCard({
 
   useEffect(() => {
     setHoverTargets({ modelA: null, modelB: null })
+    setFloatingTokens({ modelA: null, modelB: null })
   }, [question?.id])
 
   useEffect(() => {
@@ -262,7 +290,7 @@ export function QAArenaQuestionCard({
     shuffleTimerRef.current = setTimeout(() => {
       setShowShuffleOverlay(false)
       shuffleTimerRef.current = null
-    }, 750)
+    }, SHUFFLE_ANIMATION_MS)
   }, [isShuffling])
 
   useEffect(() => () => {
@@ -272,9 +300,13 @@ export function QAArenaQuestionCard({
     if (shuffleTimerRef.current) {
       clearTimeout(shuffleTimerRef.current)
     }
+    Object.values(slamTimeoutsRef.current).forEach((timeoutId) => {
+      if (timeoutId) clearTimeout(timeoutId)
+    })
   }, [])
 
   const options = question?.options || []
+
   const tokensByOption = useMemo(() => {
     const map = Object.fromEntries(options.map((opt) => [opt.label, []]))
     const modelKeys = ['modelA', 'modelB']
@@ -282,7 +314,6 @@ export function QAArenaQuestionCard({
     modelKeys.forEach((modelKey) => {
       const info = models?.[modelKey] || {}
       const finalAnswer = modelAnswers?.[modelKey]
-      const hoverLabel = hoverTargets[modelKey]
       const shortName = info.badgeLabel || info.shortName || info.id || modelKey.toUpperCase()
       const displayTitle = info.display || info.id || shortName
 
@@ -293,28 +324,106 @@ export function QAArenaQuestionCard({
           shortName,
           title: `${displayTitle} chose option ${finalAnswer}`,
           pendingCountdown: null,
+          slam: slamLabels[modelKey] === finalAnswer,
         })
         return
       }
 
-      if (activeModel?.id === modelKey && hoverLabel && map[hoverLabel]) {
-        map[hoverLabel].push({
-          modelKey,
-          state: 'pending',
-          shortName,
-          title: `${displayTitle} is hovering option ${hoverLabel}`,
-          pendingCountdown: countdown
-            ? {
-                current: Number.isFinite(countdown.seconds) ? countdown.seconds : null,
-                max: Number.isFinite(countdownMax) && countdownMax > 0 ? countdownMax : Number.isFinite(countdown.seconds) ? Math.ceil(countdown.seconds) : null,
-              }
-            : null,
-        })
-      }
+      // Pending tokens are rendered via the floating overlay for smoother animation
     })
 
     return map
-  }, [activeModel, correctAnswer, countdown?.seconds, countdownMax, hoverTargets, modelAnswers, models, options])
+  }, [activeModel, correctAnswer, hoverTargets, modelAnswers, models, options, slamLabels])
+
+  useEffect(() => {
+    ;['modelA', 'modelB'].forEach((modelKey) => {
+      const currentAnswer = modelAnswers?.[modelKey]
+      const previousAnswer = prevAnswersRef.current[modelKey]
+      if (currentAnswer && currentAnswer !== previousAnswer) {
+        setSlamLabels((prev) => ({ ...prev, [modelKey]: currentAnswer }))
+        if (slamTimeoutsRef.current[modelKey]) {
+          clearTimeout(slamTimeoutsRef.current[modelKey])
+        }
+        slamTimeoutsRef.current[modelKey] = setTimeout(() => {
+          setSlamLabels((prev) => {
+            if (prev[modelKey] !== currentAnswer) return prev
+            const next = { ...prev }
+            delete next[modelKey]
+            return next
+          })
+          slamTimeoutsRef.current[modelKey] = null
+        }, 520)
+      }
+      if (!currentAnswer && previousAnswer) {
+        setSlamLabels((prev) => {
+          if (!(modelKey in prev)) return prev
+          const next = { ...prev }
+          delete next[modelKey]
+          return next
+        })
+      }
+      prevAnswersRef.current[modelKey] = currentAnswer ?? null
+    })
+  }, [modelAnswers])
+
+  useLayoutEffect(() => {
+    const container = containerRef.current
+    if (!container) return
+    const containerRect = container.getBoundingClientRect()
+    const nextState = { modelA: null, modelB: null }
+
+    ;['modelA', 'modelB'].forEach((modelKey) => {
+      if (modelAnswers?.[modelKey]) {
+        nextState[modelKey] = null
+        return
+      }
+      if (activeModel?.id !== modelKey) {
+        nextState[modelKey] = null
+        return
+      }
+      const targetLabel = hoverTargets[modelKey]
+      const targetNode = targetLabel ? optionRefs.current[targetLabel] : null
+      if (!targetNode) {
+        nextState[modelKey] = null
+        return
+      }
+      const rect = targetNode.getBoundingClientRect()
+      const top = rect.top - containerRect.top + Math.min(rect.height, 56) * 0.5
+      const left = rect.left - containerRect.left + 36
+      nextState[modelKey] = {
+        modelKey,
+        top,
+        left,
+        pendingCountdown:
+          countdown && Number.isFinite(countdown.seconds)
+            ? {
+                current: countdown.seconds,
+                max: Number.isFinite(countdownMax) && countdownMax > 0 ? countdownMax : countdown.seconds,
+              }
+            : null,
+      }
+    })
+
+    setFloatingTokens((previous) => {
+      const isSame = ['modelA', 'modelB'].every((key) => {
+        const prevToken = previous[key]
+        const nextToken = nextState[key]
+        if (!prevToken && !nextToken) return true
+        if (!prevToken || !nextToken) return false
+        const countdownChanged = (() => {
+          const prevCountdown = prevToken.pendingCountdown
+          const nextCountdown = nextToken.pendingCountdown
+          if (!prevCountdown && !nextCountdown) return false
+          if (!prevCountdown || !nextCountdown) return true
+          return Math.abs((prevCountdown.current ?? 0) - (nextCountdown.current ?? 0)) > 0.05
+        })()
+        if (countdownChanged) return false
+        return Math.abs(prevToken.top - nextToken.top) < 0.5 && Math.abs(prevToken.left - nextToken.left) < 0.5
+      })
+      if (isSame) return previous
+      return nextState
+    })
+  }, [activeModel, hoverTargets, modelAnswers, countdown?.seconds, countdownMax, options])
 
   if (!question) {
     return (
@@ -334,9 +443,45 @@ export function QAArenaQuestionCard({
         <p className="text-xs font-semibold uppercase tracking-[0.45em] text-slate-500 dark:text-slate-400">{title}</p>
         <h2 className="text-2xl font-black leading-snug text-slate-900 dark:text-white">{question.prompt}</h2>
       </header>
-      <div className="relative flex flex-col gap-3">
+      <div ref={containerRef} className="relative flex flex-col gap-3">
+        <div className="pointer-events-none absolute inset-0 z-10">
+          {['modelA', 'modelB'].map((modelKey) => {
+            const floating = floatingTokens[modelKey]
+            if (!floating) return null
+            const info = models?.[modelKey] || {}
+            const shortName = info.badgeLabel || info.shortName || info.id || modelKey.toUpperCase()
+            const title = `${shortName} is hovering option ${hoverTargets[modelKey] || ''}`.trim()
+            return (
+              <div
+                key={`floating-${modelKey}`}
+                className="absolute z-20 transition-transform duration-300 ease-[cubic-bezier(0.22,0.61,0.36,1)]"
+                style={{ transform: `translate(${floating.left - 16}px, ${floating.top - 16}px)` }}
+              >
+                <ModelToken
+                  modelKey={modelKey}
+                  state="pending"
+                  shortName={shortName}
+                  title={title}
+                  pendingCountdown={floating.pendingCountdown}
+                />
+              </div>
+            )
+          })}
+        </div>
         {options.map((option) => (
-          <OptionCard key={option.label} option={option} tokens={tokensByOption[option.label] || []} isCorrect={correctAnswer === option.label} />
+          <OptionCard
+            key={option.label}
+            ref={(node) => {
+              if (node) {
+                optionRefs.current[option.label] = node
+              } else {
+                delete optionRefs.current[option.label]
+              }
+            }}
+            option={option}
+            tokens={tokensByOption[option.label] || []}
+            isCorrect={correctAnswer === option.label}
+          />
         ))}
       </div>
     </section>
