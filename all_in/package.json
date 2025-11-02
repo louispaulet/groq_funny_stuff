@@ -19,6 +19,7 @@
     "@tailwindcss/typography": "^0.5.16",
     "@zxing/browser": "^0.1.5",
     "@zxing/library": "^0.21.0",
+    "clsx": "^2.1.1",
     "dompurify": "^3.2.6",
     "highlight.js": "^11.11.1",
     "html2canvas": "^1.4.1",
