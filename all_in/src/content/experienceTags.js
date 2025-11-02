@@ -14,4 +14,5 @@ export const tagsById = {
   newsanalyzer: ['chat-based', 'data-connected', 'real-time'],
   sixdegrees: ['chat-based', 'humor', 'sequential'],
   pongshowdown: ['arcade', 'structured-output', 'llama-4'],
+  qaarena: ['structured-output', 'quiz', 'wiki-powered'],
 }

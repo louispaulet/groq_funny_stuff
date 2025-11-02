@@ -343,6 +343,30 @@ export const experiences = [
     defaultBaseUrl: FALLBACK_BASE_URL,
   },
   {
+    id: 'qaarena',
+    path: '/qa-arena',
+    name: 'QA Arena',
+    headline: 'LLM quiz battles with Wikipedia fuel.',
+    description:
+      'Spin a random benchmark topic, auto-generate five questions, and watch two Groq-hosted models duel for trivia glory with five-second cooldowns.',
+    badge: 'Arena',
+    heroGradient: 'from-sky-500 via-purple-500 to-rose-500',
+    panelAccent: 'bg-sky-100 text-sky-900 dark:bg-sky-500/20 dark:text-sky-200',
+    navAccent: {
+      gradient: 'from-sky-500 via-purple-500 to-rose-500',
+      hover:
+        'hover:bg-sky-500/10 hover:text-purple-500 hover:border-purple-400/60 dark:hover:bg-sky-500/20 dark:hover:text-purple-200 dark:hover:border-purple-400/60',
+      focus: 'focus-visible:ring-sky-500/40',
+    },
+    defaultModel: 'openai/gpt-oss-20b',
+    modelOptions: ['openai/gpt-oss-20b', 'openai/gpt-oss-120b'],
+    allowBaseUrlOverride: false,
+    enableStlViewer: false,
+    enableBarcodeScanner: false,
+    logLabel: 'QAArena',
+    defaultBaseUrl: FALLBACK_BASE_URL,
+  },
+  {
     id: 'newsanalyzer',
     path: '/newsanalyzer',
     name: 'News Analyzer',

@@ -51,6 +51,7 @@ Groq AllIn Studio is the flagship experience in this repo: a single React worksp
 * **Game of Life Lab** – Purely client-side cellular automaton with toroidal wrap, preset seeds, live controls, and density stats for experimentation without backend calls.【F:all_in/src/pages/GameOfLifeLabPage.jsx†L1-L200】
 * **DALL·E vs Flux Comparison** – Loads a static CSV of 186 prompt pairs, paginates the gallery, and surfaces download helpers for qualitative research.【F:all_in/src/pages/DalleVsFluxPage.jsx†L1-L200】
 * **Second-Hand Food Market** – A satire storefront fed by local JSON that demonstrates rich storytelling components and cross-links to other experiences—no API calls required.【F:all_in/src/pages/SecondHandFoodMarketPage.jsx†L1-L183】
+* **QA Arena** – Drafts Wikipedia-backed quizzes via `/obj`, enforces five-second cooldowns between three service calls, and stages live scoring with category breakdowns for dueling models.【F:all_in/src/pages/QAArenaPage.jsx†L1-L478】
 
 ## Local development
 * Install dependencies: `make install`

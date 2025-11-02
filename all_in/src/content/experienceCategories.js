@@ -44,6 +44,12 @@ const baseExperienceCategories = [
     description: 'Lighthearted sandboxes for fandoms, remixing, and storytelling breaks.',
     experienceIds: ['pokedex', 'sixdegrees', 'pongshowdown'],
   },
+  {
+    id: 'arenas',
+    title: 'Benchmark Arenas',
+    description: 'Competitive matchups that pit Groq-hosted models against curated challenges.',
+    experienceIds: ['qaarena'],
+  },
 ]
 
 const categorizedExperienceIds = new Set(

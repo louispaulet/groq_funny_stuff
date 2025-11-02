@@ -13,6 +13,7 @@ import { CarMakerDetail } from './carmaker'
 import { NewsAnalyzerDetail } from './newsanalyzer'
 import { SixDegreesDetail } from './sixdegrees'
 import { PongShowdownDetail } from './pongshowdown'
+import { QAArenaDetail } from './qaarena'
 
 export const detailedCopyById = {
   allergyfinder: <AllergyFinderDetail />,
@@ -30,4 +31,5 @@ export const detailedCopyById = {
   newsanalyzer: <NewsAnalyzerDetail />,
   sixdegrees: <SixDegreesDetail />,
   pongshowdown: <PongShowdownDetail />,
+  qaarena: <QAArenaDetail />,
 }

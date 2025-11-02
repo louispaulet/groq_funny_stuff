@@ -30,6 +30,7 @@ import PongShowdownPage from './pages/PongShowdownPage'
 import DalleVsFluxPage from './pages/DalleVsFluxPage'
 import MermaidStudioPage from './pages/MermaidStudioPage'
 import TimelineStudioPage from './pages/TimelineStudioPage'
+import QAArenaPage from './pages/QAArenaPage'
 import ScrollToTop from './components/ScrollToTop'
 import MetadataManager from './seo/MetadataManager'
 
@@ -47,6 +48,7 @@ export default function App() {
             <Route path="/game-of-life-lab" element={<GameOfLifeLabPage />} />
             <Route path="/dalle-vs-flux" element={<DalleVsFluxPage />} />
             <Route path="/timeline-studio" element={<TimelineStudioPage />} />
+            <Route path="/qa-arena" element={<QAArenaPage />} />
             {experiences.map((experience) =>
               experience.id === 'allergyfinder' ? (
                 <Fragment key={experience.id}>

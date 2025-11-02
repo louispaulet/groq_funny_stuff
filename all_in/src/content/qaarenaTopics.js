@@ -1,0 +1,280 @@
+export const QA_ARENA_CATEGORIES = {
+  'mathematics-logic': {
+    id: 'mathematics-logic',
+    label: 'Mathematics & Logic',
+    accentGradient: 'from-indigo-500/30 via-purple-500/20 to-transparent',
+    badgeColor: 'bg-indigo-500 text-indigo-100',
+  },
+  'physics-engineering': {
+    id: 'physics-engineering',
+    label: 'Physics & Engineering',
+    accentGradient: 'from-amber-500/30 via-orange-500/20 to-transparent',
+    badgeColor: 'bg-amber-500 text-amber-100',
+  },
+  'computer-science-ai': {
+    id: 'computer-science-ai',
+    label: 'Computer Science & AI',
+    accentGradient: 'from-sky-500/30 via-cyan-500/20 to-transparent',
+    badgeColor: 'bg-sky-500 text-sky-100',
+  },
+  'history-civilizations': {
+    id: 'history-civilizations',
+    label: 'History & Civilizations',
+    accentGradient: 'from-rose-500/30 via-orange-500/20 to-transparent',
+    badgeColor: 'bg-rose-500 text-rose-100',
+  },
+  'economics-politics-society': {
+    id: 'economics-politics-society',
+    label: 'Economics, Politics & Society',
+    accentGradient: 'from-emerald-500/30 via-teal-500/20 to-transparent',
+    badgeColor: 'bg-emerald-500 text-emerald-100',
+  },
+  'philosophy-thought': {
+    id: 'philosophy-thought',
+    label: 'Philosophy & Thought',
+    accentGradient: 'from-fuchsia-500/30 via-violet-500/20 to-transparent',
+    badgeColor: 'bg-fuchsia-500 text-fuchsia-100',
+  },
+  'biology-medicine-mind': {
+    id: 'biology-medicine-mind',
+    label: 'Biology, Medicine & Mind',
+    accentGradient: 'from-green-500/30 via-lime-500/20 to-transparent',
+    badgeColor: 'bg-green-500 text-green-100',
+  },
+  'space-astronomy-cosmology': {
+    id: 'space-astronomy-cosmology',
+    label: 'Space, Astronomy & Cosmology',
+    accentGradient: 'from-blue-500/30 via-indigo-500/20 to-transparent',
+    badgeColor: 'bg-blue-600 text-blue-100',
+  },
+  'culture-art-misc': {
+    id: 'culture-art-misc',
+    label: 'Culture, Art & Misc',
+    accentGradient: 'from-yellow-500/30 via-amber-400/20 to-transparent',
+    badgeColor: 'bg-yellow-500 text-yellow-900',
+  },
+}
+
+export const QA_ARENA_TOPICS = [
+  { theme: 'P vs NP Problem', articleTitle: 'P versus NP problem', categoryId: 'mathematics-logic' },
+  { theme: 'Gödel\'s Incompleteness Theorems', articleTitle: 'Gödel\'s incompleteness theorems', categoryId: 'mathematics-logic' },
+  { theme: 'Banach–Tarski Paradox', articleTitle: 'Banach–Tarski paradox', categoryId: 'mathematics-logic' },
+  { theme: 'Fermat\'s Last Theorem', articleTitle: 'Fermat\'s Last Theorem', categoryId: 'mathematics-logic' },
+  { theme: 'Riemann Hypothesis', articleTitle: 'Riemann hypothesis', categoryId: 'mathematics-logic' },
+  { theme: 'Turing Machine', articleTitle: 'Turing machine', categoryId: 'mathematics-logic' },
+  { theme: 'Collatz Conjecture', articleTitle: 'Collatz conjecture', categoryId: 'mathematics-logic' },
+  { theme: 'Axiom of Choice', articleTitle: 'Axiom of choice', categoryId: 'mathematics-logic' },
+  { theme: 'Monte Carlo Method', articleTitle: 'Monte Carlo method', categoryId: 'mathematics-logic' },
+  { theme: 'Markov Chain', articleTitle: 'Markov chain', categoryId: 'mathematics-logic' },
+  { theme: 'RSA (cryptosystem)', articleTitle: 'RSA (cryptosystem)', categoryId: 'mathematics-logic' },
+  { theme: 'Kalman Filter', articleTitle: 'Kalman filter', categoryId: 'mathematics-logic' },
+  { theme: 'Bayesian Inference', articleTitle: 'Bayesian inference', categoryId: 'mathematics-logic' },
+  { theme: 'Fourier Transform', articleTitle: 'Fourier transform', categoryId: 'mathematics-logic' },
+  { theme: 'Conway\'s Game of Life', articleTitle: 'Conway\'s Game of Life', categoryId: 'mathematics-logic' },
+  { theme: 'Cellular Automaton', articleTitle: 'Cellular automaton', categoryId: 'mathematics-logic' },
+  { theme: 'Nash Equilibrium', articleTitle: 'Nash equilibrium', categoryId: 'mathematics-logic' },
+  { theme: 'Graph Theory', articleTitle: 'Graph theory', categoryId: 'mathematics-logic' },
+  { theme: 'Gödel Numbering', articleTitle: 'Gödel numbering', categoryId: 'mathematics-logic' },
+  { theme: 'Lambda Calculus', articleTitle: 'Lambda calculus', categoryId: 'mathematics-logic' },
+  { theme: 'Special Relativity', articleTitle: 'Special relativity', categoryId: 'physics-engineering' },
+  { theme: 'General Relativity', articleTitle: 'General relativity', categoryId: 'physics-engineering' },
+  { theme: 'Standard Model', articleTitle: 'Standard Model', categoryId: 'physics-engineering' },
+  { theme: 'Quantum Field Theory', articleTitle: 'Quantum field theory', categoryId: 'physics-engineering' },
+  { theme: 'Higgs Boson', articleTitle: 'Higgs boson', categoryId: 'physics-engineering' },
+  { theme: 'Bose–Einstein Condensate', articleTitle: 'Bose–Einstein condensate', categoryId: 'physics-engineering' },
+  { theme: 'Schrödinger\'s Cat', articleTitle: 'Schrödinger\'s cat', categoryId: 'physics-engineering' },
+  { theme: 'Maxwell\'s Equations', articleTitle: 'Maxwell\'s equations', categoryId: 'physics-engineering' },
+  { theme: 'Nuclear Fusion', articleTitle: 'Nuclear fusion', categoryId: 'physics-engineering' },
+  { theme: 'Rocket Equation', articleTitle: 'Tsiolkovsky rocket equation', categoryId: 'physics-engineering' },
+  { theme: 'Von Neumann Probe', articleTitle: 'Von Neumann probe', categoryId: 'physics-engineering' },
+  { theme: 'Dyson Sphere', articleTitle: 'Dyson sphere', categoryId: 'physics-engineering' },
+  { theme: 'Alcubierre Drive', articleTitle: 'Alcubierre drive', categoryId: 'physics-engineering' },
+  { theme: 'Fermi Paradox', articleTitle: 'Fermi paradox', categoryId: 'physics-engineering' },
+  { theme: 'Antimatter', articleTitle: 'Antimatter', categoryId: 'physics-engineering' },
+  { theme: 'Cryogenics', articleTitle: 'Cryogenics', categoryId: 'physics-engineering' },
+  { theme: 'Semiconductor', articleTitle: 'Semiconductor', categoryId: 'physics-engineering' },
+  { theme: 'Spintronics', articleTitle: 'Spintronics', categoryId: 'physics-engineering' },
+  { theme: 'Quantum Cryptography', articleTitle: 'Quantum cryptography', categoryId: 'physics-engineering' },
+  { theme: 'Control Theory', articleTitle: 'Control theory', categoryId: 'physics-engineering' },
+  { theme: 'Neural Network', articleTitle: 'Artificial neural network', categoryId: 'computer-science-ai' },
+  { theme: 'Transformer (machine learning)', articleTitle: 'Transformer (machine learning model)', categoryId: 'computer-science-ai' },
+  { theme: 'Backpropagation', articleTitle: 'Backpropagation', categoryId: 'computer-science-ai' },
+  { theme: 'Diffusion Models', articleTitle: 'Diffusion model', categoryId: 'computer-science-ai' },
+  { theme: 'Genetic Algorithm', articleTitle: 'Genetic algorithm', categoryId: 'computer-science-ai' },
+  { theme: 'Expert System', articleTitle: 'Expert system', categoryId: 'computer-science-ai' },
+  { theme: 'Knowledge Graph', articleTitle: 'Knowledge graph', categoryId: 'computer-science-ai' },
+  { theme: 'PageRank', articleTitle: 'PageRank', categoryId: 'computer-science-ai' },
+  { theme: 'Cryptographic Hash Function', articleTitle: 'Cryptographic hash function', categoryId: 'computer-science-ai' },
+  { theme: 'Differential Privacy', articleTitle: 'Differential privacy', categoryId: 'computer-science-ai' },
+  { theme: 'Public-key Cryptography', articleTitle: 'Public-key cryptography', categoryId: 'computer-science-ai' },
+  { theme: 'Blockchain', articleTitle: 'Blockchain', categoryId: 'computer-science-ai' },
+  { theme: 'Byzantine Fault Tolerance', articleTitle: 'Byzantine fault', categoryId: 'computer-science-ai' },
+  { theme: 'CAP Theorem', articleTitle: 'CAP theorem', categoryId: 'computer-science-ai' },
+  { theme: 'Operating System', articleTitle: 'Operating system', categoryId: 'computer-science-ai' },
+  { theme: 'Containerization', articleTitle: 'Operating-system-level virtualization', categoryId: 'computer-science-ai' },
+  { theme: 'Distributed Computing', articleTitle: 'Distributed computing', categoryId: 'computer-science-ai' },
+  { theme: 'Cloud-native Computing', articleTitle: 'Cloud-native computing', categoryId: 'computer-science-ai' },
+  { theme: 'Reinforcement Learning', articleTitle: 'Reinforcement learning', categoryId: 'computer-science-ai' },
+  { theme: 'AlphaGo', articleTitle: 'AlphaGo', categoryId: 'computer-science-ai' },
+  { theme: 'Byzantine Empire', articleTitle: 'Byzantine Empire', categoryId: 'history-civilizations' },
+  { theme: 'Roman Republic', articleTitle: 'Roman Republic', categoryId: 'history-civilizations' },
+  { theme: 'Tang Dynasty', articleTitle: 'Tang dynasty', categoryId: 'history-civilizations' },
+  { theme: 'Mongol Empire', articleTitle: 'Mongol Empire', categoryId: 'history-civilizations' },
+  { theme: 'French Revolution', articleTitle: 'French Revolution', categoryId: 'history-civilizations' },
+  { theme: 'Meiji Restoration', articleTitle: 'Meiji Restoration', categoryId: 'history-civilizations' },
+  { theme: 'Industrial Revolution', articleTitle: 'Industrial Revolution', categoryId: 'history-civilizations' },
+  { theme: 'Cold War', articleTitle: 'Cold War', categoryId: 'history-civilizations' },
+  { theme: 'Space Race', articleTitle: 'Space Race', categoryId: 'history-civilizations' },
+  { theme: 'Silk Road', articleTitle: 'Silk Road', categoryId: 'history-civilizations' },
+  { theme: 'Abbasid Caliphate', articleTitle: 'Abbasid Caliphate', categoryId: 'history-civilizations' },
+  { theme: 'Persian Empire', articleTitle: 'Achaemenid Empire', categoryId: 'history-civilizations' },
+  { theme: 'Medieval Europe', articleTitle: 'Middle Ages', categoryId: 'history-civilizations' },
+  { theme: 'Vikings', articleTitle: 'Vikings', categoryId: 'history-civilizations' },
+  { theme: 'Ottoman Empire', articleTitle: 'Ottoman Empire', categoryId: 'history-civilizations' },
+  { theme: 'Napoleonic Wars', articleTitle: 'Napoleonic Wars', categoryId: 'history-civilizations' },
+  { theme: 'World War I', articleTitle: 'World War I', categoryId: 'history-civilizations' },
+  { theme: 'World War II', articleTitle: 'World War II', categoryId: 'history-civilizations' },
+  { theme: 'Cuban Missile Crisis', articleTitle: 'Cuban Missile Crisis', categoryId: 'history-civilizations' },
+  { theme: 'Fall of Constantinople', articleTitle: 'Fall of Constantinople', categoryId: 'history-civilizations' },
+  { theme: 'Game Theory', articleTitle: 'Game theory', categoryId: 'economics-politics-society' },
+  { theme: 'Monetary Policy', articleTitle: 'Monetary policy', categoryId: 'economics-politics-society' },
+  { theme: 'Keynesian Economics', articleTitle: 'Keynesian economics', categoryId: 'economics-politics-society' },
+  { theme: 'Chicago School of Economics', articleTitle: 'Chicago school of economics', categoryId: 'economics-politics-society' },
+  { theme: 'Bretton Woods System', articleTitle: 'Bretton Woods system', categoryId: 'economics-politics-society' },
+  { theme: 'Inflation', articleTitle: 'Inflation', categoryId: 'economics-politics-society' },
+  { theme: 'Behavioral Economics', articleTitle: 'Behavioral economics', categoryId: 'economics-politics-society' },
+  { theme: 'Principal–agent Problem', articleTitle: 'Principal–agent problem', categoryId: 'economics-politics-society' },
+  { theme: 'Public Choice Theory', articleTitle: 'Public choice', categoryId: 'economics-politics-society' },
+  { theme: 'Prisoner\'s Dilemma', articleTitle: 'Prisoner\'s dilemma', categoryId: 'economics-politics-society' },
+  { theme: 'Economic Sanctions', articleTitle: 'Economic sanctions', categoryId: 'economics-politics-society' },
+  { theme: 'Information Asymmetry', articleTitle: 'Information asymmetry', categoryId: 'economics-politics-society' },
+  { theme: 'Great Depression', articleTitle: 'Great Depression', categoryId: 'economics-politics-society' },
+  { theme: 'Great Recession', articleTitle: 'Great Recession', categoryId: 'economics-politics-society' },
+  { theme: 'Universal Basic Income', articleTitle: 'Universal basic income', categoryId: 'economics-politics-society' },
+  { theme: 'Social Contract', articleTitle: 'Social contract', categoryId: 'economics-politics-society' },
+  { theme: 'Cyber Warfare', articleTitle: 'Cyberwarfare', categoryId: 'economics-politics-society' },
+  { theme: 'Terrorism', articleTitle: 'Terrorism', categoryId: 'economics-politics-society' },
+  { theme: 'Antitrust Law', articleTitle: 'Competition law', categoryId: 'economics-politics-society' },
+  { theme: 'Shadow Banking System', articleTitle: 'Shadow banking system', categoryId: 'economics-politics-society' },
+  { theme: 'Existentialism', articleTitle: 'Existentialism', categoryId: 'philosophy-thought' },
+  { theme: 'Stoicism', articleTitle: 'Stoicism', categoryId: 'philosophy-thought' },
+  { theme: 'Utilitarianism', articleTitle: 'Utilitarianism', categoryId: 'philosophy-thought' },
+  { theme: 'Structuralism', articleTitle: 'Structuralism', categoryId: 'philosophy-thought' },
+  { theme: 'Postmodernism', articleTitle: 'Postmodernism', categoryId: 'philosophy-thought' },
+  { theme: 'Phenomenology', articleTitle: 'Phenomenology', categoryId: 'philosophy-thought' },
+  { theme: 'Pragmatism', articleTitle: 'Pragmatism', categoryId: 'philosophy-thought' },
+  { theme: 'Rationalism', articleTitle: 'Rationalism', categoryId: 'philosophy-thought' },
+  { theme: 'Empiricism', articleTitle: 'Empiricism', categoryId: 'philosophy-thought' },
+  { theme: 'Ethics', articleTitle: 'Ethics', categoryId: 'philosophy-thought' },
+  { theme: 'Free Will', articleTitle: 'Free will', categoryId: 'philosophy-thought' },
+  { theme: 'Consciousness', articleTitle: 'Consciousness', categoryId: 'philosophy-thought' },
+  { theme: 'Theory of Mind', articleTitle: 'Theory of mind', categoryId: 'philosophy-thought' },
+  { theme: 'Simulation Hypothesis', articleTitle: 'Simulation hypothesis', categoryId: 'philosophy-thought' },
+  { theme: 'Problem of Evil', articleTitle: 'Problem of evil', categoryId: 'philosophy-thought' },
+  { theme: 'Ship of Theseus', articleTitle: 'Ship of Theseus', categoryId: 'philosophy-thought' },
+  { theme: 'Pascal\'s Wager', articleTitle: 'Pascal\'s wager', categoryId: 'philosophy-thought' },
+  { theme: 'Occam\'s Razor', articleTitle: 'Occam\'s razor', categoryId: 'philosophy-thought' },
+  { theme: 'Epistemology', articleTitle: 'Epistemology', categoryId: 'philosophy-thought' },
+  { theme: 'CRISPR', articleTitle: 'CRISPR', categoryId: 'biology-medicine-mind' },
+  { theme: 'Human Genome Project', articleTitle: 'Human Genome Project', categoryId: 'biology-medicine-mind' },
+  { theme: 'Protein Folding', articleTitle: 'Protein folding', categoryId: 'biology-medicine-mind' },
+  { theme: 'Neural Plasticity', articleTitle: 'Neuroplasticity', categoryId: 'biology-medicine-mind' },
+  { theme: 'Immune System', articleTitle: 'Immune system', categoryId: 'biology-medicine-mind' },
+  { theme: 'Mitochondrion', articleTitle: 'Mitochondrion', categoryId: 'biology-medicine-mind' },
+  { theme: 'Epigenetics', articleTitle: 'Epigenetics', categoryId: 'biology-medicine-mind' },
+  { theme: 'Stem Cell', articleTitle: 'Stem cell', categoryId: 'biology-medicine-mind' },
+  { theme: 'Microbiome', articleTitle: 'Human microbiome', categoryId: 'biology-medicine-mind' },
+  { theme: 'Neurotransmitter', articleTitle: 'Neurotransmitter', categoryId: 'biology-medicine-mind' },
+  { theme: 'Memory Consolidation', articleTitle: 'Memory consolidation', categoryId: 'biology-medicine-mind' },
+  { theme: 'Cognitive Bias', articleTitle: 'Cognitive bias', categoryId: 'biology-medicine-mind' },
+  { theme: 'Evolution', articleTitle: 'Evolution', categoryId: 'biology-medicine-mind' },
+  { theme: 'Natural Selection', articleTitle: 'Natural selection', categoryId: 'biology-medicine-mind' },
+  { theme: 'Photosynthesis', articleTitle: 'Photosynthesis', categoryId: 'biology-medicine-mind' },
+  { theme: 'Prion', articleTitle: 'Prion', categoryId: 'biology-medicine-mind' },
+  { theme: 'Virology', articleTitle: 'Virology', categoryId: 'biology-medicine-mind' },
+  { theme: 'Pandemic', articleTitle: 'Pandemic', categoryId: 'biology-medicine-mind' },
+  { theme: 'Placebo Effect', articleTitle: 'Placebo', categoryId: 'biology-medicine-mind' },
+  { theme: 'Circadian Rhythm', articleTitle: 'Circadian rhythm', categoryId: 'biology-medicine-mind' },
+  { theme: 'Big Bang', articleTitle: 'Big Bang', categoryId: 'space-astronomy-cosmology' },
+  { theme: 'Cosmic Microwave Background', articleTitle: 'Cosmic microwave background', categoryId: 'space-astronomy-cosmology' },
+  { theme: 'Exoplanet', articleTitle: 'Exoplanet', categoryId: 'space-astronomy-cosmology' },
+  { theme: 'Kepler Space Telescope', articleTitle: 'Kepler space telescope', categoryId: 'space-astronomy-cosmology' },
+  { theme: 'LIGO', articleTitle: 'Laser Interferometer Gravitational-Wave Observatory', categoryId: 'space-astronomy-cosmology' },
+  { theme: 'Redshift', articleTitle: 'Redshift', categoryId: 'space-astronomy-cosmology' },
+  { theme: 'Dark Matter', articleTitle: 'Dark matter', categoryId: 'space-astronomy-cosmology' },
+  { theme: 'Dark Energy', articleTitle: 'Dark energy', categoryId: 'space-astronomy-cosmology' },
+  { theme: 'Black Hole', articleTitle: 'Black hole', categoryId: 'space-astronomy-cosmology' },
+  { theme: 'Hawking Radiation', articleTitle: 'Hawking radiation', categoryId: 'space-astronomy-cosmology' },
+  { theme: 'White Hole', articleTitle: 'White hole', categoryId: 'space-astronomy-cosmology' },
+  { theme: 'Neutron Star', articleTitle: 'Neutron star', categoryId: 'space-astronomy-cosmology' },
+  { theme: 'Pulsar', articleTitle: 'Pulsar', categoryId: 'space-astronomy-cosmology' },
+  { theme: 'Oort Cloud', articleTitle: 'Oort cloud', categoryId: 'space-astronomy-cosmology' },
+  { theme: 'Kuiper Belt', articleTitle: 'Kuiper belt', categoryId: 'space-astronomy-cosmology' },
+  { theme: 'Interstellar Medium', articleTitle: 'Interstellar medium', categoryId: 'space-astronomy-cosmology' },
+  { theme: 'Great Filter', articleTitle: 'Great Filter', categoryId: 'space-astronomy-cosmology' },
+  { theme: 'Kardashev Scale', articleTitle: 'Kardashev scale', categoryId: 'space-astronomy-cosmology' },
+  { theme: 'Stellar Evolution', articleTitle: 'Stellar evolution', categoryId: 'space-astronomy-cosmology' },
+  { theme: 'Planetary Migration', articleTitle: 'Planetary migration', categoryId: 'space-astronomy-cosmology' },
+  { theme: 'Bauhaus', articleTitle: 'Bauhaus', categoryId: 'culture-art-misc' },
+  { theme: 'Impressionism', articleTitle: 'Impressionism', categoryId: 'culture-art-misc' },
+  { theme: 'Cubism', articleTitle: 'Cubism', categoryId: 'culture-art-misc' },
+  { theme: 'Surrealism', articleTitle: 'Surrealism', categoryId: 'culture-art-misc' },
+  { theme: 'Cinema of Japan', articleTitle: 'Cinema of Japan', categoryId: 'culture-art-misc' },
+  { theme: 'History of Video Games', articleTitle: 'History of video games', categoryId: 'culture-art-misc' },
+  { theme: 'Cyberpunk', articleTitle: 'Cyberpunk', categoryId: 'culture-art-misc' },
+  { theme: 'Solarpunk', articleTitle: 'Solarpunk', categoryId: 'culture-art-misc' },
+  { theme: 'Steampunk', articleTitle: 'Steampunk', categoryId: 'culture-art-misc' },
+  { theme: 'Tolkien Legendarium', articleTitle: 'Tolkien\'s legendarium', categoryId: 'culture-art-misc' },
+  { theme: 'French New Wave', articleTitle: 'French New Wave', categoryId: 'culture-art-misc' },
+  { theme: 'Renaissance Art', articleTitle: 'Renaissance art', categoryId: 'culture-art-misc' },
+  { theme: 'Gregorian Chant', articleTitle: 'Gregorian chant', categoryId: 'culture-art-misc' },
+  { theme: 'Greek Mythology', articleTitle: 'Greek mythology', categoryId: 'culture-art-misc' },
+  { theme: 'Norse Mythology', articleTitle: 'Norse mythology', categoryId: 'culture-art-misc' },
+  { theme: 'Philosophy of Science', articleTitle: 'Philosophy of science', categoryId: 'culture-art-misc' },
+  { theme: 'History of Mathematics', articleTitle: 'History of mathematics', categoryId: 'culture-art-misc' },
+  { theme: 'History of Computing', articleTitle: 'History of computing hardware', categoryId: 'culture-art-misc' },
+  { theme: 'World Heritage Site', articleTitle: 'World Heritage Site', categoryId: 'culture-art-misc' },
+  { theme: 'Cartography', articleTitle: 'Cartography', categoryId: 'culture-art-misc' },
+]
+
+let topicDeck = []
+let lastTopicTheme = null
+
+function getSecureRandomIndex(upperBound) {
+  if (upperBound <= 0) return 0
+  const cryptoSource = typeof globalThis !== 'undefined' && globalThis.crypto && typeof globalThis.crypto.getRandomValues === 'function' ? globalThis.crypto : null
+  if (cryptoSource) {
+    const maxUint32 = 0xffffffff
+    const bucket = new Uint32Array(1)
+    let randomFraction = 0
+    do {
+      cryptoSource.getRandomValues(bucket)
+      randomFraction = bucket[0] / (maxUint32 + 1)
+    } while (randomFraction >= 1)
+    return Math.floor(randomFraction * upperBound)
+  }
+  return Math.floor(Math.random() * upperBound)
+}
+
+function reshuffleTopicDeck() {
+  topicDeck = QA_ARENA_TOPICS.slice()
+  for (let index = topicDeck.length - 1; index > 0; index -= 1) {
+    const swapIndex = getSecureRandomIndex(index + 1)
+    ;[topicDeck[index], topicDeck[swapIndex]] = [topicDeck[swapIndex], topicDeck[index]]
+  }
+  if (lastTopicTheme && topicDeck.length > 1 && topicDeck[0]?.theme === lastTopicTheme) {
+    const swapIndex = 1 + getSecureRandomIndex(topicDeck.length - 1)
+    ;[topicDeck[0], topicDeck[swapIndex]] = [topicDeck[swapIndex], topicDeck[0]]
+  }
+}
+
+export function pickRandomTopic() {
+  if (!QA_ARENA_TOPICS.length) return null
+  if (!topicDeck.length) {
+    reshuffleTopicDeck()
+  }
+  const nextTopic = topicDeck.shift()
+  if (!nextTopic) return null
+  lastTopicTheme = nextTopic.theme
+  return { ...nextTopic }
+}
