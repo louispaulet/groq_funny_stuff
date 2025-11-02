@@ -40,6 +40,17 @@ export function createHeroStats({ experienceCount, categoryCount }) {
 
 export const curatedSpotlights = [
   {
+    id: 'qa-arena',
+    eyebrow: '🧠 Benchmark · Competitive',
+    title: 'QA Arena',
+    description:
+      'Pit oss-20B against oss-120B on surprise Wikipedia topics. Watch five-second countdowns, live scoring, and question-by-question replays.',
+    to: '/qa-arena',
+    cta: 'Enter the arena',
+    badge: 'Wikipedia-fueled trivia',
+    accent: 'from-sky-500/25 via-purple-500/20 to-transparent',
+  },
+  {
     id: 'timeline',
     eyebrow: '📜 New · Diagramming',
     title: 'Timeline Studio',

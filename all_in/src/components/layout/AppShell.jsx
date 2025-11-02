@@ -67,7 +67,8 @@ const includedExperience = (experience) =>
   experience.id !== 'carmaker' &&
   experience.id !== 'mermaidstudio' &&
   experience.id !== 'pokedex' &&
-  experience.id !== 'pongshowdown'
+  experience.id !== 'pongshowdown' &&
+  experience.id !== 'qaarena'
 
 export default function AppShell({ children }) {
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
