@@ -28,6 +28,7 @@ import EmotionEmojiFoundryPage from './pages/EmotionEmojiFoundryPage'
 import SecondHandFoodMarketPage from './pages/SecondHandFoodMarketPage'
 import PongShowdownPage from './pages/PongShowdownPage'
 import DalleVsFluxPage from './pages/DalleVsFluxPage'
+import ZImageSeedComparisonPage from './pages/ZImageSeedComparisonPage'
 import MermaidStudioPage from './pages/MermaidStudioPage'
 import TimelineStudioPage from './pages/TimelineStudioPage'
 import QAArenaPage from './pages/QAArenaPage'
@@ -47,6 +48,7 @@ export default function App() {
             <Route path="/second-hand-food-market" element={<SecondHandFoodMarketPage />} />
             <Route path="/game-of-life-lab" element={<GameOfLifeLabPage />} />
             <Route path="/dalle-vs-flux" element={<DalleVsFluxPage />} />
+            <Route path="/z-image-seed-comparison" element={<ZImageSeedComparisonPage />} />
             <Route path="/timeline-studio" element={<TimelineStudioPage />} />
             <Route path="/qa-arena" element={<QAArenaPage />} />
             {experiences.map((experience) =>

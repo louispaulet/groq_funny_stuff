@@ -45,6 +45,11 @@ vi.mock('./pages/DalleVsFluxPage', () => ({
   default: () => <div data-testid="dalle-vs-flux">dalle</div>,
 }))
 
+vi.mock('./pages/ZImageSeedComparisonPage', () => ({
+  __esModule: true,
+  default: () => <div data-testid="z-image-seed-comparison">z-image</div>,
+}))
+
 vi.mock('./pages/TimelineStudioPage', () => ({
   __esModule: true,
   default: () => <div data-testid="timeline-studio">timeline</div>,
@@ -195,6 +200,9 @@ describe('App routing', () => {
 
     renderAt('/dalle-vs-flux')
     expect(screen.getByTestId('dalle-vs-flux')).toBeInTheDocument()
+
+    renderAt('/z-image-seed-comparison')
+    expect(screen.getByTestId('z-image-seed-comparison')).toBeInTheDocument()
 
     renderAt('/timeline-studio')
     expect(screen.getByTestId('timeline-studio')).toBeInTheDocument()

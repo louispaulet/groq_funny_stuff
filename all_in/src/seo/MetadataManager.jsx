@@ -64,6 +64,11 @@ const STATIC_ROUTE_METADATA = {
     description: 'Revisit saved Flux renders, prompts, and annotations from the image generator workspace.',
     keywords: 'Flux image gallery, saved renders, Groq image generation',
   },
+  '/z-image-seed-comparison': {
+    title: `z-image Seed Comparison | ${SITE_NAME}`,
+    description: 'Compare two z-image outputs per prompt using different seeds, side by side with downloads.',
+    keywords: 'z-image seeds, image comparison, Groq research gallery',
+  },
 }
 
 function normalizePath(pathname) {
