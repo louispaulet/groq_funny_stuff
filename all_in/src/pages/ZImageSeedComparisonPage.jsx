@@ -111,23 +111,21 @@ function parseComparisonCsv(text) {
     throw new Error('CSV header missing required columns')
   }
 
-  const requiredIndices = [promptIndex, seedAIndex, seedBIndex]
-  if (categoryIndex !== -1) {
-    requiredIndices.push(categoryIndex)
-  }
-
-  const requiredIndex = Math.max(...requiredIndices)
+  const requiredIndex = Math.max(promptIndex, seedAIndex, seedBIndex)
 
   return rows
     .slice(1)
     .filter((row) => row.length > requiredIndex)
-    .map((row) => ({
-      prompt: row[promptIndex]?.trim() || '',
-      seedAUrl: row[seedAIndex]?.trim() || '',
-      seedBUrl: row[seedBIndex]?.trim() || '',
-      category:
-        categoryIndex === -1 ? 'Uncategorized' : row[categoryIndex]?.trim() || 'Uncategorized',
-    }))
+    .map((row) => {
+      const categoryValue =
+        categoryIndex !== -1 && row.length > categoryIndex ? row[categoryIndex] : ''
+      return {
+        prompt: row[promptIndex]?.trim() || '',
+        seedAUrl: row[seedAIndex]?.trim() || '',
+        seedBUrl: row[seedBIndex]?.trim() || '',
+        category: categoryValue?.trim() || 'Uncategorized',
+      }
+    })
     .filter((entry) => entry.prompt && entry.seedAUrl && entry.seedBUrl)
 }
 
