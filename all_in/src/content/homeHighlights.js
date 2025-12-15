@@ -94,6 +94,17 @@ export const curatedSpotlights = [
     badge: 'Cost transparency',
     accent: 'from-fuchsia-500/25 via-violet-500/20 to-transparent',
   },
+  {
+    id: 'z-image-seed-comparison',
+    eyebrow: 'DYou Research drop',
+    title: 'z-image Seed Comparison',
+    description:
+      'View two z-image outputs per prompt with different seeds. Browse side-by-side renders, filter by category, and download full-resolution exports.',
+    to: '/z-image-seed-comparison',
+    cta: 'Open seed gallery',
+    badge: 'Two seeds per prompt',
+    accent: 'from-emerald-500/25 via-cyan-500/20 to-transparent',
+  },
 ]
 
 export const heroExperienceOptions = [
