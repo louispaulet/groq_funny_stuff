@@ -41,6 +41,7 @@ describe('AppShell', () => {
           'pokedex',
           'mermaidstudio',
           'pongshowdown',
+          'qaarena',
         ].includes(experience.id)
       )
       .map((exp) => exp.navLabel ?? exp.name)

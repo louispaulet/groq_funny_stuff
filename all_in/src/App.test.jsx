@@ -288,6 +288,7 @@ describe('App routing', () => {
       'newsanalyzer',
       'sixdegrees',
       'pongshowdown',
+      'qaarena',
       'timelinestudio',
     ])
 
