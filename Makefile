@@ -11,7 +11,7 @@ $(INSTALL_STAMP): $(ALLIN_DIR)/package-lock.json
 	touch $(INSTALL_STAMP)
 
 run:
-	cd $(ALLIN_DIR) && npm run dev -- --host --port $(ALLIN_PORT) --strictPort
+	./scripts/run_allin_dev.sh $(ALLIN_DIR) $(ALLIN_PORT)
 
 build:
 	cd $(ALLIN_DIR) && npm run build
